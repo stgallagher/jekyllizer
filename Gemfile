@@ -40,6 +40,7 @@ platforms :jruby do
   gem "jruby-openssl"
 end
 
+#gem 'rspec' , "2.0.0.beta.22"
 ### rspec-core only
 gem "mocha", "~> 0.9.10"
 gem "rr", "~> 1.0.2"

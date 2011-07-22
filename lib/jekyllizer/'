@@ -1,0 +1,32 @@
+
+module Jekyllizer
+  class DirectoryManager 
+   
+    def initialize(source, destination)
+      @source = source
+      @destination = destination
+      @html_files = Dir["#{@source}/**/*.html"]
+    end
+
+    def get_source
+      @source
+    end
+
+    def get_destination
+      @destination
+    end
+
+    def get_changer
+      @file_changer = FileChanger.new(@html_files[0])
+    end
+    
+    def file_changer
+      @file_changer
+    end
+
+    def get_html_files
+      @html_files
+    end
+
+  end
+end
