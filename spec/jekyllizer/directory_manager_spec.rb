@@ -25,7 +25,7 @@ module Jekyllizer
                                       File.expand_path("file2.html"))
       end
 
-      it "only gets html files" do
+      it "should only get html files" do
         FileUtils.touch("file.jpeg")
         @dm.html_files.should_not include(File.expand_path("file.jpeg"))
       end
@@ -39,7 +39,7 @@ module Jekyllizer
       it "should pass a file name to changer" do
         @dm.html_files
         @dm.changer
-        @dm.pass_files_to_changer
+        @dm.pass_file_to_changer(@dm.html_files[0])
         @dm.file_changer.filename.should == "/home/sgallagher/8thLightWork/jekyllizer/dir1/file4.html"
       end
 
@@ -55,6 +55,14 @@ module Jekyllizer
         returned_file_contents = @dm.changed_file_contents
         expected_file_contents = IO.readlines("/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/after_process/2010-12-20-speech-is-silver-silence-is-golden.html")
         returned_file_contents.should == expected_file_contents
+      end
+
+      it "should save the file under the changed filename, with the changed contents, in the destination directory" do
+        pending
+        @dm.changer
+        @dm.source= "/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/Test-Blog-Data/"
+        @dm.destination= "/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/Results/"
+        @dm.change_files.should == ""
       end
   end
 end

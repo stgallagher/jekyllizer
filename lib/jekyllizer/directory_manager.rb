@@ -11,17 +11,22 @@ module Jekyllizer
     def source
       @source
     end
-
+    
     def source=(source)
       @source = source
       @file_changer.filename= source
       @html_files = Dir["#{@source}/**/*.html"]
     end
 
+
     def destination
       @destination
     end
 
+    def destination=(destination)
+      @destination = destination
+    end
+    
     def changer
       @file_changer = FileChanger.new
     end
@@ -30,8 +35,8 @@ module Jekyllizer
       @file_changer
     end
 
-    def pass_files_to_changer
-      @file_changer.filename= @html_files[0]
+    def pass_file_to_changer(filename)
+      @file_changer.filename= filename
     end
 
     def changed_filename
@@ -48,5 +53,14 @@ module Jekyllizer
       @html_files
     end
 
+    def change_files
+      @html_files.each do |file|
+        pass_file_to_changer(file)
+        File.open(changed_filename, "w+") do |f|
+          while changer_file_contents
+          end
+        end       
+      end 
+    end
   end
 end

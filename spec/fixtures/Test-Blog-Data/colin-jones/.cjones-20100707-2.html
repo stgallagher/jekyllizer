@@ -1,0 +1,112 @@
+<h1>Craftsman Swap at Relevance &mdash; Day 2</h1>
+<p id="author">Colin Jones</p>
+<p id="date">2010-07-07</p>
+<h2>
+  Today was my second at Relevance for our craftsmanship swap. 
+  <a href="http://twitter.com/redinger">Chris</a> and I continued work on
+  the project from yesterday.
+</h2>
+<p>
+  I was glad to have a chance to continue the story work we'd started, and see
+  it through to completion by this afternoon, eliminating a few timezone bugs 
+  along the way (I'll get back to that).
+</p>
+<p>
+  We started the morning off with the company-wide stand-up meeting again, followed 
+  by a retrospective for the project I was pairing on. Chris explained that every 
+  iteration on a given project, Relevance does either a retrospective or a risk 
+  assessment meeting.
+</p>
+<p>
+  After some scheduling and telephone difficulties on the client's side were (mostly)
+  sorted out, <a href="http://twitter.com/jasonrudolph">Jason</a> kicked us off as the
+  retrospective facilitator. I haven't been on a project that held retrospectives on a
+  regular basis before (though we've certainly done them at times), so it was interesting
+  to see the very structured approach Relevance takes. 
+</p>
+<p>
+  As a brief outline, the team (and customers) began by outlining their expectations and
+  hopes for the retrospective, followed by ratings of how several areas of the project
+  (communication, ROI, building the right thing, etc.) were going, and finally a review
+  and a set of action items with due dates attached. 
+</p>
+<p>
+   The team members&mdash;Chris, Jason, <a href="http://twitter.com/donmullen">Don Mullen</a>,
+  and <a href="http://twitter.com/parenteau">Michael Parenteau</a>&mdash;were all excellent
+  at interacting with the customers. I like to think that I'm pretty good at that kind of
+  interaction, but there's a lot I picked up in a short time on that conference call. 
+</p>
+<p>
+  I heard a lot of rephrasing the customer's concerns to verify that the team always had the
+  correct interpretation, and I'm sure the customer came away feeling like their needs were
+  really being addressed, especially with the clear action items to address any issues
+  that came up.
+</p>
+<p>
+  Michael's design work on this project, incidentally, is pretty killer and got rave reviews
+  from both of the client representatives.
+</p>
+<p>
+  In yesterday's installment, I neglected to mention the project management tool the teams use, 
+  <a href="http://www.thoughtworks-studios.com/mingle-agile-project-management">Mingle</a>. It's
+  a very nice tool, which looks to have a ton of features, but (unlike some other many-featured
+  products I've used) manages to keep the interface very clean and simple. 
+</p>
+<p>
+  I'm not sure in what situations I'd feel compelled to switch to it over something nice 
+  (and free) like Pivotal Tracker or Agile Zen, but it is an impressive piece of software 
+  that I'm glad to have had a chance to take a look at.
+</p>
+<p>
+  So&hellip; time zones. Every time I deal with them it's a mind-bending struggle to keep all
+  the concerns in their proper place, and today was no exception. We had our Time.zone in Rails
+  set to <abbr title="Universal Time Coordinated">UTC</abbr>, but were still getting some 
+  <abbr title="Eastern Standard Time">EST</abbr> times.
+</p>
+<p>
+  Well, it turns out things like Date.today.beginning_of_day don't respect that setting and use
+  whatever the default system time zone is. After about an hour of investigations and pondering,
+  we eventually decided to replace most uses of Date with the Rails TimeWithZone object,
+  allowing some mildly unsavory naming with the understanding that the decision is going to need
+  to be revisited to account for various user time zones anyway.
+</p>
+<p>
+  It seems to me that this is a universal problem for apps that might be used in different time
+  zones. Chris suggested that this might add to the often-quoted-but-rarely-sourced list of hard
+  problems in computer science: cache invalidation and naming* (and off-by-one errors?).
+</p> 
+<p>
+  So henceforth, time zones are in there too. That's right, you heard it here first: it's three
+  (or four, depending on if you're telling the off-by-one joke) hard problems: cache invalidation,
+  naming, and time zones. 
+</p>
+<p>
+  After work <a href="http://twitter.com/abedra">Aaron Bedra</a>, Alex Warr, 
+  <a href="http://twitter.com/stuarthalloway">Stuart Halloway</a>, and 
+  <a href="http://twitter.com/stuartsierra">Stuart Sierra</a> introduced me to my first draft-style
+  game of Magic the Gathering. 
+</p>
+<p>
+  Yes, that's right, I spent the evening with three of the Clojure/core guys and learned a ton&hellip;
+  about Magic. It was fun&mdash;I got a ton of help from everybody, especially Alex and
+  with a lot of help I actually won a few rounds. 
+</p>
+<p>
+  We played duels, best-of-3, and I went 2-2 overall in games. And by &ldquo;I&rdquo;, I mostly mean
+  &ldquo;the people who told me what I should put down.&rdquo; I heard a rumor on one end of the table
+  that Relevance prefers to hire Magic players over non-players as programmers**, so potential
+  applicants should take note.
+</p>
+<p>
+  I don't know that I'll run out and buy a deck, but it's always fun to learn a new game, especially
+  when the cards are named things like &ldquo;Lord of Shatterskull Pass&rdquo;.
+</p>
+
+<p>
+  Sounds like I'll be sitting in with <a href="http://twitter.com/alandipert">Alan Dipert</a>'s team 
+  tomorrow on some Clojure work, which I'm very much looking forward to.
+</p>
+
+<p>* Some people on the Internet say the credit belongs to Phil Karlton, so it must be true.</p>
+
+<p>** This sounds made up, and may be.</p>

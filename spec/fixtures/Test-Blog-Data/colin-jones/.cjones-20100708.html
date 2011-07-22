@@ -1,0 +1,92 @@
+<h1>Craftsman Swap at Relevance &mdash; Day 3</h1>
+<p id="author">Colin Jones</p>
+<p id="date">2010-07-08</p>
+<h2>
+  Day 3 at Relevance began, as the previous days, with the company standup. 
+  <a href="http://twitter.com/stuartsierra">Stuart Sierra</a>, of clojure.test and 
+  <a href="http://apress.com/book/view/9781430272311">Practical Clojure</a> fame, was my
+  pair for the day. 
+</h2>
+<p>
+  Yep, there are two Stuarts at Relevance with Clojure books! If you're interested in Clojure,
+  and you haven't already purchased the Apress book, electronic or print, you should 
+  <a href="http://apress.com/book/view/9781430272311">do that</a>.
+</p>
+<p>
+  We started off with some Bash scripting for a cron job. Mostly pretty straightforward stuff,
+  though I did really like the way the structure and logging behavior in the script turned out.
+  I won't go so far as to say that this (or any) Bash script is a thing of beauty, but it's
+  very clear, concise, and is going to do the job very well. 
+</p>
+<p>
+  One cool thing I hadn't realized was possible (and Stuart mentioned that a decent amount
+  configuration is necessary for this) is that we used sendmail to, well, send mail&mdash;but
+  directly from the command line. So we had something along these lines:
+</p>
+<script src="https://gist.github.com/1052138.js?file=cjones-20100708-1.txt"></script>
+<p>
+  Our needs weren't very complex with regard to things like email headers, so it really was
+  dirt simple to use, which was a very pleasant surprise.
+</p>
+<p>
+  We worked in Emacs, which was a bit of a struggle for me, but a reminder that I ought to be
+  able to get around a bit better in that editor, as I'm interested in Clojure and many people
+  in the community are gung-ho about it. 
+</p>
+<p>  
+  <a href="http://orgmode.org/">org-mode</a> was one notable takeaway there&mdash;we used the
+  tables there to structure our table-based tests, and it can do some pretty cool formatting.
+</p>
+<p>
+  I'll also say in Emacs' favor that users and authors sure are serious about documentation 
+  (just look at the previous link or <a href="http://www.gnu.org/software/emacs/manual">the GNU Emacs Manuals</a>),
+  which I love to see. 
+</p>
+<p>
+  However, it can be a bit intimidating when you feel like you have to read a few books to
+  get to know the editor.
+</p>
+<p>
+  At the project standup with Stuart, <a href="http://twitter.com/alandipert">Alan Dipert</a>,
+  and <a href="http://twitter.com/shayfrendt">Shay Frendt</a>, the client reported a problem with
+  a story that's still in progress, so Stuart and I spent the remainder of the day chasing this bug.
+</p>
+<p>
+  There were several bright spots, however: we added several higher-level tests around some 
+  data-translation layers of the system (which includes JRuby on Rails and Clojure applications).
+  Our tests were on the Clojure side of things, which was great to get a chance to see. 
+</p>
+<p>
+  Stuart had this great idea to write table-based tests a la Cucumber or Fitnesse, and we wrote
+  a quick and dirty parser for a syntax similar to Cucumber's, plumbed a few tests in, and found
+  one of our problems after a bit of data correction. 
+</p>
+<p>
+  We found the other, more mysterious problem soon afterward, and spent most of the rest of the
+  day trying to track down the exact reason for it. It's interesting that neither of these problems
+  had much to do with code - they were both problems with data. In one case, we received data in
+  a format we didn't expect, and in the other, a subset of data suddenly went missing. 
+</p>
+<p>
+  I generally feel like good practices like <abbr title="Test Driven Development">TDD</abbr> and
+  pair programming can save you from many unexpected errors, but I don't know that there's a good
+  solution for cases where data is mucked up, besides deploying, seeing what real data looks like,
+  and adapting based on those results. 
+</p>
+<p>
+  I would suggest something like Haskell's QuickCheck (and similar ideas elsewhere), to try out more
+  possibilities in the tests, but even if we used something like that here, I have a feeling we would
+  have still ended up with an incorrect constraint, so wouldn't have caught these problems.
+</p>
+<p>
+  These problems make me wonder if, as external data drives more and more of a given application,
+  it becomes more and more important for the data itself to be tested. That is, it would be ideal
+  to be able to write tests that make assertions against the structure and contents of the external
+  data. 
+</p>
+<p>
+  I'm not sure whether that would have been possible in this case, due to privacy concerns,
+  but it's an idea that I'd love to hear feedback on anyway. And now that I imagine such a test
+  system more carefully, maybe that's just design by contract in a different light?
+</p>
+<p>Looking forward to tomorrow!</p>

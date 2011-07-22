@@ -1,0 +1,95 @@
+<h1>Craftsman Swap at Relevance &mdash; Day 4</h1>
+<p id="author">Colin Jones</p>
+<p id="date">2010-07-09</p>
+<h2>
+  Today was my last day at Relevance, pairing again with 
+  <a href="http://twitter.com/stuartsierra">Stuart Sierra</a>. Along with 
+  <a href="http://twitter.com/alandipert">Alan Dipert</a>, we arrived at a 
+  solution for our data woes from yesterday, and deployed it. 
+</h2>
+<p>
+  The approach we chose exposed a problem with data interpretation when a 
+  Clojure-precondition-thrown AssertionError came back to bite us later in the day.
+  Note to self: <code>AssertionError</code>, which preconditions throw, is a 
+  <code>java.lang.Error</code>, not a <code>java.lang.Exception</code>. Catch it accordingly,
+  especially if you're running these preconditions in a thread pool!
+</p>
+<p>
+  Today may have been the most fast-paced of my time here. In the morning after the
+  project standup, Alan did some whiteboarding with Stuart and me to explain the
+  architecture and requirements of a spike that we spent the rest of the day on. 
+</p>
+<p>
+  It's going to be a pretty cool system that integrates with the rest of the client system.
+  The interesting bits include writing to Redis (potentially with a C application) and a
+  web service (in Clojure) that reads from Redis server to provide data to end users. 
+</p>
+<p>
+  So Stuart and I started from scratch on a new Compojure app with Clojure 1.2, Leiningen,
+  and redis-clojure. We got set up relatively quickly, and implemented a tiny web service
+  that parses a request to find what to read from Redis, does all the proper error handling,
+  and returns a reasonable result. 
+</p>
+<p>
+  We had ideas about providing several types of web services (HTML, JSON, XML, perhaps
+  even plain text), but for the purposes of the spike, we just used the browser.
+</p>
+<p>
+  I had fully expected Stuart's knowledge of Clojure to be impressive, and I wasn't 
+  disappointed. I didn't see too many things I hadn't seen before, but having seen
+  things is different than knowing just when to use them. 
+</p>
+<p>
+  There was a new macro, condp, that I hadn't seen before, and it seems like a great
+  substitute for <code>cond</code> in situations where all the predicates look very similar. 
+</p>
+<p>
+  And if you've ever been frustrated by needing to restart a Clojure process in order to
+  add a <code>jar</code> to the <code>classpath</code>, you'll be excited to know that 
+  Stuart is working on an interesting solution involving Nailgun.
+</p>
+<p>
+  It's also been cool to hear a couple of questions 
+  <a href="http://twitter.com/stuarthalloway">Stuart Halloway</a> asked us about Clojure
+  idioms (he kindly included me in the questions, which were really for Stuart Sierra). 
+</p>
+<p>
+  It's sometimes easy to forget that everybody's human, and the smartest people will
+  often ask for help rather than forge ahead as a lone warrior, and they're better off
+  for it&mdash;even when it's just <a href="http://www.c2.com/cgi/wiki?RubberDucking">rubber ducking</a>. 
+</p>
+<p>
+  On that note, my experience here has been that almost everyone seems to be pairing all the time,
+  and those who aren't pairing are either working on project management or QA-type tasks, or have
+  their code reviewed by someone else later on. 
+</p>
+<p>
+  My own experience at 8th Light has always been that two heads are better than one, so this was
+  cool to see. Additionally, as I've said before, the developers all seem to be very good at 
+  client-relations issues, and I discovered today that, as I suspected, Relevance uses its
+  own developers as project managers for all projects. 
+</p>
+<p>
+  This seems very noteworthy to me &mdash;it's been rare that I've seen a developer as project
+  manager, but it seems to be the rule here. This is also often the case for the QA role.
+</p>
+<p>
+  Certainly there is  a lot of testing going on here at both the unit and acceptance test level,
+  but there is often a developer doing QA on other developers' work.
+</p>
+<p>
+  My experience this week was great. I would highly recommend anyone considering doing something
+  like a craftsman swap / journeyman pairing tour to just do it. 
+</p>
+<p>
+  This has been a wonderful experience, and it's easy to see why people like 
+  <a href="http://twitter.com/coreyhaines">Corey Haines</a> have been such proponents of this
+  sort of thing. 
+</p>
+<p>
+  Relevance would be an excellent choice for a visit if you can make it happen&mdash;I've learned a lot,
+  and I look forward to bringing more of that back to the team at 8th Light when I get back to Chicagoland.
+</p>
+<p>
+  Many thanks to 8th Light and Relevance for the opportunity to do this!
+</p>

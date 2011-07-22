@@ -1,0 +1,61 @@
+<h1>Jenkins, RVM, and Selenium</h1>
+<p id="author">Li-Hsuan Lung</p>
+<p id="date">2011-03-02</p>
+<h2>
+  I have been working on migrating half a dozen 8th Light projects to our continuous integration
+  server last week. Barring one <a href="https://github.com/dougbradbury/rubarb">open-source gem project</a>,
+  most of them were Rails.
+</h2> 
+<p>
+  I have used Jenkins to build, pipeline, and install projects on Windows with batch
+  commands and ant tasks in the past, but this would be the first time I set up Rails projects and deal with Ruby
+  management and running features in a headless environment.
+</p>
+<h3>RVM</h3>
+<p>
+  Obviously the center piece of this operation is <b>RVM</b>. The catch is that Jenkins does not load your bash
+  profiles on slave environment for each build, which is usually how you load <b>RVM</b> into a shell session.
+</p>
+<p>
+  This can be resolved with either including <b>RVM</b> scripts in Jenkins' startup, or run,  
+  <code>source ~/.bash_profile</code> at the beginning of your build steps assuming you followed the post 
+  install instruction in <a href="http://rvm.beginrescueend.com/rvm/install/">RVM installation guide</a>. 
+</p>
+<p>
+  Afterward, you can execute <code>rvm use 1.9.2@gemset</code> to pick up project setting, or take advantage
+  of .rvmrc&mdash;business as usual.
+</p>
+<p>
+  Alternatively, you can install Jenkins' <a href="http://wiki.jenkins-ci.org/display/JENKINS/Rake+Plugin">Rake plugin</a>.
+  The plugin allows you to choose a Ruby installation per project, and since version 1.7, with <b>RVM</b> integration
+  you can also pick a specific gemset you created on <b>RVM</b>.
+</p>
+<p>
+  From Jenkins' homepage, go to Manage Jenkins, Configure System, and fill out <b>RVM</b> installation path under
+  the Rake section. Now at your project configuration, when you add a new build step to invoke Rake task, you will
+  see a list of Ruby versions and available gemsets ready at your disposal. The Rake plugin refreshes this list
+  every time you save the Configure System page.
+</p>
+<h3>Headless Selenium</h3>
+<p>
+  Some Rails projects are set up to run acceptance tests against a real browser, and unfortunately our continuous
+  integration box is without a display. The common solution for this type of problem seems to be installing <b>Xvfb</b>,
+  a virtual framebuffer server that renders your <b>GUI</b> tools in memory:
+</p>
+<script src="https://gist.github.com/812630.js?file=xvfb.sh"></script>
+<p>
+  Moving forward, you can write a script to run Xvfb whenever you kick start a build, and make sure the <b>DISPLAY</b>
+  variable is set accordingly when Selenium is up. Your other option is to install the 
+  <a href="https://github.com/leonid-shevtsov/headless">headless gem</a>, and call to launch the server with Ruby <b>API</b>
+  in your <code>features/support/env.rb</code> file:
+</p>
+<script src="https://gist.github.com/812632.js?file=headless.rb"></script>
+<p>
+  Now armed with <b>RVM</b> and headless gem, you can create a new job on Jenkins with relative ease. I hope,
+  at this point, you will have a reasonably good grasp on how to set up your own Rails project on a <b>CI</b> server,
+  and ready to reap the profits of the continuous integration process.
+</p>
+<p>
+  To sum it up, here is the final recipe for a Rails project's build step:
+</p>
+<script src="https://gist.github.com/812833.js?file=project.sh"></script>
