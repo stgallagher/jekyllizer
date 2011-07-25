@@ -1,0 +1,318 @@
+---
+layout: post
+title: Up and running with TDD on Android
+tag: Testing
+---
+
+<h2>
+  A couple of weeks ago, I happened to be in the right place at the right time (the
+  first <abbr>ORD</abbr> Session) when Google hooked a bunch of developers up with an
+  Android Dev Phone 1.
+</h2> 
+<p>
+  I&rsquo;d been interested in Android for awhile because it&rsquo;s a more open platform than the
+  iPhone, and the code is Java (I&rsquo;ve never worked in Objective-C), so I was excited.
+</p> 
+<p>
+  After my initial excitement of hacking around and getting things to work, I decided to
+  regain my discipline and figure out a workflow for 
+  <abbr title="Test Driven Development">TDD</abbr>. The good news is that JUnit is built
+  right into the Java framework that Android app have available.
+</p>
+<p>
+  The less-good news is that writing and running tests on Android isn&rsquo;t as well-documented
+  as many other facets of the application framework. I&rsquo;d like to share my setup, which
+  doesn&rsquo;t depend on any specific <abbr title="Integrated Development Environment">IDE</abbr>
+  or text editor.
+</p> 
+<p>
+  I&rsquo;m assuming Mac or Linux here, but I&rsquo;m sure Windows would only require minimal 
+  changes. Other assumptions:
+</p>
+<ul>
+  <li>
+    <a href="http://developer.android.com/sdk/1.5_r2/index.html" rel="external">The Android SDK</a>
+    is installed
+  </li>
+  <li>Android tools directory is on the <code>PATH</code></li>
+  <li>
+    <a href="http://ant.apache.org/" rel="external">Ant</a> is on the machine and on the 
+    <code>PATH</code>
+  </li>
+</ul>
+<p>
+  Note: The <code>tools</code> directory is the main one, not the one below 
+  <code>platforms</code>. In my case: <code>/Users/colin/lib/android/tools</code>.
+</p>
+<p>
+  Let&rsquo;s get started by creating a project with the command-line utility, which will
+  give you the test directory structure and build files that you need (you won&rsquo;t get
+  these with the Eclipse or IntelliJ plugins, for instance).
+</p>
+<p>
+  Of course, you can read documentation for the android command to see more details,
+  but here&rsquo;s what we&rsquo;re doing:
+</p>
+{% highlight bash linenos %}
+$ android create project -t 1 -p tictactoe-android -a TicTacToe -k com.colinwjones
+$ cd tictactoe-android
+{% endhighlight %}
+<p>
+  All of these options are required (<code>-n</code>, the project name, is optional,
+  and I&rsquo;ve left it out above)
+</p>
+<ul>
+  <li>
+    <code>-t</code> is the build target platform
+  </li>
+  <li>
+    <code>-p</code> is the path of the new project to create
+  </li>
+  <li>
+    <code>-a</code> is the first Activity that you want to create
+  </li>
+  <li>
+    <code>-k</code> is your package name
+  </li>
+</ul>
+<p>
+  Next, we want to create an <abbr title="Android Virtual Device">AVD</abbr> 
+  if one doesn&rsquo;t already exist&mdash;it&rsquo;s an emulator for the phone operating 
+  system. We can check to see if one exists already first:
+</p>
+{% highlight bash linenos %}
+$ android list avd
+{% endhighlight %}
+<p>
+  If you don&rsquo;t have an <abbr title="Android Virtual Device">AVD</abbr> already,
+  create one:
+</p>
+{% highlight bash linenos %}
+$ android create avd -n ColinPhone -t 1
+{% endhighlight %}
+<p>
+  You&rsquo;ll be asked if you want a custom hardware profile (if you don&rsquo;t, just hit Return).
+</p>
+<ul>
+  <li>
+    <code>-n</code> is the name of the new device
+  </li>
+  <li>
+    <code>-t</code> is the target platform, as before
+  </li>
+</ul>
+<p>
+  At this point, let&rsquo;s go ahead and fire up the emulator, making sure to match the name
+  to the one you created. It&rsquo;s good to make sure that our state at this early point is
+  a good one.
+</p>
+{% highlight bash linenos %}
+$ emulator -avd ColinPhone &
+{% endhighlight %}
+<p>
+  Here I&rsquo;m launching the emulator <abbr title="Android Virtual Device">(AVD)</abbr> in 
+  the background so I don&rsquo;t need to open up a new Terminal window. You&rsquo;ll get some output
+  in your terminal window; if it bothers you, <code>Ctrl-L</code> will freshen it up. 
+</p>
+<p>
+  Now we&rsquo;ll build and install both of your apps (the test package is really a separate
+  application, which is a good idea to keep the tests out of the eventual deployment
+  package anyway):
+</p>
+{% highlight bash linenos %}
+$ ant debug
+$ adb install -r bin/TicTacToe-debug.apk
+$ cd tests
+$ ant debug
+$ adb install -r bin/TicTacToe-debug.apk
+{% endhighlight %}
+<p>
+  The debug target isn&rsquo;t actually defined in either buildfile 
+  (<code>build.xml</code> or <code>tests/build.xml</code>),
+  but is available nonetheless (see <code>$ ant help</code> for other targets you might not
+  otherwise find). This takes care of bundling resources, compiling, converting classfiles
+  to Android&rsquo;s <code>.dex</code> format, and packaging.
+</p>
+<p>
+  Note that <code>adb</code> is <i>not</i> <code>ant</code>&mdash;it&rsquo;s the Android Debug 
+  Bridge, and it&rsquo;s invaluable for working with the emulator. The <code>-r</code> option 
+  to <code>adb install</code> reinstalls the package if necessary. Now, this is pretty 
+  redundant-looking, but just remember that the tests directory is a sort of parallel 
+  structure with your project directory, and you need both.
+</p>
+<p>
+  It&rsquo;s time to run the default test suite that the <code>android create project</code> call has
+  given us (this can be run either from tests directory or from the root of the project):
+</p>
+{% highlight bash linenos %}
+$ adb shell am instrument -w com.colinwjones.tests/android.test.InstrumentationTestRunner
+{% endhighlight %}
+<p>
+  Of course, you&rsquo;ll want to substitute your package and activity names for the ones in my
+  examples. It&rsquo;s very important to realize that you&rsquo;ve just compiled and installed your 
+  software on the emulator and are running tests on it there.
+</p>
+<p>
+  In order to do <abbr title="Test Driven Development">TDD</abbr>, you&rsquo;ll need to recompile
+  changed code and reinstall on the emulator. I hope that one day there will be a way to avoid
+  going through the emulator each time, but this is the only method I&rsquo;ve been able to get 
+  working so far. 
+</p>
+<p>
+  Now we need to actually add a real test to
+  <code>tests/src/com/colinwjones/TicTacToeTest.java</code>. Here, an 
+  <abbr title="Integrated Development Environment">IDE</abbr> like IntelliJ or Eclipse comes
+  in handy, especially if you&rsquo;re just starting with Android and aren&rsquo;t sure of the methods
+  you might want to use.
+</p>
+{% highlight java linenos %}
+// with imports at top:
+
+import import android.widget.Button;
+
+/* some code
+ * ...
+ * ...
+ */
+
+// inside your test class:
+
+public void testNewGameButtonExists() throws InterruptedException
+{
+    Button button = (Button) getActivity().findViewById(R.id.new_button);
+    assertEquals("New Game", button.getText());
+{% endhighlight %}
+<p>
+  Building our test package at this point will fail, since no resource with the 
+  <code>new_button</code> id exists yet. Let&rsquo;s do it anyway to see the first failure and
+  guide us to our implementation code (running this from the tests directory):
+</p>
+{% highlight bash linenos %}
+$ ant debug
+{% endhighlight %}
+<p>
+  The error tells us where to go next: we&rsquo;ll implement the button in 
+  <code>/layout/main.xml</code> (making sure to set the right ID on the button).
+</p>
+{% highlight xml linenos %}
+<Button android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/new_button" />
+{% endhighlight %}
+<p>
+  Since we changed the main layout, the implementation package needs to be built first,
+  then the test package:
+</p>
+{% highlight bash linenos %}
+$ cd ..
+$ ant debug && adb install -r bin/TicTacToe-debug.apk
+$ cd tests
+$ ant debug && adb install -r bin/TicTacToe-debug.apk
+{% endhighlight %}
+<p>
+  Now run the tests again:
+</p>
+{% highlight bash linenos %}
+$ adb shell am instrument -w com.colinwjones.tests/android.test.InstrumentationTestRunner
+{% endhighlight %}
+<p>
+  Great! Now we have a proper failure:
+</p>
+{% highlight bash linenos %}
+com.colinwjones.TicTacToeTest:
+Failure in testNewGameButtonExists:
+junit.framework.AssertionFailedError: expected:<new game> but was:<>
+{% endhighlight %}
+<p>
+  We just need to add the right text in the 
+  <abbr title="Extensible Markup Language">XML</abbr> layout:
+<p>
+{% highlight xml linenos %}  
+<Button android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/new_button" 
+        android:text="New Game" />
+{% endhighlight %}
+<p>
+  Let&rsquo;s rid of the default &ldquo;Hello, World&rdquo; TextView in <code>main.xml</code>
+  while we&rsquo;re at it. Now rebuild, reinstall, and re-run tests:
+</p>
+{% highlight bash linenos %}
+$ cd ..
+$ ant debug && adb install -r bin/TicTacToe-debug.apk
+$ cd tests
+$ ant debug && adb install -r bin/TicTacToe-debug.apk
+$ adb shell am instrument -w com.colinwjones.tests/android.test.InstrumentationTestRunner
+{% endhighlight %}
+<p>
+  This is getting annoying typing all these commands: we&rsquo;re going to want to 
+  write a shell script or Ant task to do this for us. But for the time being,
+  we&rsquo;ll plod through (that was the last time, though). Now we&rsquo;re passing:
+</p>
+{% highlight bash linenos %}
+Test results for InstrumentationTestRunner=..
+Time: 1.009
+OK (2 tests)
+{% endhighlight %}
+<p>
+  It&rsquo;s a bit strange that the test runner claims we have 2 tests: each test
+  class will add one of its own.
+</p>
+<p>
+  Now that we&rsquo;ve seen how to get the tests running, let&rsquo;s automate it by
+  adding Ant tasks to the <code>build.xml</code> in the main project directory. 
+</p>
+<p>
+  You&rsquo;ll need to set the environment variable <code>ANDROID_TOOLS</code>
+  for this exact task to work, or you can provide the full path to <code>adb</code>:
+</p>
+{% highlight xml linenos %}
+<target name="clean">
+  <delete includeemptydirs="true">
+    <fileset dir="bin" includes="**/*" />
+    <fileset dir="tests/bin" includes="**/*" />
+  </delete>
+</target>
+<target depends="clean, debug" name="test">
+  <property environment="env" />
+  <property name="android-tools" value="${env.ANDROID_TOOLS}" />
+  <ant dir="tests" antfile="build.xml" inheritall="false" target="debug" />
+  <exec executable="${android-tools}/adb" failonerror="true">
+    <arg line="install -r bin/TicTacToe-debug.apk" />
+  </exec>
+  <exec executable="${android-tools}/adb" failonerror="true">
+    <arg line="install -r tests/bin/TicTacToe-debug.apk" />
+  </exec>
+  <exec executable="${android-tools}/adb">
+    <arg line="shell am instrument" />
+    <arg value="-w" />
+    <arg line="com.colinwjones.tests/android.test.InstrumentationTestRunner" />
+  </exec>
+</target>
+{% endhighlight %}
+<p>
+  Now we can just run:
+</p>
+{% highlight bash linenos %}
+$ ant test
+{% endhighlight %}
+<p>
+  from the project directory (assuming the emulator is already up and running
+  with <code> emulator -avd ColinPhone &</code>), and we&rsquo;ll be good to go.
+</p>
+<p>
+  Honestly, it&rsquo;s a pretty simple process: the key for me was in using the Android
+  command-line tools rather than <abbr title="Integrated Development Environment">IDE</abbr>
+  plugins. It helped me to understand the build process and get beyond the initial frustration
+  of not having the <abbr title="Integrated Development Environment">IDE</abbr> do the
+  work for me.
+</p>
+<p>
+  I imagine things will change a bit for Windows users, so please leave comments if
+  there&rsquo;s anything drastically different, or if things change for Mac/Linux
+  users as the framework develops.
+</p>
+<p>
+  I do hope this will help someone else to get set up and save the headache I had
+  when first discovering Android.
+</p>

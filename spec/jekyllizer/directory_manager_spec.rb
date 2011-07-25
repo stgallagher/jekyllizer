@@ -5,6 +5,7 @@ require 'fileutils'
 
 module Jekyllizer  
   describe DirectoryManager do
+    FakeFS.activate!
     before(:all) do
       FileUtils.touch("file1.html")
       FileUtils.touch("file2.html")
@@ -39,30 +40,31 @@ module Jekyllizer
       it "should pass a file name to changer" do
         @dm.html_files
         @dm.changer
-        @dm.pass_file_to_changer(@dm.html_files[0])
+        @dm.changer.filename="/home/sgallagher/8thLightWork/jekyllizer/dir1/file4.html"
         @dm.file_changer.filename.should == "/home/sgallagher/8thLightWork/jekyllizer/dir1/file4.html"
       end
 
       it "should receive a changed filename" do
         @dm.changer
-        @dm.source="/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/before_process/cdemyanovich-20101220.html"
-        @dm.changed_filename.should == "/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/before_process/2010-12-20-speech-is-silver-silence-is-golden.html"
+        @dm.pass_file_to_changer("/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/before_process/craig-demyanovich/cdemyanovich-20101220.html")
+        @dm.destination="/home/sgallagher/8thLightWork/Test-Result-Data/."
+        @dm.changed_filename.should == "/home/sgallagher/8thLightWork/Test-Result-Data/craig-demyanovich/_posts/2010-12-20-speech-is-silver-silence-is-golden.html"
       end
 
       it "should receive changed file contents" do
         @dm.changer
-        @dm.source="/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/before_process/cdemyanovich-20101220.html"
+        @dm.source="/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/before_process/craig-demyanovich/cdemyanovich-20101220.html"
         returned_file_contents = @dm.changed_file_contents
         expected_file_contents = IO.readlines("/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/after_process/2010-12-20-speech-is-silver-silence-is-golden.html")
         returned_file_contents.should == expected_file_contents
       end
 
       it "should save the file under the changed filename, with the changed contents, in the destination directory" do
-        pending
+        FakeFS.deactivate!
         @dm.changer
-        @dm.source= "/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/Test-Blog-Data/"
-        @dm.destination= "/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/Results/"
-        @dm.change_files.should == ""
+        @dm.source= "/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/mass-before-process/"
+        @dm.destination= "/home/sgallagher/8thLightWork/jekyllizer/spec/fixtures/blog_posts/mass-actual-results/."
+        @dm.change_files
       end
   end
 end

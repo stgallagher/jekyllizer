@@ -40,9 +40,11 @@ module Jekyllizer
     end
 
     def changed_filename
+      dir = File.dirname(@destination)
+      subdir = @file_changer.filename.match(/([^\/]*)\/[^\/]*\.html/).captures.to_s
       basename = @file_changer.formatted_filename
-      dir = File.dirname(@source)
-      changed_filename = dir + "/" + basename 
+      
+      changed_filename = dir + "/" + subdir + "/_posts/" + basename 
     end
 
     def changed_file_contents
@@ -54,11 +56,13 @@ module Jekyllizer
     end
 
     def change_files
+      puts @html_files.size
+      puts "In change_files => Source: " + @source
       @html_files.each do |file|
+        puts file
         pass_file_to_changer(file)
-        File.open(changed_filename, "w+") do |f|
-          while changer_file_contents
-          end
+        File.open(changed_filename, "w+") do |line| 
+          line << changed_file_contents
         end       
       end 
     end

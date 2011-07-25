@@ -1,0 +1,221 @@
+<h1>Up and running with TDD on Android</h1>
+<p id="author">Colin Jones</p>
+<p id="date">2009-07-11</p>
+<h2>
+  A couple of weeks ago, I happened to be in the right place at the right time (the
+  first ORD Session) when Google hooked a bunch of developers up with an Android Dev
+  Phone 1.
+</h2> 
+<p>
+  I'd been interested in Android for awhile because it's a more open platform than the
+  iPhone, and the code is Java (I've never worked in Objective-C), so I was excited.
+</p> 
+<p>
+  After my initial excitement of hacking around and getting things to work, I decided to
+  regain my discipline and figure out a workflow for 
+  <abbr title="Test Driven Development">TDD</abbr>. The good news is that JUnit is built
+  right into the Java framework that Android app have available.
+</p>
+<p>
+  The less-good news is that writing and running tests on Android isn't as well-documented
+  as many other facets of the application framework. I'd like to share my setup, which
+  doesn't depend on any specific <abbr title="Integrated Development Environment">IDE</abbr>
+  or text editor.
+</p> 
+<p>
+  I'm assuming Mac or Linux here, but I'm sure Windows would only require minimal 
+  changes. Other assumptions:
+</p>
+<ul>
+  <li>
+    <a href="http://developer.android.com/sdk/1.5_r2/index.html">The Android SDK</a>
+    is installed
+  </li>
+  <li>Android tools directory is on the <code>PATH</code></li>
+  <li>
+    <a href="http://ant.apache.org/">Ant</a> is on the machine and on the 
+    <code>PATH</code>
+  </li>
+</ul>
+<small>
+  Note: The &ldquo;tools&rdquo; directory is the main one, not the one below 
+  &ldquo;platforms.&rdquo; In my case: <code>/Users/colin/lib/android/tools</code>.
+</small>
+<p>
+  Let's get started by creating a project with the command-line utility, which will
+  give you the test directory structure and build files that you need (you won't get
+  these with the Eclipse or IntelliJ plugins, for instance).
+</p>
+<p>
+  Of course, you can read documentation for the android command to see more details,
+  but here's what we're doing:
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-1.sh"></script>
+<p>
+  All of these options are required (<code>-n</code>, the project name, is optional,
+  and I've left it out above)
+</p>
+<ul>
+  <li>
+    <code>-t</code> is the build target platform (1 refers to Android version1.1
+    on my machine, see the ids in <code>$ android list targets</code> for yours. 
+    This is important to remember as you'll need to refer to it later)
+  </li>
+  <li>
+    <code>-p</code> is the path of the new project to create (make up a folder
+    name for your new project
+  </li>
+  <li><code>-a</code> is the first Activity that you want to create</li>
+  <li><code>-k</code> is your package name</li>
+</ul>
+<p>
+  Next, we want to create an <abbr title="Android Virtual Device">AVD</abbr> 
+  (Android Virtual Device) if one doesn't already exist&mdash;it's an emulator 
+  for the phone operating system. We can check to see if one exists already first:
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-2.sh"></script>
+<p>
+  If you don't have an <abbr title="Android Virtual Device">AVD</abbr> already,
+  create one:
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-3.sh"></script>
+<p>
+  You'll be asked if you want a custom hardware profile (I don't, so I just hit Return).
+</p>
+<ul>
+  <li><code>-n</code> is the name of the new device</li>
+  <li>
+    <code>-t</code> is the target platform, as before (and it should match your
+    project's platform)
+  </li>
+</ul>
+<p>
+  At this point, let's go ahead and fire up the emulator, making sure to match the name
+  to the one you created. It's good to make sure that our state at this early point is
+  a good one.
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-4.sh"></script>
+<p>
+  Here I'm launching the emulator <abbr title="Android Virtual Device">(AVD)</abbr> in 
+  the background so I don't need to open up a new Terminal window. You'll get some output
+  in your terminal window; if it bothers you, Ctrl-L will freshen it up. 
+</p>
+<p>
+  Now we'll build and install both of your apps (the test package is really a separate
+  application, which is a good idea to keep the tests out of the eventual deployment
+  package anyway):
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-5.sh"></script>
+<p>
+  The debug target isn't actually defined in either buildfile (build.xml or tests/build.xml),
+  but is available nonetheless (see <code>$ ant help</code> for other targets you might not
+  otherwise find). This takes care of bundling resources, compiling, converting classfiles
+  to Android's .dex format, and packaging.
+</p>
+<p>
+  Note that adb is NOT ant&mdash;it's the Android Debug Bridge, and it's invaluable for working
+  with the emulator. The <code>-r</code> option to <code>adb install</code> reinstalls the
+  package if necessary. Now, this is pretty redundant-looking, but just remember that the
+  tests directory is a sort of parallel structure with your project directory, and you need both.
+</p>
+<p>
+  It's time to run the default test suite that the <code>android create project</code> call has
+  given us (this can be run either from tests directory or from the root of the project):
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-6.sh"></script>
+<p>
+  Of course, you'll want to substitute your package and activity names for the ones in my
+  examples. It's very important to realize that you've just compiled and installed your 
+  software on the emulator and are running tests on it there.
+</p>
+<p>
+  In order to do <abbr title="Test Driven Development">TDD</abbr>, you'll need to recompile
+  changed code and reinstall on the emulator. I hope that one day there will be a way to avoid
+  going through the emulator each time (or that there already is one that I've been unable
+  to find), but this is the only method I've been able to get working so far. 
+</p>
+<p>
+  Now we need to actually add a real test to (in my case) 
+  <code>tests/src/com/colinwjones/TicTacToeTest.java</code>. Here, an 
+  <abbr title="Integrated Development Environment">IDE</abbr> like IntelliJ or Eclipse comes
+  in handy, especially if you're just starting with Android and aren't sure of the methods
+  you might want to use.
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-7.java"></script>
+<p>
+  Building our test package at this point will fail, since no resource with the 
+  <code>new_button</code> id exists yet. Let's do it anyway to see the first failure and
+  guide us to our implementation code (running this from the tests directory):
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-8.sh"></script>
+<p>
+  The error tells us where to go next: we'll implement the button in 
+  <code>/layout/main.xml</code> (making sure to set the right ID on the button).
+</p>
+<script src="https://gist.github.com/1051899.js?file=cjones-20090711-9.xml"></script>
+<p>
+  Since we changed the main layout, the implementation package needs to be built first,
+  then the test package:
+</p>
+<script src="https://gist.github.com/1051833.js?file=cjones-20090711-11.sh"></script>
+<p>
+  Now run the tests again:
+</p>
+<script src="https://gist.github.com/1051833.js?file=cjones-20090711-12.sh"></script>
+<p>
+  Great! Now we have a proper failure:
+</p>
+<script src="https://gist.github.com/1051833.js?file=cjones-20090711-13.sh"></script>
+<p>
+  We just need to add the right text in the 
+  <abbr title="Extensible Markup Language">XML</abbr> layout:
+<p>
+<script src="https://gist.github.com/1051833.js?file=cjones-20090711-14.xml"></script>
+<p>
+  Let's rid of the default &ldquo;Hello, World&rdquo; TextView in main.xml
+  while we're at it. Now rebuild, reinstall, and re-run tests:
+</p>
+<script src="https://gist.github.com/1051833.js?file=cjones-20090711-15.sh"></script>
+<p>
+  This is getting annoying typing all these commands: we're going to want to 
+  write a shell script or Ant task to do this for us. But for the time being,
+  we'll plod through (that was the last time, though). Now we're passing:
+</p>
+<script src="https://gist.github.com/1051833.js?file=cjones-20090711-16.sh"></script>
+<p>
+  It's a bit strange that the test runner claims we have 2 tests: each test
+  class will add one of its own.
+</p>
+<p>
+  Now that we've seen how to get the tests running, let's automate it by
+  adding Ant tasks to the build.xml in the main project directory. 
+</p>
+<p>
+  You'll need to set the environment variable <code>ANDROID_TOOLS</code>
+  for this exact task to work, or you can provide the full path to <code>adb</code>:
+</p>
+<script src="https://gist.github.com/1051833.js?file=cjones-20090711-17.xml"></script>
+<p>
+  Now we can just run:
+</p>
+<script src="https://gist.github.com/1051833.js?file=cjones-20090711-18.sh"></script>
+<p>
+  from the project directory (assuming the emulator is already up and running
+  with <code> emulator -avd ColinPhone &</code>), and we'll be good to go.
+</p>
+<p>
+  Honestly, it's a pretty simple process: the key for me was in using the Android
+  command-line tools rather than <abbr title="Integrated Development Environment">IDE</abbr>
+  plugins. It helped me to understand the build process and get beyond the initial frustration
+  of not having the <abbr title="Integrated Development Environment">IDE</abbr> do the
+  work for me.
+</p>
+<p>
+  I imagine things will change a bit for Windows users, so please leave comments if
+  there's anything drastically different (and also if things change for Mac/Linux
+  users as the framework develops).
+</p>
+<p>
+  I do hope this will help someone else to get set up and save the headache I had
+  when first discovering Android.
+</p>
