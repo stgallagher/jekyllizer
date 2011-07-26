@@ -1,3 +1,4 @@
+require 'fileutils'
 
 module Jekyllizer
   class DirectoryManager 
@@ -39,12 +40,14 @@ module Jekyllizer
       @file_changer.filename= filename
     end
 
-    def changed_filename
+    def changed_directory
       dir = File.dirname(@destination)
       subdir = @file_changer.filename.match(/([^\/]*)\/[^\/]*\.html/).captures.to_s
-      basename = @file_changer.formatted_filename
-      
-      changed_filename = dir + "/" + subdir + "/_posts/" + basename 
+      @changed_directory =  dir + "/" + subdir + "/_posts/"
+    end
+
+    def changed_basename
+      @basename = @file_changer.formatted_filename
     end
 
     def changed_file_contents
@@ -56,12 +59,22 @@ module Jekyllizer
     end
 
     def change_files
-      puts @html_files.size
-      puts "In change_files => Source: " + @source
       @html_files.each do |file|
-        puts file
+       #puts "In change files: File is => " + file
         pass_file_to_changer(file)
-        File.open(changed_filename, "w+") do |line| 
+        changed_directory
+        changed_basename
+        "changed directory is =>"
+        @changed_directory
+        "changed basename is =>"
+        @basename
+        if(File.directory?(@changed_directory))
+         FileUtils.chdir(@changed_directory)
+        else
+         FileUtils.mkdir_p(@changed_directory)
+         FileUtils.chdir(@changed_directory)
+        end
+        File.open(@basename, "w+") do |line| 
           line << changed_file_contents
         end       
       end 

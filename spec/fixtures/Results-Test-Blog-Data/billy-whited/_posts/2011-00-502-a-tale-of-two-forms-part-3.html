@@ -1,0 +1,325 @@
+---
+layout: post
+title: A Tale of Two Forms (Part 3)
+tag:
+---
+
+
+<p>
+  Last week, we took a closer look at some simple "under the hood" changes you can make to your forms 
+  to improve their usability and accessibility. In this third and final installment of "A Tale of Two 
+  Forms," well examine a few ways you can tweak the design/layout of your forms in order to improve 
+  these attributes. I'll be the first to admit that designing forms can be a rather uninspiring process, 
+  but I would argue that there are few other areas of web design that carry as much importance.
+</p>
+<p>
+  I'll jump into basic form design principles shortly, but before I do I want to urge you to review 
+  the previous two articles on forms so you can recap where we've been—and where we still need to go. 
+  You can find those articles here:
+</p>
+<ul>
+  <li><a href="http://blog.8thlight.com/articles/2011/4/14/marking-up-a-semantic-form">
+    A Tale of Two Forms (Part 1)</a></li>
+  <li><a href="http://blog.8thlight.com/articles/2011/4/21/a-tale-of-two-forms-part-2">
+    A Tale of Two Froms (Part 2)</a></li>
+<ul>
+<p>
+  Also, here is a look at what our form looked like the last time we gave it any visual consideration: 
+</p>
+<p>
+  <a href="http://www.flickr.com/photos/rocketspops/5619548335/" 
+     title="semantic-form by rocketspops, on Flickr"><img 
+     src="http://farm6.static.flickr.com/5068/5619548335_3e6de77879_o.png" 
+     height="400" 
+     alt="semantic-form" 
+     width="600" 
+     style="border:1px solid #dddddd; margin:20px 0;">
+  </a>
+</p>  
+<h3>Basic Principles of Form Design</h3>
+<p>
+  As you can see above, we have a fairly nondescript form on our hands. It's got some fields, a submit 
+  button and is, for the most part, un-styled. I've seen tons of forms like this one scattered about the 
+  internet and I for one won't argue that there is anything inherently wrong with an un-styled form.
+</p>
+<p>
+  In fact, given how insistent (dictatorial?) most browsers are with the styling of their form elements, 
+  and how disparate the rendering of form elements is across the browser landscape, there are distinct 
+  advantages to leaving your form elements alone.
+</p>
+<p>
+  However, aside from the lack of decoration on this form, there are still some pretty glaring issues 
+  with it's design. We've got room for improvement here. So let's examine a few basic principles of form 
+  design and apply them to this design.
+</p>
+<ol>
+  <li>
+  <h3>LABEL ALIGNMENT</h3>
+  <p>
+    The alignment of form labels is one of those subtle design considerations that can have a considerable 
+    impact on the performance of your form. In the above example, the labels are all left-aligned. While this 
+    has a certain visual appeal, <a href="http://www.lukew.com/ff/entry.asp?504">it turns out to be the least 
+    efficient way to place them</a>.
+  </p>
+  <p>
+    When form labels are left aligned, users spend precious extra seconds scanning back and forth between 
+    label and input. As a result, it takes users longer to fill out forms with left aligned labels than it 
+    does to fill out a form with top (the most efficient) or right (the second most efficient) aligned labels.
+  </p>  
+  <p>
+    Now, this isn't all bad because there might be a situation in which you want to slow users down. Also, 
+    left aligned labels are the easiest to scan, so on forms with many fields they might make some sense. But, 
+    given how short our form is, it makes sense to optimize for ease of use and vertical space savings. Let's 
+    align our labels to the right.
+  </p>
+  </li>
+  <li>
+  <h3>INPUT AFFORDANCES</h3>
+  <p>
+    The term "affordance," as it relates to design, basically means the same thing as "clue." Think about a 
+    door that you have to pull to open on one side, and push to open on the other. How do you design a solution 
+    that communicates this fundamental aspect of the door?
+  </p>
+  <p>
+    Well, the door handle "affords" the pulling action, while the door plate "affords" the pushing action. For 
+    most people, this interaction is intuitive. By imbuing our form with affordances, we can give our users hints 
+    that make them a little easier to complete.
+  </p>
+  <p>
+    Perhaps the easiest way to do this with web forms is to restrict certain field inputs to a length that 
+    corresponds with the data they are asking for (we already know we can do this, at least in part, with the 
+    <a href="http://www.w3.org/TR/html4/interact/forms.html#adef-maxlength">maxlength attribute</a>.)
+  </p>
+  <p>
+    For example, this technique comes in handy when working with phone number, zip code and state fields. By 
+    shortening these fields, we give users a clue about how the system expects them to enter their information. 
+    In this way, we can actually prevent errors before they even happen!
+  </p>
+  </li>
+  <li><h3>INFORMATION CHUNKING</h3>
+  <p>
+    Depending on the nature of your form, you might find that several of your input fields ask for related 
+    information. In our above example it would seem that the <i>first name, last name, phone,</i> and <i>email</i> 
+    fields could all be grouped under a general category of "contact information."
+  </p>
+  <p>
+    Using the HTML <a href="http://www.w3.org/wiki/HTML/Elements/fieldset">fieldset element</a> we can semantically 
+    group related elements and "chunk" our fields into sets that provide context and meaning to our users. We can then 
+    style these fieldsets to create visual separations.
+  </p>  
+  <p>
+    By breaking our forms up into logical sections, we can make them appear less daunting, provide context to our 
+    users about the nature of the information we are asking them for, and help those users with assistive devices more 
+    easily navigate (and understand) them.
+  </p>
+  </li>
+  <li>
+  <h3>PRIMARY AND SECONDARY ACTIONS</h3>
+  <p>
+    Often forms have more than one action a user can take. There is frequently a <i>submit</i> button and perhaps a 
+    <i>cancel, continue, next</i> or <i>back</i> button. In almost all cases, these buttons carry different weight or 
+    significance for the user.
+  </p>
+  <p>
+    For instance, we wouldn't want a <i>submit</i> and a <i>cancel</i> button to share the exact same styling—doing so 
+    would make users much more likely to click the wrong button by mistake.
+  </p>
+  <p>
+    As a result, it's a good idea to determine which of your form buttons correspond with "primary" actions and which 
+    with "secondary" (or tertiary, quaternary, etc.) Once you've made this distinction, you can visually emphasize the 
+    "primary" action and allow the "secondary" button to recede visually.
+  </p>  
+  </li>
+  <h3>Pulling it all together</h3>
+  <p>
+    Here's what our form looks like after applying the design principles above and some of the tips from my previous 
+    two articles:
+  </p>
+    <a href="http://www.flickr.com/photos/rocketspops/5640241133/" 
+     title="attribute-form by rocketspops, on Flickr">
+    <img src="http://farm6.static.flickr.com/5103/5640241133_778e79c3fc_b.jpg" 
+         height="664" 
+         alt="attribute-form" 
+         width="600" 
+         style="border:1px solid #dddddd; margin:20px;">
+    </a>
+<small>The HTML source for our final form:</small>
+
+<!-- HTML
+<form action="" method="" role="form">
+  <fieldset>
+    <legend>Your Contact Info</legend>
+      <div>
+        <label for="first-name" title="First Name"><span>F</span>irst name</label>
+	<input accesskey="f" autofocus id="first-name" name="first-name" role="input" tabindex="1" type="text">
+      </div>
+      <div>
+        <label for="last-name" title="Last Name"><span>L</span>ast name</label>
+        <input accesskey="l" id="last-name" name="last-name" role="input" tabindex="2" type="text">
+      </div>
+      <div>
+	<label for="phone" title="Phone"><span>P</span>hone</label>
+	<input accesskey="p" id="phone" maxlength="10" name="phone" placeholder="8004156309" role="input" tabindex="3" type="text">
+      </div>
+      <div>
+	<label for="email" title="Email"><span>E</span>mail</label>
+	<input accesskey ="e" id="email" name="email" role="input" tabindex="4" type="text">
+      </div>
+  </fieldset>
+  <fieldset>
+    <legend>Your Location</legend>
+      <div>
+  	<label for="address" title="Address"><span>A</span>ddress</label>
+  	<input accesskey="a" id="address" name="address" role="input" tabindex="5" type="text">
+  	<label for="address-2" title="Address line 2">A<span>d</span>dress line 2</label>
+  	<input accesskey="d" id="address-2" name="address-2" placeholder="(optional) P.O. Box, Apt. #, etc." role="input" tabindex="6" type="text">
+      </div>
+      <div>
+  	<label for="city" title="City"><span>C</span>ity</label>
+  	<input accesskey="c" id="city" name="city" role="input" tabindex="7" type="text">
+      </div>
+      <div>
+  	<label for="state" title="State"><span>S</span>tate</label>
+  	<input accesskey="s" id="state" maxlength="2" name="state" role="input" tabindex="8" type="text">
+      </div>
+      <div>
+  	<label for="zip-code" title="Zip Code" ><span>Z</span>ip code</label>
+  	<input accesskey="z" id="zip-code" maxlength="5" name="zip-code" tabindex="9" type="text">
+      </div>
+  </fieldset>
+  <div>
+    <input accesskey="u" type="submit" role="button" tabindex="10" value="submit">
+    <a href="#" title="cancel">Cancel</a>
+  </div>
+</form>
+view rawattribute-form.htmlThis Gist brought to you by GitHub.
+-->
+
+<small>The CSS for our final form:</small>
+<!-- CSS
+body { background:rgb(255,255,255); font-family:sans-serif; font-size:62.5%; }
+
+form { margin:5em auto; width:40em; }
+
+fieldset { 
+  border-color:rgb(230,230,230);
+  border-style:solid;
+  border-width:0 0 0 0.5em;
+  margin-bottom:3em;	
+  position:relative;
+}
+
+fieldset:hover { border-color:rgb(200,200,200); }
+
+legend { 
+  color:rgb(200,200,200);
+  font-size:1em; 
+  letter-spacing:0.1em;
+  line-height:1.4em;
+  position:absolute;
+    left:-7.5em;
+  text-align:right;
+  text-transform:uppercase;
+  width:6em;
+}
+
+fieldset:hover legend { color:rgb(170,170,170); }
+
+div { 
+  display:inline-block; 
+  margin:0 0 1.3em 0; 
+  padding:0.5em 0; 
+  width:40em; 
+}
+
+div:last-child { margin-bottom:0; }
+
+a[title="cancel"] { color:rgb(255,0,0); font-size:1.2em; margin-left:0.8333em; }
+
+a[title="cancel"]:hover { text-decoration:none; }
+
+/* labels ---- */
+
+label { 
+  color:rgb(90,90,90);
+  cursor:pointer;
+  display:inline-block; 
+  float:left;
+  font-size:1.6em;
+  margin-right:0.625em;
+  position:relative;
+    top:0.5em;
+  text-align:right; 
+  text-transform:capitalize; 
+  width:7.8125em; 
+}
+
+label:hover { color:rgb(0,0,0); }
+
+label span { color:rgb(0,0,0); border-bottom:1px solid rgb(0,0,0); }
+
+label[for="address-2"] { visibility:hidden; }
+
+/* inputs ---- */
+
+input[type="text"] { 
+  float:left; 
+  font-size:1.4em; 
+  padding:0.3571em; 
+  width:17.8571em; 
+}
+
+input[type="text"]:focus { background-color:rgb(255,248,198); }
+
+input#address { margin-bottom:0.5em; }
+
+input#phone { width:6.7857em; }
+
+input#state { text-align:center; width:1.8571em; }
+
+input#zip-code { width:3.4286em; }
+
+input[type="submit"] { 
+  background-color:rgb(0,150,1);  
+  border:1px solid rgb(0,128,0); 
+  color:rgb(255,255,255);
+  font-size:1.4em; 
+  font-weight:bold;
+  letter-spacing:0.14286em;
+  margin-left:10.6428em; 
+  padding:0.3571em 0.7143em; 
+  text-transform:uppercase;
+
+  -webkit-border-radius:0.3571em;
+}
+
+input[type="submit"]:hover { background-color:rgb(0,128,0); cursor:pointer; }
+
+view rawattributes-form.cssThis Gist brought to you by GitHub.
+-->
+
+<h3>Recommended Reading</h3>
+<ul>
+  <li>
+    <a href="http://rosenfeldmedia.com/books/webforms/">Web Form Design</a> by Luke Wroblewski
+    <img src="http://rosenfeldmedia.com/i/covers/webforms-lg.gif" 
+         alt="Web Form Design by Luke Wroblewski" 
+         style="float:left; margin:0 15px 15px 0;" 
+         width="50px">
+    <p>
+      For a more profound and in-depth look into the design of forms on the web, I couldn't recommend this book more.
+    </p>
+  </li>  
+  <li>
+    <a href="http://www.jnd.org/books.html#33">The Design of Everyday Things</a> by Donald Norman
+    <img src="http://www.jnd.org/images/DOET-2002cover.jpg" 
+         alt="The Design of Everyday Things by Donald Norman" 
+         style="float:left; margin:0 15px 15px 0;" 
+         width="50px">
+    <p>
+      This book provides profound insights into the nature of human computer/device/interface/object interaction 
+      (including the notion of "affordances"). By highlighting frequently overlooked principles of humane design, 
+      Norman ensures that you'll never look at, think about, or interact with your surroundings in the same way again.
+    </p>
+  </li>  
+</ul>    

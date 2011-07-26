@@ -1,0 +1,144 @@
+<h1>MMEmail: My First Clojure Open Source Contribution</h1>
+<p id="author">Micah Martin</p>
+<p id="date">2010-04-21</p>
+
+<p>
+  While working on 
+  <a href="http://potterycat.com/">website for my sister</a>, 
+  I was perturbed that there were no libraries on 
+  <a href="http://clojars.org/">Clojars</a> 
+  for sending email. I was using 
+  <a href="http://nakkaya.com/2009/11/10/using-java-mail-api-from-clojure/">Leiningen</a> 
+  which will download and include all your dependancies for you (so sweet!). Yet, with the 
+  <a href="http://nakkaya.com/2009/11/10/using-java-mail-api-from-clojure/">library I found</a>
+  , I had to manually download all the required jars. Call me lazy but being forced to manually 
+  download dependancies seems like cruel and unusual punishment these days.
+</p>
+
+<p>
+  So I solved the problem:
+</p>
+
+<h3><a href="https://github.com/slagyr/mmemail">MMEmail</a></h3>
+
+<p>
+  Simple Clojure library for sending email, with just one jar!
+</p>
+
+<h3>Installation</h3>
+
+<h4>Leiningan:</h4>
+
+<!-->
+(defproject your-project "0.0.0"
+  :dependencies [[mmemail "1.0.0"]]
+-->
+
+<h4>Jar File</h4>
+
+<p>
+  …can be downloaded at http://clojars.org/repo/mmemail/mmemail/1.0.0/mmemail-1.0.0.jar
+</p>
+
+<h3>Usage:</h3>
+
+<h4>Include the library</h4>
+
+<!--
+(use 'mmemail.core)
+-->
+
+<h4>The Easy Way</h4>
+
+<p>
+  <code>mmemail.core</code> is the only include you need. It contains only 2 methods, the 
+  fist being send-email. It takes a map that includes all the configuration and email 
+  parameters. That’s it.
+</p>
+
+<!--
+(send-email {:host "smtp.gmail.com" 
+             :port 465 
+             :ssl true 
+             :user "road@gmail.com" 
+             :password "runner" 
+             :to "joe@acme.com" 
+             :subject "Greetings" 
+             :body "Meep Meep!"})
+-->
+
+<p>
+  Most of the parameters are required, but based on your server configuration you might 
+  get away without these:
+</p>
+
+<ul>
+  <li>:ssl</li>
+  <li>:password</li>
+  <li>:subject</li>
+</ul>
+
+<p>
+  It also accepts the following optional parameters:
+</p>
+
+<ul>
+  <li>:from (defaults to :user)</li>
+  <li>:cc</li>
+  <li>:bcc</li>
+</ul>
+
+<p>
+  The recipient parameters (:to, :cc, :bcc) may be a string, for one recipient, or a sequence 
+  of strings, for multiple recipients.
+</p>
+
+<h4>The Convenient Way</h4>
+
+<p>
+  It can be annoying to pass such a big map into the function, and typically you’ll want to get 
+  all the server configuration out of the way. This is where the second function of <code>mmemail.core 
+  (create-mailer)</code> comes into play.
+</p>  
+
+<!--
+(def my_mailer (create-mailer {:host "smtp.gmail.com"
+                               :port 465
+                               :ssl true
+                               :user "road@gmail.com"
+                               :password "runner"}))
+-->                             
+
+<p>                              
+  <code>create-mailer</code> will return a new function with all the configuration baked in. 
+  So in the future, you can send email like so:
+</p>  
+
+<!--
+ (my_mailer {:to "joe@acme.com"
+             :subject "Greetings"
+             :body "Meep Meep!"})
+-->
+
+<p>
+  The <code>create-mailer</code> accepts email parameters that will be used as defaults 
+  when the generated function is called.
+</p>
+
+<!--
+(def my_mailer (create-mailer {:subject "Greetings"
+                               :body "Meep Meep!"
+                               :host "smtp.gmail.com"
+                               :port 465
+                               :ssl true
+                               :user "road@gmail.com"
+                               :password "runner"}))
+(my_mailer {:to "joe@acme.com"})
+-->
+
+<h3>License</h3>
+
+<p>
+  Copyright 2010 Micah Martin. All Rights Reserved. MMEmail and all included source files 
+  are distributed under terms of the GNU LGPL.
+</p>  

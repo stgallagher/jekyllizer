@@ -1,0 +1,24 @@
+---
+layout: post
+title: Unrubify
+tag:
+---
+
+
+<p>
+	Often times while writing meta programming code, I am using the eval function and doing 
+	manipulation on method/class/variable names. Today I needed to unrubify a name. I haven’t 
+	seen this done regularly, and unfortunately there is no fun rails method to do it (there 
+	is one for rubifying a string). So, here is my attempt at it, for anyone trying to solve 
+	the same problem.
+</p>
+<!--
+def unrubify(sentence)  
+  sentence.capitalize!
+  sentence.gsub!(/_(.)/) { $1.upcase }
+  return sentence 
+end
+-->
+<p>
+	Any suggestions on improvements please let me know!
+</p>

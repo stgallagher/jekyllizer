@@ -1,0 +1,125 @@
+<h1>Test Driving Module Methods</h1>
+<p id="author">Eric Smith</p>
+<p id="date">2007-05-03</p>
+
+<p>
+	Recently I had the pleasure and frustration of working the net-sftp gem for Ruby. Pleasure 
+	because it’s a well written library, with an easy to use syntax that looks something like 
+	this:
+</p>
+<!-- 
+Net::SFTP.start( 'localhost', :registry_options => { :logs => { :levels => { "sftp.*" => :debug } } }) do |sftp|
+  sftp.put_file "test.data", "temp/blah.data"
+  puts "getting remote file to local location..."
+  sftp.get_file "temp/blah.data", "new.data"
+end 
+-->
+<p>
+	The above is just a shortened version from one of the examples in the GEM itself. It’s simple 
+	to use and easy to read. Having written similar code in C++, for Windows no less, I can really 
+	appreciate how quickly this can get an FTP application off the ground. The frustration came 
+	when I went to test drive this guy. Net::SFTP.start is a module method, not a class member. I 
+	can’t stub it in the traditional way using the RSpec stub! command or use should_receive. On 
+	top of that it passes back a block, which needs to be tested to make sure it’s being called 
+	correctly. After a few shots at mocking it out Paul and I test drove it with an actual FTP 
+	server. In the short term that was necessary anyway, as a hazard of frequent mocking can be 
+	that you are only testing how well you read the API. You see that when the tests pass and the 
+	first shot at actually running the code blows up. In the long term the customer asked for a 
+	few new small features, changing directories and what not, and I really want to get this under 
+	long-term test to do that. So how do we do it?
+</p>
+<p>
+	Well we could stop using the .start command entirely. We could pass in a mock Net::SFTP 
+	object and test it, making sure to close it manually. Unfortunately that eliminates the clean 
+	code we see above, and if possible I’d like to keep it. The solution is to intercept the start 
+	method.
+</p>
+<p>
+	The first thing I do is 
+	<a href="http://en.wikipedia.org/wiki/Monkey_patch">monkey patch</a> the code like so:
+</p>
+<!-- 
+module Net ; module SFTP
+  def start( *args, &block )
+  end
+  module_function :start
+end ; end 
+context "My Context" do 
+-->
+<p>
+	I’ve put it before the context, to make sure it’s redefined before the object I’m testing 
+	is created. Next we need to expose our mock objects in the context to the monkey patch. 
+	This isn’t done with traditional writers and readers, because that would require finding 
+	the specific specification running for each time through the monkey patched start. Instead 
+	we make our mocks class members in the setup method, and create a class method in the context 
+	to retrieve the variables. The class method looks like this:
+</p>
+<!-- def Spec.get_mock_ftp_objects
+  return @@mock_starter, @@mock_session
+end -->
+<p>
+	This reveals a bit of the underworkings of RSpec. Each block in the context block is turned into 
+	a class method using class_eval, as part of the Spec object. Making the method static allowed 
+	this new monkey patched method:
+</p>
+<!-- module Net
+  module SFTP
+    def start( *args, &block )
+      @mock_starter, @mock_session = Spec.get_mock_ftp_objects
+      @mock_starter.start args[0], args[1], args[2]
+      yield @mock_session
+    end
+    module_function :start
+  end
+end -->
+<p>
+	The code gets the two mock objects via our new method. Isn’t it grand how Ruby lets you return 
+	multiple objects? The call to start allows me to make sure that the arguments passed to the real 
+	start are correct. The real interesting call is the yield. By yielding the mock back to the 
+	object it will replace the sftp in the original code. Now I can test it! In fact I’ve already 
+	realized a bug in my code (in stopping) just by the process of doing this. I love it when a plan 
+	comes together. The final code example is here, I ended up extracting out a new class, so the 
+	names have changed. This one tests both the starting object and the block yielded:
+</p>
+<!-- require 'net/sftp'
+require File.expand_path(File.dirname(__FILE__) + "/ftp_client")
+
+module Net
+  module SFTP
+    def start( *args, &block )
+      @mock_starter, @mock_session = Spec.get_mock_ftp_objects
+      @mock_starter.start args[0], args[1], args[2]
+      yield @mock_session
+    end
+    module_function :start
+  end
+end
+
+context "FTP Client" do  
+  setup do
+    @client = FtpClient.new("test_server", "user", "password", "directory")
+    @@mock_starter = mock('mock_starter')
+    @@mock_session = mock('mock_session')
+    @@mock_session.stub!(:opendir)
+    @@mock_session.stub!(:close_handle)
+  end
+
+  specify "makes ftp connection, to proper place" do
+    @@mock_starter.should_receive(:start).with("test_server", "user", "password")
+    @client.read_from_server
+  end
+
+  specify "changes to ftp_directory, better close that handle" do
+    @@mock_starter.should_receive(:start).with("test_server", "user", "password")
+    @@mock_session.should_receive(:opendir).with("directory").and_return("fake handle")
+    @@mock_session.should_receive(:close_handle).with("fake handle")
+    @client.read_from_server
+  end
+
+  def Spec.get_mock_ftp_objects
+    return @@mock_starter, @@mock_session
+  end
+end -->
+<p>
+	Maybe this isn’t the best way to do this, but I like it. I’m looking forward to comments.
+</p>	

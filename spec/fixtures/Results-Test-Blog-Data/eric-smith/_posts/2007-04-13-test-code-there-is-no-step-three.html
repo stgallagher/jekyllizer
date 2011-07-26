@@ -1,0 +1,134 @@
+---
+layout: post
+title: Test, Code, There is no Step Three!
+tag:
+---
+
+
+<p>
+	Occasionally even great developers fall into bad habits, and the rest of us do it more 
+	than occasionally. This is especially true when under deadline and suddenly everything 
+	you’ve ever learned is thrown out the window in a desperate effort to get something to 
+	finish. I’ll share a story from a recent project to demonstrate just how much trouble 
+	rushing can get you into, and why we shouldn’t chuck our good habits at the first sign 
+	of adversity.
+</p>
+<p>
+	The story was relatively simple. Multiple XML documents needed to be generated based on 
+	information from another application in the system. My pair and I sat down and wrote our 
+	first test, which looked a little something like this:
+</p>
+<!-- 
+specify valid data should generate valid document do
+  data.valid  = true
+
+  doc = doc_generator.generate(data)
+  doc.valid?.should eql(true)
+  doc.header.should eql(â€œValid Headerâ€)
+  doc.text.should eql(â€œValid Textâ€)
+  doc.footer.should eql(â€œFooterâ€)
+end 
+-->
+<p>
+	So then we wrote a little code:
+</p>
+<!-- 
+def generate(data)
+  if data.valid
+    doc = Document.new
+    doc.header = â€œValid Headerâ€
+    doc.text = â€œValid Textâ€
+    doc.footer = â€œFooterâ€
+  end
+end 
+-->
+<p>
+	Okay we’ve got a passing test, with the 
+	<a href="http://c2.com/cgi/wiki?DoTheSimplestThingThatCouldPossiblyWork">simplest thing 
+	that could possibly work.. Great. Now let’s do the next one. Looking at the acceptance test 
+	we need to generate a different document when the data is notifying us of inaccessible data. 
+	Unfortunately there isn’t a flag for that, so we’ll have to figure it out from a combination 
+	of booleans. We write another test, we get it to pass with this code:
+</p>
+<!-- def generate(data)
+  if data.valid
+    doc.header = â€œValid Headerâ€
+    doc.text = â€œValid Textâ€
+    doc.footer = â€œFooterâ€
+  elsif data.invalid and data.accessible
+    doc.header = â€œDifferent Headerâ€
+    doc.text = â€œDifferent Valid Textâ€
+    doc.footer = â€œFooterâ€
+  end
+end -->
+<p>
+	That’s getting pretty ugly, but hey all the tests pass and we’re under deadline. We could 
+	replace the boolean checks with a query, but we’ve really got to finish and can’t be bothered 
+	with that kind of change. It would take almost a minute! Of course the big problem isn’t this 
+	code, it’s that we have quite a few more acceptance tests to go. Eventually this code looked 
+	something like this:
+</p>
+<!-- 
+def generate(data)
+  if data.valid
+    doc.header = â€œValid Headerâ€
+    doc.text = â€œValid Textâ€
+    doc.footer = â€œFooterâ€
+  elsif data.invalid and data.accessible
+    doc.header = â€œDifferent Headerâ€
+    doc.text = â€œDifferent Valid Textâ€
+    doc.footer = â€œFooterâ€
+  elsif data.reset and not data.invalid
+    if data.new
+      doc.header = â€œYet more Different Headersâ€
+      doc.text = â€œValid Textâ€
+      doc.footer = â€œNew Footerâ€
+    else
+      doc.header = â€œAnother Different Headerâ€
+      doc.text = â€œRandom Textâ€
+      doc.footer = â€œa completely different Footerâ€
+    end
+  else
+    doc.header = â€œYet more Different Headersâ€
+    doc.text = â€œOh for crying out loud.â€
+    doc.footer = â€œGood god another Footerâ€  
+  end
+end 
+-->
+<p>
+	What do all those boolean combinations check for? Heck I don’t know. On top of that we’ve got 
+	several messages that are sent by this class that don’t use the data passed in, which look like 
+	this:
+</p>
+<!-- def send_error(message)
+  doc.header = â€œError Headerâ€
+  doc.text = message
+  doc.footer = â€œFooterâ€
+end -->
+<p>
+	Clearly we had a problem, and my pair and I knew it the entire time, yet each time the refactor 
+	step in TDD arrived we would grin and bear it, with that deadline looming. Each time the step 
+	would take longer and longer, as the code became more complex, but we wouldn’t change because 
+	of the immediate benefit. It’s always quicker to just change the one piece of code, right?
+</p>
+<p>
+	Obviously the answer is no, it isn’t. My pair and I demoed our code, made the customer happy and 
+	than frantically began rewriting the code. After about two more days of broken tests we had a 
+	reasonably clean and elegant solution, and I didn’t have to hide the code from Micah anymore. How 
+	long did the first draft take? Oh, about two days all told. So we laugh and realize we could have 
+	made our deadline even if we had done the job right the first time, but even that isn’t true. 
+	Remember the code became more and more complex as we worked through the story, and began to resemble 
+	legacy code. Each new document required us to figure out each boolean check, and usually led to us 
+	breaking old tests as the fragile code changed. I firmly believe that if we hadn’t continues using 
+	the blunt tools of conditional code and implemented the object-oriented solution we later refactored 
+	to we would have actually been done more quickly. Furthermore while cleaning up that ugly code I 
+	wasn’t providing business value to the customer, thereby hurting the following iteration. A few days 
+	later I needed to add a new document to the system. What had previously taken a half-hour or so for 
+	each case took seconds. Imagine if we had done that the first time. The moral of the story clear. 
+	<a href="http://blog.8thlight.com/articles/2007/01/29/clean-as-you-code">CleanAsYouCode</a>, and 
+	don’t let deadline pressure cause you to abandon your own principles. In the long run and short 
+	run you’ll improve your codebase, make your customer happy, and probably enjoy your job more too.
+</p>
+<p>
+	Thanks to <a href="http://www.instiki.org/show/HomePage">Instiki</a> for the headline
+</p>	

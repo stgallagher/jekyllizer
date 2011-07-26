@@ -1,0 +1,226 @@
+<h1>A Leiningen Tutorial</h1>
+<p id="author">Colin Jones</p>
+<p id="date">2010-11-26</p>
+<h2>
+  <a href="http://github.com/technomancy/leiningen">Leiningen</a>, a project by
+  <a href="http://twitter.com/technomancy">Phil Hagelberg (aka technomancy)</a>, is
+  probably the most popular Clojure build tool. 
+</h2>
+<p>
+  The existing alternatives, such as <a href="http://github.com/ninjudd/cake">Cake</a>,
+  <a href="https://github.com/sonatype/polyglot-maven">Polyglot-Maven</a>, and 
+  <a href="http://maven.apache.org/">Maven</a> itself, each have advantages of their own,
+  but Leiningen has become both the most-contributed-to Clojure project (in terms of number
+  of contributors), and, by my estimation, the most-used.  
+</p>
+<p>
+  This introduction will focus on Leiningen itself, rather than motivations for using it,
+  or differences from other tools. For some discussion of those differences, see the 
+  mailing list discussions on 
+  <a href="http://groups.google.com/group/projectclj---spec">the Clojure project.clj <b>SPEC</b></a>,
+  or 
+  <a href="http://stackoverflow.com/questions/3906276/whats-the-difference-between-cake-and-leiningen">
+    this StackOverflow question.
+  </a>
+</p>
+<p>
+  For the purposes of this tutorial, just know that Leiningen is, as its tagline states,
+  "A build tool for Clojure designed to not set your hair on fire".
+</p>
+<p>
+  This tutorial is intended for people who have never touched Leiningen - if you've used
+  it on a project before, you're better off jumping straight to the resources I mention at
+  the end of this post, such as the excellent documentation in the project itself.
+</p>
+<h3>Prerequisites</h3>
+<p>
+  There are only a few prerequisites for getting going with Leiningen:
+</p>
+<ul>
+  <li>
+    <a href="http://github.com/technomancy/leiningen/raw/stable/bin/lein">
+      The <code>lein</code> script for *nix / Mac OSX
+    </a>, or the 
+    <a href="http://github.com/downloads/technomancy/leiningen/lein-win32.zip">zip file for Windows</a>
+  </li>
+  <li>A Java runtime environment (1.5 or 1.6 would be fine)</li>
+  <li>
+    Either <code>wget</code> or <code>curl</code> (wget is included in the zip file for Windows,
+    and Mac OSX and Ubuntu have one of these installed by default)
+  </li>
+  <li>
+    An internet connection. You won't always need the internet connection to run tasks,
+    but you'll certainly need it to get Leiningen bootstrapped.</li>
+</ul>
+<h3>Installing</h3>
+<p>
+  Once you've downloaded the <code>lein</code> script (or, on Windows, downloaded the 
+  zip file and unzipped it), you'll need to add it to your <code>PATH</code>, and make 
+  sure it's executable (just adding it to the <code>PATH</code> should be enough for Windows):
+</p>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-1.sh"></script>
+<p>
+  I keep my lein script in <code>~/bin</code>, as Phil suggests in the project 
+  <code>README</code>.
+</p>
+<p>Now, if you just run</p>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-2.sh"></script>
+<p>
+  you'll see some download activity as Leiningen grabs its latest stable-release jarfile and puts
+  it into the <code>~/.lein/self-installs</code> directory, where your lein script will be able
+  to find it later, as you get ready to run real tasks.
+</p>
+<h3>Trying it out</h3>
+<p>Let's start out by creating a new project:</p>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-3.sh"></script>
+<p>
+  Now, if you <code>cd my-sandbox</code>, you'll find that Leiningen has created a directory
+  structure for you, one that is now pretty typical for Clojure projects:
+</p>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-4.sh"></script>
+<p>
+  The only file here that we need to concern ourselves with is the project.clj,
+  which describes the project in several ways:
+</p>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-5.clj"></script>
+<p>
+  The first thing to notice is that this is just Clojure code. No yucky 
+  <abbr title="Extensible Markup Language">XML</abbr> to deal with (I know, 
+  <a href="http://alan.dipert.org/post/1606016275/an-xml-rant">we shouldn't dismiss XML out of hand</a>),
+  and things are very clean and minimal. Let's break it down into parts:
+</p>
+<ul>
+  <li>
+    <code>defproject</code> is the macro that does the work to collect information about
+    the project so that the Leiningen tasks know what to do.
+  </li>
+  <li>
+    <code>my-sandbox</code> is, of course, the name of our project. It's expressed
+    here as a Clojure symbol.
+  </li>
+  <li>
+    <code>"1.0.0-SNAPSHOT"</code> is the project version, which will become 
+    important later.
+  </li>
+  <li>
+    The remainder of the entries are expressed in pairs: key-value, key-value,
+    etc. It's essentially a map, even though <code>defproject</code> uses unrolled
+    arguments, so we don't need the usual curly braces.
+  </li>
+</ul>
+<h3>Dependencies</h3>
+<p>
+  Leiningen's dependency management is really one of the coolest things about it, so let's take
+  a moment to look at the way you identify dependencies. <code>[GROUP/]ARTIFACT-ID VERSION</code>
+  is the syntax you use when declaring a dependency. When the <code>GROUP</code> is the same as
+  the <code>ARTIFACT-ID</code>, so the normal syntax would give you something like 
+  <code>foobar/foobar "1.0.0"</code>, you can safely omit the GROUP and say 
+  <code>foobar "1.0.0"</code> instead.
+</p>
+<p>
+  The idea is that the <code>GROUP</code> is whatever organization created the code, and the 
+  <code>ARTIFACT-ID</code> is the name of the project or artifact itself&mdash;pretty intuitive. 
+  You'll notice that our project name and version look suspiciously similar to those of our
+  dependencies, and in fact we can also use the same <code>GROUP/ARTIFACT-ID</code> syntax as
+  the project name to specify that this project belongs in a group different from its name.
+</p>
+<p>
+  Each of the projects in our dependency list, will declare its dependencies as well, through
+  the <code>pom.xml</code> file associated with that project. When we actually upload to a 
+  Maven repository (such as Clojars), we can use Leiningen to generate that <b>POM</b> file for us,
+  rather than hand-coding it.
+</p>
+<p>
+  Now that we have a little background on how the <code>project.clj</code> is constructed,
+  we can go ahead and pull down our dependencies with the following command (making sure
+  we're in the <code>my-sandbox</code> directory):
+</p>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-6.sh"></script>
+<p>
+  And now you have jarfiles for your dependencies in a newly-created 
+  <code>lib</code> directory.
+</p>
+<p>
+  Easy, right? In the event that you do see errors, and in the interest of total disclosure,
+  the dependencies are first downloaded into your <code>~/.m2/repository</code> directory, 
+  then copied from there into your project's <code>lib</code> directory.
+</p>
+<p> 
+  So if you encounter problems, you may want to check to see that you have reasonable
+  permissions and ownership set up for that directory.
+</p>
+<h3>Classpath</h3>
+<p>Running</p>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-7.sh"></script>
+<p>
+  should make it clear that Leiningen sets up your classpath in a reasonable way for
+  your project: the <code>src</code>, <code>test</code>, <code>classes</code>, 
+  <code>test-resources</code>, and <code>resources</code> directories are all there,
+  as are the jarfiles for your dependencies. 
+</p>
+<p>
+  This is the classpath that most any Leiningen task will use when running from your
+  project directory, and will obviously vary on a per-project basis. The upshot here 
+  is that you can fire up a REPL that already has all of your dependencies on the 
+  classpath, without resorting to any deprecated <code>add-classpath</code> hackery:
+</p>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-8.sh"></script>
+<p>
+  Don't forget that you'll still need to <code>require</code> or <code>use</code>
+  the namespaces you want to use, as you would with any other Clojure libs besides
+  the ones automatically provided in <code>clojure.core</code> and the other 
+  automatically-available namespaces.
+</p>
+<h3>Testing</h3>
+<script src="https://gist.github.com/1054491.js?file=cjones-20101126-9.sh"></script>
+<p>
+  shows you that the project starts with one failing test, which expects 
+  <code>false</code> to be truthy - not one that I'm particulary keen to make pass,
+  but a good example nonetheless. 
+</p>
+<p>
+  It's pretty trivial to run tests this way, but of course the <abbr>JVM</abbr> 
+  startup time makes it much more efficient to run tests in a different way:
+</p>
+<script src="https://gist.github.com/1054541.js?file=cjones-20101126-11.sh"></script>
+<p>
+  Leiningen's interactive mode is a pretty sweet way to avoid taking the <abbr>JVM</abbr> 
+  startup time hit for every test run, but it's a bit of a double-edged sword: you might
+  get falsely-passing test runs, because of the fact that <abbr>JVM</abbr> classes will 
+  stick around in memory even after you delete their associated functions.
+</p>
+<p> 
+  Just be sure to run tests occasionally outside of interactive mode, and you'll be sure
+  to catch errors like this quickly.
+</p>
+<h3>More Fun!</h3>
+<p>
+  Leiningen is a mature and interesting enough project that there's no way to cover
+  it all in a single blog post. I hope that by this point I've whet your appetite a bit
+  to learn more about Leiningen (and perhaps Clojure). 
+</p>
+<p>
+  By now, you're definitely ready to move on to the more in-depth 
+  <a href="https://github.com/technomancy/leiningen/blob/stable/README.md">README</a>,
+  <a href="https://github.com/technomancy/leiningen/blob/stable/TUTORIAL.md">TUTORIAL</a>,
+  and <a href="https://github.com/technomancy/leiningen/blob/stable/PLUGINS.md">PLUGINS</a>
+  documents bundled with the Leiningen project on GitHub, and you'll also get a lot out of
+  joining (and searching) <a href="http://groups.google.com/group/leiningen">the Leiningen mailing list</a>
+  and asking questions in the #leiningen and/or #clojure IRC channels on FreeNode.
+</p>
+<p>Seriously, if you haven't visited the <abbr>IRC</abbr> channels, do that as soon as possible!</p>
+<script src="https://gist.github.com/1054541.js?file=cjones-20101126-12.sh"></script>
+<p>
+  gives you an idea of all the things that are possible with the base distribution of Leiningen,
+  and a growing <a href="https://github.com/technomancy/leiningen/wiki/Plugins">plugin ecosystem</a>
+  has been springing up to support various users' build, distribution, testing, and other needs.
+</p>
+<p>
+  Further, there are many opportunities to jump into the Leiningen code itself and make improvements. 
+  Phil has posted 
+  <a href="http://groups.google.com/group/leiningen/search?group=leiningen&q=low+hanging+fruit&qt_g=Search+this+group">
+    several lists of low-hanging fruit
+  </a> as well as a <a href="https://github.com/technomancy/leiningen/blob/master/todo.org">project todo list</a>,
+  which are great for people looking to get into doing open-source software in Clojure.
+</p>
+		

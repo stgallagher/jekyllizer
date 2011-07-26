@@ -1,0 +1,84 @@
+---
+layout: post
+title: Ruby and Human Compilers
+tag:
+---
+
+
+<p>
+	In Paul Graham's Book, Hackers and Painters, he talks about patterns and Human Compilers. 
+	I started to think about how some traditional Object-Oriented patterns are implemented in 
+	different languages. What problems do these patterns solve?
+</p>	
+<p>
+	Paul Graham's human compiler is an interesting concept I would like to explore more with 
+	relation to ruby, which is what I have been working in lately. The object-oriented design 
+	patterns I have been taught are intended for one reason, to increase productivity. These 
+	patterns produce well decoupled, easily testable, clean, and reused code that makes it easier 
+	for developers to extend and maintain an application. It is the mind of the developer that 
+	produces this compiler to be able to read and interpret these patterns to perform workflow 
+	optimizations. When I see a pattern in the code, I can easily navigate the implementation 
+	and the problem that it is solving. I can hold the entire context in my mind to work on that 
+	piece of code. This human compiler is what allows me to move quickly through an unfamiliar 
+	piece of code. Moving to dynamic languages, I see the context I need shrinking in the 
+	traditional way, holding onto patterns. So I started to wonder, could we build patterns into 
+	the language better, or eliminate the need for them? Are the GOF patterns mostly just a method 
+	of satisfying our human compiler for statically typed languages? 
+</p>
+<p>
+	I have suspicions that moving to ruby from C++/C#/Java will eliminate the need for many of 
+	the design patterns we have coveted in those languages. I would like to explore a few of them 
+	to prove this thesis. I want to look at the patterns that have helped make testing/design/decoupling 
+	better and see how they are different in ruby. Also, how can we transfer the values behind 
+	those patterns? The patterns were all based on good decisions, and can we learn anything from 
+	them or should we throw away the thought process that made them necessary?
+</p>	
+<p>
+	Lets start by taking the most commonly used pattern, Abstract Server. Writing in C#, I need to 
+	create interfaces to make sure I don't violate the Interface Segregation Principle and depend 
+	on concrete classes. This becomes a big deal in a statically typed language because you don't 
+	want to have to depend on a specific type. However, in ruby, you respond to messages of a class, 
+	which don't care what type the return values are. Also, because it is a compiled language, you 
+	don't want to have to recompile the clients of a class just because the implementation changes. 
+	In fact, in ruby, the Interface-Segregation violation goes away since there is no need for 
+	explicit interfaces to abstract, rather every class becomes an interface for itself.
+</p>
+<p>
+	Have you ever been working on a java/C++/ C# project and noticed an inheritance hierarchy that 
+	makes you twinge? Statically typed languages abuse inheritance by definition. Why do you need 
+	interfaces? Shouldn't an abstraction be one of behavior? In ruby, you send messages to objects, 
+	which is the same type of firewall, as each object acts as its own interface. However, since an 
+	inheritance tree got there, you need to decouple it since it is growing large and not maintainable. 
+	Or have you seen interfaces placed in front of a class for the sole value of abstraction. A good 
+	example of this I have seen is with Views in the Model/View/Presenter pattern. Something that 
+	looked like this:
+</p>	
+<!-- 
+public interface ISomeView
+{} 
+-->
+
+<!-- 
+public class SomeView : ISomeView
+{//some implementation} 
+-->
+<p>
+	This uses the philosophy that the Views need to be decoupled from the Presenters. This is true, 
+	but the point of decoupled is missed. Decoupling is a method of using firewalls to hide the 
+	implementation of code from its clients (Abstract Server). How does this degenerate do this? 
+	It doesn't. I have seen projects where inheritance is used liberally and there are interfaces 
+	for everything. I have also seen projects where inheritance is used conservatively and composition 
+	is used for everything, to prevent the formation of highly coupled inheritance trees. Finding the 
+	proper balance in static languages is difficult, but it is also a problem that should not exist. 
+	In ruby, inheritance is used on a YAGNI basis, as you only use it in the clearest of cases. It 
+	makes inheritance a tool to be used rather than monitored for abuses.
+</p>
+<p>
+	In ruby, you only inherit through necessity of behavior rather than clarity for form. Inheritance 
+	in most static languages is used as a tool for design patterns to make the code easier to read/work 
+	on/maintain for the developers. This is unnecessary in ruby since it is built into the language. 
+	Ruby does it instead of your human compiler. Writing beautiful code in java meant making the code 
+	clean and decoupled. Inheritance is no longer needed to do that in ruby, as it only serves a 
+	utilitarian purpose. Form is just as important in ruby as it is in static languages, it is just 
+	expressed without using features meant to serve efficiency purposes.
+</p>	

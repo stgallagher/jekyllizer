@@ -1,0 +1,68 @@
+---
+layout: post
+title: Reflection on Hangman
+tag:
+---
+
+
+<p>
+  Last week concluded the Hangman Ruby Sparring Tournament. The results are below.
+</p>
+
+<p>
+  Unlike the previous 
+  <a href="http://slagyr.github.com/sparring/battleship_results/index.html">
+  Battleship Tournament</a>, I put the effort in to write a competitive hangman player 
+  (of course he was banned from competition). This made things interesting. By knowing 
+  precisely what it takes to create a player, I was able to precisely tune the scoring 
+  metrics. My goal with the scoring metrics was to evaluate the code, without actually 
+  looking at it myself, and rate it’s quality/cleanliness on a scale of 0 to 100, where 
+  100 was asymptotically impossible to reach.
+</p>
+
+<p>
+  It is not easy to score well on ALL the metrics. Each metric will push your code in 
+  a different direction some of them are opposing. For example, to score well on the 
+  flog metrics, you have to break your code up in to lots of tiny methods. However, 
+  extracting methods increases the amount of code you have which brings down the simplicity 
+  score. To get an overall high score requires compromising between opposing metrics 
+  over and over again. Realistically, writing clean code requires the same type of 
+  compromising between coding principles. I am thoroughly impressed with the high scores 
+  that people were able to achieve in this tournament.
+</p>
+
+<p>
+  In the end, I believe that the highest scoring players do fit many of the criteria 
+  for “clean code”. Which is to say that to metrics used to evaluate the code are fairly 
+  complete. However, there is one gaping hole. The highest scoring solutions look like this:
+</p>  
+
+<!--
+def b
+  @r.fill(0)
+  c
+  @l = @l.sort_by { |x| @r[x] }
+end
+-->
+
+<p>
+  People discovered that by using short variable names and method names, they could 
+  considerably reduce the “simplicity” of their solution. For this tournament, the 
+  simplicity score measures the code mass (compress all the code and count the bytes). 
+  It’s a fair metrics because in general, the less code there is, the less code people 
+  have to read to understand it. I especially like the fact that comments hurt the score. 
+  Anyhow, clearly the code above is not good code.
+</p>
+
+<p>
+  What’s missing is a analysis tool to measure “Readability” of code. I imagine such a 
+  tool would be similar to flog and flay in that it parses your code and examines all names 
+  used for variables, methods, classes, etc. When it finds 1-letter names like above, it 
+  punishes. When it finds names containing english (or other languages) words, or 
+  derivatives of other names, it rewards. For example, it I had a class named “Player”, 
+  that’s an english word which is readable. Good. Now a class named “ThingAmaBob” is not 
+  english but that not necessarily bad. And you’d expect variables with names like 
+  “my<i>thing</i>ama<i>bob</i>” or “<i>thing</i>ama_bobs” which would be good. There are 
+  plenty of ways to expand on the idea. Such a tool would bring our repertoire of metric 
+  tools one step close to completion.
+</p>

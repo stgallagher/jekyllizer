@@ -1,0 +1,41 @@
+<h1>Clean This Code</h1>
+<p id="author">Eric Smith</p>
+<p id="date">2011-04-23</p>
+
+<p>
+  If you follow me on twitter (@paytonrules) you’ve probably seen me griping at 
+  various times about writing a testing framework for Objective-C. I’m currently 
+  writing my first expectations, and bootstrapping a testing framework continues 
+  to be an interesting problem, which I’ll probably write more about later. I find 
+  I continually have to go backwards on the tests to clean them, because as I 
+  implement more features I start using them in earlier tests. Meanwhile I want to 
+  clean the test I’ve recently written, often without the benefits of features I 
+  don’t have yet.
+</p>  
+
+<p>
+  The code below are the tests for my first expectations. Currently I see a lot 
+  of duplication, and I’m curious how you might go about cleaning it with the 
+  framework in it’s current state. Keep in mind these rules:
+</p>
+
+<ul>
+  <li>
+    I don’t have a before or after feature yet, and since some developers swear 
+      that using before and after is a bad practice, you can’t use that.
+  </li>
+  <li>
+    I don’t have expectations that take primitive types, which is why you see 
+    expect(obj) in some places, but a crude check then FAIL in others. I will, 
+    but don’t yet.
+  </li>
+  <li>
+    By using this DSL you don’t have access to a class to put variables on like 
+    you would in an XUnit style test. I have no idea of OCMock will work for 
+    mocking objects in my framework yet.
+  </li>
+</ul>  
+
+<p>
+  Given all those constraints - clean this code!
+</p>  

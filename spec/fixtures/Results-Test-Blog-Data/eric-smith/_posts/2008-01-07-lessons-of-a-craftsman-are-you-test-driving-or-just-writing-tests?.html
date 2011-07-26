@@ -1,0 +1,41 @@
+---
+layout: post
+title: Lessons of a Craftsman: Are you Test Driving, or just writing tests?
+tag:
+---
+
+
+<p>
+	Recently I wrote the beginnings of a blackjack game in Java, and I found myself making what I 
+	believe is a common error. The Java gameplay mechanic uses a state machine to manipulate the 
+	deck. As I was implementing the state machine I found I needed a Card object, in addition to 
+	my Card3DObject which actually drew the card, a look-up table for the 3D cards, an interface 
+	for the Deck and an object representing the Deck (so I could mock it out), and when I came 
+	across the situation for an Ace I decided a needed an object responsible for computing a Total 
+	in order to handle the situation of an Ace being a 1 or 11.
+</p>
+<p>
+	Apparently an if statement would cause an irreversible hand cramp, ending my programming career.
+</p>
+<p>
+	If you’ve ever done the bowling game, and really why haven’t you, there’s more than a few ways 
+	to skin that particular cat. Ron Jefferies has done it about [four thousand different ways] 
+	(http://www.xprogramming.com/xpmag/index.htm), whereas Bob Martin typically teaches a simple 
+	one. While none of them are wrong, I’m partial to the Martin version because it’s a simple 
+	problem, and it deserves a simple solution. I can give that version to a college student, and 
+	he can understand it. Furthermore in that version the tests drive the design. Let’s go back 
+	and look at my blackjack game to see what I mean.
+</p>
+<p>
+	When writing the game I decided blackjack would be a FSM. I drew a couple of diagrams, then 
+	used the Java state machine generator to make my state machine. The problem, as I see it, is 
+	that I did this without writing a line of code. Furthermore as I was coding I was thinking 
+	two steps ahead, and making design decisions before I needed to. I did a mini-version of the 
+	BDUF, and it’s something I see people do all the time. I was writing test first but I wasn’t 
+	always letting tests drive that design. Frankly that’s not necessarily a bad thing, and 
+	virtually all large systems need some design as a sort of guide, but what I should have done 
+	is wait until the code forced me into the state machine, forced me into other objects, etc. 
+	It’s not the end of the world, and in the end I may even have made the same decisions I 
+	would have anyway, but given that I didn’t let my tests drive my design I probably won’t 
+	end up with the simplest thing that could possibly work. That’s a shame.
+</p>	

@@ -1,0 +1,98 @@
+---
+layout: post
+title: TDD and iPhone - NSTimer
+tag:
+---
+
+
+<h2>
+  <abbr title="Test Driven Development">TDD</abbr> on the iPhone is a challenging 
+  experience, especially when you’ve been spoiled by Ruby like I have been, but it 
+  can be done.  I have a tutorial in the works for getting started, but in the 
+  meantime I’ll be writing bits and pieces about my experience.  The first was 
+  <a href="http://blog.8thlight.com/articles/2009/4/16/dependency-inversion-principle-and-iphone">here</a> 
+  and this is the second.  Test cases are written using the 
+  <a href="http://code.google.com/p/google-toolbox-for-mac/">Google Toolbox for Mac</a>.  
+  This particular example is about the NSTimer.
+</h2>
+<h3>It keeps going and going</h3>
+<p>
+  The app to your right is a simple app for experimentation purposes that runs 
+  <a href="http://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway’s Game of Life</a>.  
+  It has two buttons: advance and start.  Advance moves one generation ahead each time 
+  you press it, whereas Start keeps advancing generations until you touch Stop.  To 
+  implement that we use an NSTimer object which is programmed to call advance on the 
+  game object.  The design is simple, shown here:
+</p>
+<div class="thumbnail"><a href="http://skitch.com/paytonrules/bqi6p/tinyuml-version-0.13-02"><img src="http://img.skitch.com/20090509-g3j6a55j7mn63mf8yrwb1wqiji.preview.jpg" alt="TinyUML Version 0.13_02"></a><br><span style="font-family: Lucida Grande,Trebuchet,sans-serif,Helvetica,Arial; font-size: 10px; color: rgb(128, 128, 128);">Uploaded with <a href="http://plasq.com/">plasq</a>’s <a href="http://skitch.com">Skitch</a>!</span></div>
+<p>
+  The GameRunner creates an NSTimer, the NSTimer sends the message to Game.  Great but 
+  how do we test it?  The less I know about something the more I tend to test it, which 
+  means I tend to write smaller and smaller tests.  Let’s look at my first few tests of 
+  the GameRunner object:
+</p>
+<script src="https://gist.github.com/1057363.js?file=esmith-20090511-1.m"></script>
+<p>
+  We’ve got some basic tests of creation.  At this point I was stumped.  I couldn’t 
+  check the other parameters of the timer, because they weren’t public variables, so 
+  at this point the code that actually created the timer looked like this:
+</p>
+<script src="https://gist.github.com/1057363.js?file=esmith-20090511-2.m"></script>
+<p>
+  That doesn’t really help me does it?  I have a timer with an interval, but it won’t 
+  call anything when it’s triggered.  This is about the time I got to pair with Jake 
+  Scruggs during the Craftsman Swap, which he’s written about 
+  <a href="http://jakescruggs.blogspot.com/2009/04/fourth-day-of-craftsman-swap.html">here</a>.  
+  It went badly, somewhat embarrassingly for me since I’m supposed to be the expert, 
+  however we learn from failure.  Let’s look at some of the steps Jake and I took that 
+  didn’t quite get us there.
+</p>
+<p>
+  The first pass on the test was simple.  We needed a mock game, and it needed to have 
+  its advanceGeneration method called (Ed. note:  I realize they aren’t called methods 
+  in Obj-C, to which I say: bite me.) each turn.  Let’s try the brute force approach:
+</p>
+<script src="https://gist.github.com/1057363.js?file=esmith-20090511-3.m"></script>
+<p>
+  I’m writing the original tests from memory, so I make the occasional error here, but 
+  it doesn’t matter since we got this wrong.  This test here seemed the most logical.  
+  We ran the test and it failed, yea!  Then we updated the code:
+</p>
+<script src="https://gist.github.com/1057363.js?file=esmith-20090511-4.m"></script>
+<p>
+  Experienced Cocoa developer’s have already discovered our error, please don’t ruin 
+  it for the rest of the readers.  So after changing the code we run the test and&hellip; 
+  we fail.  So from here Jake and I figured it out.  Sleep won’t work because it stops 
+  the entire application, including the run loop that calls our timer, so we’ll just 
+  have to get the info out of the timer another way.  We’re interested in testing that 
+  we’ve setup the timer correctly, and can trust that the timer just works.  After a 
+  loooong time browsing documentation we figured it out.  We could call this:
+</p>
+<script src="https://gist.github.com/1057363.js?file=esmith-20090511-5.m"></script>
+<p>
+  This will fire the timer and validate that it is setup correctly.  So we did this, 
+  our test passed, we ran the app and it….failed.  We <em>knew</em> the timer was 
+  executing because our test was passing, but when we ran the real app it just didn’t 
+  do it.  Stumped and frustrated we stopped for the day.  Then time passed&hellip;
+</p>
+<p>
+  Yesterday I had a candidate in for an apprenticeship position, and we attempted to 
+  solve the same problem.  We re-evaluated the test and decided calling fire directly 
+  was cheating.  We looked into a half-dozen other ways to test this and learned about 
+  the NSRunLoop.  Too much coding in Windows had rotted my brain, the run loop in 
+  Objective-C is not the same as the one in Windows.  Specifically the current run loop 
+  is accessible as an object.  We wrote a new test:
+</p>
+<script src="https://gist.github.com/1057363.js?file=esmith-20090511-6.m"></script>
+<p>
+  It’s not perfect - the 0.30 relies on the hard coded default interval of 0.25, and 
+  that is too long, but it failed!  In the process of learning about NSRunLoop we also 
+  realized I used the wrong method.  The working code is this:
+</p>
+<script src="https://gist.github.com/1057363.js?file=esmith-20090511-7.m"></script>
+<p>
+  See the word &ldquo;scheduled&rdquo; in front of Timer?  That actually adds the 
+  timer to the default run loop.  Now we ran our spec, ran our actual code, and it 
+  works!  The moral of the story?  Well if you’re persistent enough you can get your 
+  code under test, and if your test is correct then your code will work.
+</p>

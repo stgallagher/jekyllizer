@@ -1,0 +1,193 @@
+<h1>A Functional Refactoring in Scala</h1>
+<p id="author">Colin Jones</p>
+<p id="date">2009-06-16</p>
+<h2>
+  Many of us have heard a lot of talk about functional programming and its benefits,
+  especially when it comes to highly concurrent applications where thread locking and
+  synchronization would be necessary in order to avoid mangling state among processes.
+</h2>
+<p>
+  Languages like Scala, Erlang, and Clojure are increasingly coming to mind as people
+  look for ways to take advantage of multiple-core processors without the headaches
+  threading can create. While I'm not quite ready to take the plunge and completely
+  eliminate state from my programming, I'm looking for more and more ways to get rid
+  of it when possible.
+</p> 
+<p>
+  In doing so, I've come across several situations where a simple refactoring to a more
+  functional style can yield rewards in readability and testability, and I'd like to
+  talk about one of them here.
+</p>
+<p>
+  Simple while loops are one of the imperative programmer's most basic tools, and it
+  might seem difficult to eliminate mutable state. However, a little persistence can
+  pay off. Let's say we start with the following (admittedly simplistic) Scala code:
+</p>
+<script src="https://gist.github.com/1051734.js?file=cjones-20090616-1.scala"></script>
+<p>
+  It's clear that state is changing inside this function, highlighted by the use of Scala's
+  <code>var</code> keyword that specifies a variable that is allowed to change 
+  (<code>val</code> variables are unmodifiable). 
+</p>
+<p>
+  While this state change isn't visible from the outside (a new copy of the variable is
+  created each time the function is entered), <code>var</code> often means there's
+  unnecessary clutter in the code and that it can be simplified. And indeed it can.
+</p>
+<p> 
+  First of all, any programmer worth her salt would first change this to a
+  <code>for</code> loop. A Java implementation might look like this:
+</p>
+<script src="https://gist.github.com/1051734.js?file=cjones-20090616-2.scala"></script>
+<p>
+  Scala's for loops look more like Java's foreach syntax:
+</p>
+<script src="https://gist.github.com/1051734.js?file=cjones-20090616-3.scala"></script>
+<p>
+  In addition to the Java-like iterating structure (left-arrow instead of :); the range
+  specification <code>(0 to limit)</code> is a Scala built-in, but there are also libraries for ranges
+  in Java, Ruby, and plenty of other languages. 
+</p>
+<p>
+  The code in the last example seems to more clearly encapsulate the structure of the function.
+  The first and last lines in the <code>while</code>-based version of <code>printUpTo</code>
+  are just boilerplate code, and while most any programmer can easily follow the structure of
+  the code, we should always be striving for improvement.
+</p>
+<p>
+  In general, I find that I'm less likely to have bugs with a smaller codebase. Certainly
+  there are exceptions (regular expressions comes to mind), but assuming that two pieces
+  of code both read well, I'd rather have less to read.
+</p>
+<p>
+  In the preceding Scala for loop syntax, <code>i</code> is implicitly a <code>val</code> 
+  within the context of the loop, which means it can't be reassigned to a new value. This
+  is a great step forward, as we could initially have created an infinite loop by manipulating
+  the value of <code>i</code> inside the while loop. We have now insulated ourselves against
+  this type of change.
+</p>
+<p>
+  Another functional way to write essentially the same loop would be to use Scala's 
+  <code>foreach</code>, a method available on Lists and Ranges that takes a function as a parameter.
+</p>
+<script src="https://gist.github.com/1051734.js?file=cjones-20090616-4.scala"></script>
+<p>
+  This seems more expressive to me, as it emphasizes the importance of the range object in the loop.
+  It would also have given us the ability to use a shorthand if we'd not needed the "i =" text:
+  <code>(0 to limit).foreach(println _)</code>, or even <code>(0 to limit).foreach(println)</code>. 
+  But there is also something to be said for the familiarity of the more traditional 
+  <code>for</code> construct.
+</p>
+<p>
+  The code above is still not completely functional, however, because the <code>println</code>
+  statement depends upon the definition of standard output at the time (imagine redefining
+  it to a <code>java.io.ByteArrayOutputStream</code>, for example). This also makes the function
+  hard to test.  
+</p>
+<p>
+  Now, if we're going to build an application to work at the console, at some point
+  we're going to have to actually use <code>println</code> if we want the user to know that the
+  application is working. Does this mean that the functional approach completely eschews input and
+  output streams?  Certainly not, but we have two problems in the example at hand:
+</p>
+<ol>
+  <li>
+    <p>
+      <code>printUpTo</code> is responsible for both the construction of each member of a group of
+      output strings, and for the actual printing of those strings. Therefore, the function has two
+      reasons to change.
+    </p> 
+    <p>
+      For instance, we might want to change the information that gets printed on each line 
+      (e.g. <code>"z = " + i</code>) or its formatting (e.g. two newlines between each
+      line of text).
+    </p>
+    <p>
+      We might also want to change how the output gets to the user (e.g. a GUI such as Swing).
+      This problem is akin to a Single Responsibility Principle violation, but on the function
+      level rather than the class level.
+    </p>
+  </li>
+  <li>
+    <code>printUpTo</code> is awkward to test.  In order to verify that the correct output comes
+    goes to the user, we'll need to either find a mocking library to change the way the Console
+    object behaves, or redirect standard output to another stream that we can read to verify its
+    contents afterwards (maybe a <code>ByteArrayOutputStream</code>).
+  </li>
+</ol>
+<p>
+  I'd prefer a further refactoring in order to alleviate these issues. The problem of verifying
+  console output in our test code won't be completely eliminated, but we'll at least isolate it
+  to its own test. Here, we're extracting <code>println</code> from the string-building part of
+  the code:
+</p>
+<script src="https://gist.github.com/1051734.js?file=cjones-20090616-5.scala"></script>
+<p>
+  Now we can test <code>applyUpTo</code> by passing our own custom action in, and tests for
+  <code>println</code>-based behavior can be isolated, so that we isolate some of the necessary
+  mocking and redirection.  
+</p>
+<p>
+  As a word of explanation, the <code>action</code> passed in needs to take a <code>String</code>
+  as an argument and return the <code>Unit</code> value: <code>()</code>. Now we can also move
+  <code>printUpTo</code> to a different class if we so desire (assuming this function is part of
+  a larger application), eliminating our need to recompile the code in <code>printUpTo</code> each
+  time the string format changes.
+</p>
+<p>
+  I'd most likely put the <code>applyUpTo</code> call on its own in a <code>main()</code> method
+  if there's really nothing more to the application.
+</p>
+<p>
+  There is another problem with the code above, however: both of the functions are returning Unit
+  values (the equivalent of Java's <code>void</code>).  This means that both of these functions rely
+  on side effects to get their jobs done. 
+</p>
+<p>
+  If we <em>were</em> to pass a side effect-free function into <code>applyUpTo</code>, we wouldn't
+  actually have any output from the <code>applyUpTo</code> to tell us that we did something. A side
+  effect is any effect of a function beyond its return value, so we can say that if a Scala function
+  has a return type of <code>Unit</code>, there are either side effects, or it is a trivial function
+  that we can safely eliminate. 
+</p>
+<p>We can make the helper function side effect-free like so:</p>
+<script src="https://gist.github.com/1051734.js?file=cjones-20090616-6.scala"></script>
+<p>
+  In this case, we're relying on a bit of syntactic sugar for transferring the iterating value of
+  <code>foreach</code> to <code>println</code>, and a placeholder (<code>_</code>) for 
+  <code>map</code>'s iterating value.  
+</p>
+<p>
+  The <code>buildUpTo</code> function is now more functional and more easily testable (we can
+  do a fairly simple comparison with the returned Iterable), but it's important to note that
+  memory usage might be a concern, as a map of all the values could become pretty large.
+</p>
+<p>
+  Another issue with this is speed: in the more functional version, we're iterating through
+  the collection twice rather than just once. We don't often get things for free, and indeed
+  there is a trade-off here between memory/speed and functionality.
+</p>
+<p>
+  The example here has been on a very small scale, and perhaps a bit contrived, but we can
+  extrapolate the ideas to a wide range of refactorings. We want to remove as much code with
+  side effects and mutable state as we can from the rest of our application.
+</p>
+<p>
+  This way we can divide up the functional parts of our application among processors in order
+  to take advantage of the multiple cores that we all have in our machines these days. There are
+  numerous other situations in which functional programming can lead to cleaner code, and there
+  are also places where it might be inappropriate or impossible.
+</p>
+<p>
+  It's important to remember the most common reason we might want to write functional code:
+  concurrency. If I'm only going to be running this small application on my local machine,
+  from the command line, and printing is going to be the limiting factor speed-wise (and it
+  probably will in this case), I would most likely stop at the simplest <code>foreach</code>
+  version above and be done with it.
+</p>
+<p>
+  It will be efficient with memory and fast. But when the function <code>buildUpTo</code>
+  becomes more complex, or we need to run numerous instances of the application, that's where
+  concurrency, and functional programming, are best applied. Our goal should be to find, and
+  use, the right tool for the job.
+</p>

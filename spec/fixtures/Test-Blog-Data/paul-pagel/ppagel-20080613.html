@@ -1,0 +1,119 @@
+<h1>Active Record migration dependencies</h1>
+<p id="author">Paul Pagel</p>
+<p id="date">2008-06-13</p>
+
+<p>
+	We had a new developer join our project recently, and he needed his computer to be setup 
+	with the project. “Here is the svn repository, when you check it out, run these rake tasks.” 
+	It unfortunately, is never that easy. This project setup revealed something about Active 
+	Record and migrations that I didn’t know about.
+</p>
+<p>
+	When I create a migration, I will often do data manipulation on the database, or pre-populate 
+	some fields with data needed for a lookup table. Lets look at a sample migration from a trivia 
+	game.
+</p>
+<!-- 
+class CreateQuestions < ActiveRecord::Migration
+
+  def self.up
+
+    create_table :questions do |t|
+      t.column :text, :string
+      t.column :answer, :string
+      t.timestamps
+    end
+
+    Question.populate
+  end
+
+  def self.down
+    drop_table :questions
+  end
+end 
+-->
+<p>
+	I want to add some sample questions, so that even if you don’t have your own questions, you 
+	will still be able to play the game. I added the method to the populate model, because I use 
+	it elsewhere in the code, and I try to keep it DRY. The populate method on the question model 
+	looks like this:
+</p>
+<!-- 
+class Question < ActiveRecord::Base
+  belongs_to :game
+  has_many :answers
+
+  def self.populate
+    Questions.create(:name => "What is your favorite color?", :answer => "I don't know")
+    Questions.create(:name => "Who was the first President", :answer => "George Washington")
+    Questions.create(:name => "Who was born Samuel Clemens?", :answer => "Mark Twain")
+  end
+
+end 
+-->
+<p>
+	So, later on, I decided to add a degree of difficulty to the questions, so the players can get 
+	more points for answering harder questions. Here is what the migration looked like.
+</p>
+<!-- 
+class CreateQuestions < ActiveRecord::Migration
+
+  def self.up
+    add_column :questions, :rank, :integer
+    Question.destroy_all #In case there are any old ones
+    Question.populate
+  end
+
+  def self.down
+    remove_column :questions, :rank
+  end
+end 
+-->
+<p>
+	Of which I had to change the populate method on the question class to:
+</p>
+<!-- 
+class Question < ActiveRecord::Base
+  belongs_to :game
+  has_many :answers
+
+  def self.populate
+    Questions.create(:name => "What is your favorite color?", :answer => "I don't know", :rank => 1)
+    Questions.create(:name => "Who was the first President", :answer => "George Washington", :rank => 3)
+    Questions.create(:name => "Who was born Samuel Clemens?", :answer => "Mark Twain", :rank => 8)
+  end
+
+end 
+-->
+<p>
+	Then I ran my migrations, and continued development. Then when developer number 2 came across and 
+	checked out the project and ran the migrations, he got the error.
+</p>
+<p>
+	undefined method rank= for class Question (…or something very similar)
+</p>
+<p>
+	The problem is the old migration is dependent on the new model. All models in rails are just a mirror 
+	of the database, so the new model has a forward definition of the data. The code in the model knows 
+	about the rank field, but the schema of the database hasn’t caught up to create that portion of the 
+	mirror yet. This creates a little bit of a catch 22. The rails wiki 
+	(http://wiki.rubyonrails.org/rails/pages/UsingMigrations) about migrations tells you to redefine the 
+	class to stop name conflicts. This would require me to make my migrations model agnostic, inserting 
+	straight to the database. As a spoiled brat when it comes to databases and rails, I refuse to let go 
+	of my Active Record sugary syntax. Another solution I thought of is to just make the last change to 
+	question do the populate, and remove it from the previous versions. This will become a maintenance 
+	nightmare.
+</p>
+<p>
+	I came to the realization that I want to make a distinction between form and content when it comes 
+	to migrations. Form in this case is schema form, the changes to the database which reflect the data 
+	which the Active Records can potential hold. Content is the specific data which is in the database. 
+	This distinction allows for me to use the power of my model classes in my data migrations, which is 
+	the place it is useful. It maintains backwards compatibility, because before I go touching the data, 
+	I have to make sure my schema is right.
+</p>
+<p>
+	What does this look like in Rails? I am not sure yet. Possibly db/migrations/schema and db/migrations/data. 
+	Possible saving the data migrations in each migration as a block and executing those at the end, only when 
+	you have the schema is correct. I am going to try it out!
+</p>	

@@ -1,0 +1,80 @@
+---
+layout: post
+title: When is a Mock not a Mock
+tag:
+---
+
+<h2>
+  A couple of weeks ago I had to add a feature to some code that was written almost two 
+  years ago. It was a pretty simple web service client that constructed some 
+  <abbr title="Extensible Markup Language">XML</abbr>, using Ruby’s 
+  <abbr title="Ruby Electric Extensible Markup Language">REXML</abbr> library, and made 
+  the web service call via another library. A quick inventory shows two dependencies, 
+  the web service call and <abbr title="Ruby Electric Extensible Markup Language">REXML</abbr>, 
+  so that’s what I expected to see when I came across the tests. But what did I see? Paraphrasing:
+</h2>
+<script src="https://gist.github.com/1057097.js?file=esmith-20090110-1.rb"></script>
+<p>
+  Of course the send_message call contained the construction of the 
+  <abbr title="Extensible Markup Language">XML</abbr> so that there was no test that the 
+  <abbr title="Extensible Markup Language">XML</abbr> being constructed was correct.  
+  Heck that was all that was being done in the class, and a closer inspection of the tests 
+  revealed that all they were doing was testing the error handling by changing the return 
+  value of parse_response. This is a classic sign that the developer at the time couldn’t 
+  figure out how to stub out the actual dependency, and so they did the next best thing, 
+  they stubbed out the caller.
+</p>
+<p>
+  I knew this was wrong, but I had an iteration meeting the next day and still had to update 
+  the .NET web service that this code was calling.  So I started to just go ahead and make 
+  the untested change, but then my Clean Code wristband started burning until I couldn’t take 
+  it any more.  I had to get the <abbr title="Ruby Electric Extensible Markup Language">REXML</abbr> 
+  library under test.  So what to do?  Well the 
+  <abbr title="Ruby Electric Extensible Markup Language">REXML</abbr> construction looked like 
+  this:
+</p>
+<script src="https://gist.github.com/1057097.js?file=esmith-20090110-2.rb"></script>
+<p>
+  Okay I know how to do this normally. The first test was simple:
+</p>
+<script src="https://gist.github.com/1057097.js?file=esmith-20090110-3.rb"></script>
+<p>
+  It passed! What was so hard about testing this anyway? Okay let’s test that the elements are 
+  set:
+</p>
+<script src="https://gist.github.com/1057097.js?file=esmith-20090110-4.rb"></script>
+<p>
+  Oh that sucks!  Since the <abbr title="Application Programming Interface">API</abbr> 
+  doesn’t run entirely through the doc object I have to stub elements, then stub each 
+  individual element, then should_receive on text, and if I want to be perfect I can stub 
+  out the array accessor too.  I have to should_receive for each element name, the tests 
+  will be hard to follow and fragile.  Now I get why the original developer punted on this.  
+  There’s got to be a better way.  I can start expecting actual 
+  <abbr title="Extensible Markup Language">XML</abbr>, but from past experience I know 
+  that leads to very hard to read tests that give errors that aren’t easy to diagnose.  
+  What I really care about is that the elements in this hash-like structure have their 
+  text element set to the right data.  After trying out several approaches I had a moment 
+  of inspiration, I want a struct!  Must be my inner C programmer.  If elements was a hash 
+  of structs, I could just check their text values are set.  This way I’m testing that I’m 
+  using the <abbr title="Ruby Electric Extensible Markup Language">REXML</abbr> library 
+  right rather than testing the library itself.  If only Ruby had a struct concept&hellip;
+</p>
+<p>
+  I suppose you’ve already figured out that it does, haven’t you?
+</p>
+<script src="https://gist.github.com/1057097.js?file=esmith-20090110-5.rb"></script>
+<p>
+  What that does is setup a class named MockElement, with the accessor text. When is a 
+  Mock not a Mock? When it’s really a Fake. Instead of stubbing out elements to return 
+  yet another mock, elements will return a hash of the element names I know I’m using 
+  that point to these fake elements. Then after making the call in the client, I’ll just 
+  check that the text is set properly. This is best demonstrated with an example:
+</p>
+<script src="https://gist.github.com/1057097.js?file=esmith-20090110-6.rb"></script>
+<p>
+  Aha! Now I’ve tested that the <abbr title="Extensible Markup Language">XML</abbr> was 
+  properly constructed without relying on looking at the actual 
+  <abbr title="Extensible Markup Language">XML</abbr> text itself and without stubbing 
+  out the class itself. The code is cleaner, the tests are easier to understand, and I 
+  can implement my new feature. More importantly, my wristband stopped burning.
+</p>

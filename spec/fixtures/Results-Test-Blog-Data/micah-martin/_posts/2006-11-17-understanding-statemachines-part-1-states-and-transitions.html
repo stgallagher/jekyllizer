@@ -1,0 +1,127 @@
+---
+layout: post
+title: Understanding Statemachines, Part 1: States and Transitions
+tag:
+---
+
+
+<h3>Introduction:</h3>
+
+<p>
+  I consider State Machines to be a programming gem. An invaluable tool for the software 
+  craftsman’s toolkit. It’s not everyday that a statemachine comes in handly, but for 
+  some problems statemachines are the most elegant and robust solution you’ll find.
+</p>  
+
+<p>
+  Perhaps you learned about Finite State Automata in school but could use a refresher. 
+  Or perhaps you’ve never heard of these crazy statemachines in your entire software 
+  career and your curiosity is piqued. This is a place to learn more.
+</p>
+
+<p>
+  I’ve found statemachines so valuable I’ve build a 
+  <a href="http://rubyforge.org/projects/statemachine/">Ruby framework to build statemachines.</a> 
+  I hope you find this tool valuable… but for that to happen you have to understand statemachines. 
+  To that end, this is the first installment of a complete statemachine lesson. Statemachines are 
+  simple. You’ll see.
+</p>  
+
+<h3>States and Transitions:</h3>
+
+<!-- Image Caption:
+
+The Vending Machine Statemachine Diagram
+
+-->
+
+<p>
+  Above is a UML diagram of the statemachine the runs a simple vending machine. We can see that 
+  there are two rectangles with rounded corners. These are <b>States</b>. The vending machine has 
+  two possible states, <i>Waiting</i> and <i>Paid</i>. At any given time during execution, the vending 
+  machine will be in one of these states.
+</p>  
+
+<p>
+  Note the arrows going from one state to another. These are called <strong>Transitions</strong>. 
+  Transitions are how statemachines change state. Also note that each transition is labeled with an 
+  <strong>Event</strong>. Events are the input to statemachines. They invoke transitions. For example, 
+  when the vending machine is in the <i>Waiting</i> state and the <i>dollar</i> event is received, the 
+  statemachine will transition into the <i>Paid</i> state. When in the paid state and the <i>selection</i> 
+  event is received, the statemachine will transition back into the <i>Waiting</i> state.
+</p>  
+
+<p>
+  This should seem reasonable. Imagine a real vending machine. When you walk up to it it’s waiting for 
+  you to put money in. You pay by sticking a dollar in and then you make your selection. After this 
+  happy transaction, the vending machine waits for the next client.
+</p>  
+
+<p>
+  This scenario is not the only possibility though. Statemachine are very helpful in examining all 
+  possible flows through the system. Take the <i>Waiting</i> state. We don’t normally expect users to 
+  make selections if they haven’t paid but it’s a possibility. As you can see this unexpected event is 
+  handled by our vending machine. It will simply continue to wait for your dollar. And it would be 
+  foolish for someone to put more money in the the vending machine if they’ve already paid. Foolish or 
+  not, you and I know it happens. Our vending machine handles this graciously by taking the money and 
+  allowing the user to make a selection for the fist dollar they supplied. Effectively the client loses 
+  the extra money they put in. <i>(grin)</i>
+</p>
+
+<h3>Implementing the Statemachine:</h3>
+
+<p>
+  We have identified 3 fundamental components to a statemachine: <strong>States, Transitions, and 
+    Events</strong>. It turns out that the simplest way to define a statemachine is to define its 
+    transitions. Each transition can be defined by identifying the state where it begins, the event 
+    by which is invoked, and the state where it ends. Using this scheme we can define out vending 
+    machine like so…
+</p>    
+
+<!-- Image for Table 
+(saved in Micah's Images folder as 
+Table-Statemachines-P1-20061117) -->
+
+<p>Defining it in ruby is not much harder:</p>
+
+<!-- 
+require 'rubygems'
+require 'statemachine'
+
+vending_machine = Statemachine.build do
+  trans :waiting, :dollar, :paid
+  trans :paid, :selection, :waiting
+  trans :waiting, :selection, :waiting
+  trans :paid, :dollar, :paid
+end -->
+
+<p>The above snippet assumes you have the <i>statemachine</i> gem installed.</p>
+
+<!-- 
+Mac users$ sudo gem install statmachine
+Windows users> gem install statemachine
+-->
+
+<p>
+  The outcome of this code an instance of Statemachine stored in the variable named 
+  <code>vending_machine</code>. To use our statemachine we need to send events to it. This is 
+  done by calling methods that correspond to events.
+</p>
+
+<!-- 
+puts vending_machine.state
+vending_machine.dollar
+puts vending_machine.state
+vending_machine.selection
+puts vending_machine.state
+-->
+
+<p>That’s it for the basics.</p>
+
+<p>
+  This concludes Part 1 of the lessing. Next we’ll learn how to make our statemachine 
+  more functional with by adding actions.
+</p>  
+
+<a href="http://blog.8thlight.com/articles/2006/11/30/understanding-statemachines-part-2-actions">
+  Understanding Statemachines, Part 2: Actions</a>

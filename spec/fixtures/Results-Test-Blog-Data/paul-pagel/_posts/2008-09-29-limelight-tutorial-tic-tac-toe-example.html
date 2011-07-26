@@ -1,0 +1,264 @@
+---
+layout: post
+title: Limelight Tutorial: Tic Tac Toe Example
+tag:
+---
+
+<h2>
+  Welcome to a Limelight production. I am going to go through a step by step introduction 
+  to limelight development using a tic tac toe game as an example. So, lets get started. 
+  I am going to create the directory structure and open it up in a text editor. 
+</h2>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-1.sh"></script>
+<p>
+  Now I need to set up Limelight. You can just download the gem.
+</p>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-2.sh"></script>
+<p>
+  We can start by creating the props.rb file in the tictactoe directory. The props.rb 
+  file defines the structure of your application. A prop is named after the theater 
+  metaphor. We are going to use them to define what our scene's physical structure look 
+  like. We can start with a simple screen with an empty board with the nine cells we need 
+  for a tic tac toe game. Lets create a spec directory to write a test for the props we 
+  are going to create.
+</p>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-3.sh"></script>
+<p>
+  Now for the spec.  In the spec directory, we can name our spec props_spec.rb.  We want 
+  to check that there is a cell on the scene.  Here is the first test.  NOTE: To be able 
+  to run the test, you will need the spec_helper.rb in your spec directory (not the props 
+  directory).  You can copy it from the 
+  <a href="http://blog.8thlight.com/files/tictac.zip">sample application</a>.
+</p>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-4.rb"></script>
+<p>
+  and when we run it (You can copy the Rakefile from the sample application as well, if you want to have a specs task), 
+</p>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-5.sh"></script>
+<p>
+  we get the failure 
+</p>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-6.txt"></script>
+<p>
+  So, lets create the props.rb file in the project root. Now we should get the error. 
+</p>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-7.txt"></script>
+<p>
+  Each of the props accepts a block of code your can give options/structure to. We can 
+  open the props.rb file and add a cell with the id of &ldquo;cell_0_0&rdquo; to make this 
+  test pass. 
+</p>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-8.txt"></script>
+<p>
+  And the test passes. Lets make sure we have the rest of the id's while we are at it. Here 
+  is a more exhaustive spec. 
+</p>
+<script src="https://gist.github.com/1054198.js?file=ppagel-20080929-9.txt"></script>
+<p>
+  And it fails in a similar manner. Lets expand our props.rb file to make the test pass. 
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-10.rb"></script>
+<p>
+  And it passes. However, it is all ruby code, so I can leverage ruby functions to help me 
+  out. Lets remove the duplication. 
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-11.rb"></script>
+<p>
+  Much better. Lets now move on to the styles. Nothing will show up without a few styles. 
+  I create a styles.rb file in the project root and filled it with some simple content. In 
+  Limelight, styles refer to how a prop is aesthetically displayed on the screen. Here is an 
+  example which defines the size and gives a border to the board and the cells. 
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-12.rb"></script>
+<p>
+  We should be able to start up Limelight and see the board. We start Limelight like: (From 
+  the tictacctoe directory) 
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-13.sh"></script>
+<p>
+  and there is your first Limelight screen.  Pretty easy, and all ruby code.  Lets make it 
+  more interesting.  Let us make it such that if you click on one of the squares, the square 
+  shows the 'X' mark denoting the first move.
+</p>
+<p>
+  First we create a directory called players.  Inside go the players, which contain the 
+  actions and behavior of the props for a Limelight scene (the controllers).
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-14.sh"></script>
+<p>
+  We want to now make a player for the cell prop. We create a file inside of the players 
+  directory called cell.rb. The file will start with a definition by looking like: 
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-15.rb"></script>
+<p>
+  We define all players in modules of the same name as the file and prop, by convention.  
+  This allows Limelight to include this behavior when it needs it.  You can specify specific 
+  mappings between the props and its players, but we don't need to do that here.  So, let's 
+  make the cell more interesting.  When we click on the cell, we want it to make a large 'X' 
+  mark.  Lets start by creating a spec for the behavior.
+</p>
+<p>
+  I created a new directory for the players spec
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-16.rb"></script>
+<p>
+  We have to add the players directory to the ruby search path, so I added the following 
+  line to the spec_helper. 
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-17.rb"></script>
+<p>
+  My spec is going to find the prop that was clicked on and make that prop display an 'X', 
+  denoting the first move. Here is what my first spec looks like (I call it cell_spec.rb): 
+</p>
+<script src="https://gist.github.com/1054205.js?file=ppagel-20080929-18.rb"></script>
+<p>
+  Which provides the feedback when run:
+</p> 
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-19.sh"></script>
+<p>
+  If you have seen a rSpec specification before, this should look syntactically familiar.  
+  Before we move on to making the test pass, let us take closer look at a few aspects.  
+</p>
+<p>
+  @id = "cell_1_1" - This line is setting the id of the imaginary prop that the players 
+  behavior will be executed against.
+  <br />
+  @scene = MockScene.new - This creates a scene to mock out.  The scene will be explained 
+  later, but for this test we are going to use the find method on scene to find our props.
+  <br />
+  @cell_one = MockProp.new - Create a mock prop that will turn to 'X' when clicked
+  <br />
+  @scene.register("cell_1_1", @cell_one) - We are giving the scene the mock prop, so the 
+  find method will find it by its id.
+  <br />
+  mouse_clicked(nil) - Simulates a mouse_click on the cell.  It takes an event, but we 
+  don't care about that yet, so lets just pass in nil.
+</p>
+<p>
+All right, time to make this test pass.  Lets open up the cell.rb player and see what we 
+need done to make the test pass.  
+</p>
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-20.rb"></script>
+<p>
+  Run the test again, no failures. We needed to find the prop on the screen which we are 
+  concerned about.  We do this by calling find on a method scene, which will give us any 
+  prop by its unique identifier.  We are looking for the id of the element we clicked, 
+  and then we set the text of that element to 'X', which makes the test satisfied.
+</p>
+<p>
+  Now, we can run the application from the root directory.
+</p>
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-21.sh"></script>
+<p>
+  If we click on the box that is displayed, a small 'X' should appear in the upper right 
+  corner.  
+</p>
+<p>
+  Congratulations, that is your first piece of Limelight behavior.  However, this is not 
+  very interesting yet.  Lets take it the next step and make the tic tac toe game work.  
+  I am going to create a lib directory to hold the game model.
+</p>
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-22.sh"></script>
+<p>
+  And before I write my first spec, I am going to add the new lib directory to the ruby 
+  search path by adding the following line to the spec_helper (It is already in the 
+  example spec_helper.rb, you don't need to add it).
+</p>
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-23.rb"></script>
+<p>
+  So, here is what my first spec looks like: 
+</p>
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-24.rb"></script>
+<p>
+  To make it pass, we need to create a game class in the lib directory and give it this 
+  code. 
+</p>
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-25.rb"></script>
+<p>
+  And we can follow the test driving of the model to make the game class.  I have already 
+  done this, and you can download the models in the 
+  <a href="http://blog.8thlight.com/files/tictac.zip">sample application</a>.  Lets move 
+  past that back to the players and hook up the game.
+</p>
+<p>
+  I am going to create a file init.rb in the root directory.  The init.rb class gets loaded 
+  up by Limelight when you start the application.  We want to create a new game and have a 
+  way to keep it in memory for the other classes to use.  Here is what the spec looks like 
+  in a init_spec.rb in the spec directory:
+</p>
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-26.rb"></script>
+<p>
+  The simplest way to start that is to have a current_game class variable. Here is the code 
+  for the init.rb.
+</p>
+<script src="https://gist.github.com/1054208.js?file=ppagel-20080929-27.rb"></script>
+<p>
+  I add the lib directory to the ruby search path so the Limelight application would know 
+  what a game is when I require it.
+</p>
+<p>
+  Now we need to plug the game model into the cell player.  Lets change the spec we made 
+  earlier to make the first move depending on the game model.  Here is the new version.
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-28.rb"></script>
+<p>
+  I am mocking out the game model and passing the values from the id into the game's move 
+  method. Here is the code that makes this pass. 
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-29.rb"></script>
+<p>
+  Minus the ugly string manipulation, it is a pretty straight forward approach. Now we 
+  should be able to start up the application and click on any of the squares and make some 
+  moves. There are 2 things left to do for this demo. We need to make sure that a player 
+  can not move on a square that is already occupied, and we need to display a winner. So 
+  for the first task, we need to write a spec to have some kind of feedback to the players 
+  that the move is invalid. Let's add this spec to the props_spec file. 
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-30.rb"></script>
+<p>
+  Nice and simple. Here is the new props.rb file. 
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-31.rb"></script>
+<p>
+  Now lets write a spec for the cell_spec to make sure that the move is valid, else we 
+  display a message in the message center to the user they must move somewhere else. Here 
+  is the spec. 
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-32.rb"></script>
+<p>
+  Same as before, with a new prop added. Here is the new cell.rb file. 
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-33.rb"></script>
+<p>
+  Simple if, makes it all work. Lets remove the duplication in the specs. Here is the 
+  new spec file. 
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-34.rb"></script>
+<p>
+  Much better. Now lets do the case of a winner. Here is the spec for the cell. 
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-35.rb"></script>
+<p>
+  And here is the new cell.rb 
+</p>
+<script src="https://gist.github.com/1054218.js?file=ppagel-20080929-36.rb"></script>
+<p>
+  Now we can finish off the application by adding new game functionality, or even a 
+  computer player that can not be beaten! However, before I let you go, we have to add 
+  some styles to the message center and pretty up the board to make it look better. To 
+  find a comprehensive list of the styles supported in Limelight, go here
+  (http://limelightwiki.8thlight.com/index.php/Style_Attributes). Here is a new version 
+  of the styles.rb. 
+</p>
+<script src="https://gist.github.com/1054219.js?file=ppagel-20080929-37.rb"></script>
+<p>
+  There was one change to the props.rb file, to wrap the message_center in a prop called 
+  message_center_container.  Also, notice the pretty rounded corners.  Easy to do.
+</p>
+<p>
+  Here is the props.rb
+</p>
+<script src="https://gist.github.com/1054219.js?file=ppagel-20080929-38.rb"></script>
+<p>
+  Happy Limelight coding!
+</p>

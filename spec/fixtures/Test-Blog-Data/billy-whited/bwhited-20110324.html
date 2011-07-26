@@ -1,0 +1,275 @@
+<h1>CSS Craftsmanship: Formatting Tips</h1>
+<p id="author">Billy Whited</p>
+<p id="date">2011-03-24</p>
+
+<ol>
+  <li>
+  <h3>Add Meta Information</h3>
+  <blockquote>
+    "...there is a huge likelihood that the systems will evolve from lower to higher 
+    entropy, which is a rough statement of the second law of thermodynamics." — Brian Greene
+  </blockquote>
+  <p>
+    Without a scaffold, CSS has the tendency to grow like an untamed garden during the development 
+    process. To begin designing a scaffold for your styles, it's helpful to make comparisons between 
+    your stylesheet and a book.
+  </p>
+  <p>
+    Much like stylesheets, books are descriptive narratives that rely on a strict organizational 
+    scheme in order to make sense. So it follows that—just as books use a "table of contents" to 
+    allow for easy navigation between sections—we too can generate a system that allows us more 
+    easily navigate and maintain our CSS.
+  </p>
+  <p>
+    At the top of each stylesheet, I list meta-information about the stylesheet itself and provide 
+    a table of contents that will help other designers understand the structure of my markup. My 
+    list usually includes these items:
+  </p>
+  <ul>
+    <li>Author</li>
+    <li>Title</li>
+    <li>Description</li>
+    <li>Table of Contents</li>
+    <li>Important Colors</li>
+  </ul>  
+<!-- CSS
+/*
+
+Title: application.css
+
+Author(unless otherwise noted): billy@8thlight.com
+
+Description: This is the main stylesheet for www.inserturlhere.com
+
+Contents:
+
+1. =R ESET
+2. =G LOBAL
+3. =T YPOGRAPHY
+4. =S TRUCTURAL
+5. =M EDIA QUERIES
+
+Colors:
+
+rgb(12,75,38); — Green
+rgb(255,143,27) — Orange
+rgb(33,41,201) — Blue
+
+*/
+
+view rawMeta-Information.cssThis Gist brought to you by GitHub.
+-->
+  <p>
+    By prepending an "=" sign to your content list entires, you can easily navigate between important 
+    sub-sections of your stylesheet by using the "find" feature of your chosen editor. For example, 
+    if you wanted to quickly navigate to the "typography" section, you would search for "=T."
+  </p>
+  
+<!--
+/* =T Y P O G R A P H Y
+---------------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6 { font-weight: 300; }
+
+h1 { 
+	border-bottom: 2px solid;
+	font-size: 2em; 
+	font-weight: 300;
+	letter-spacing: 0.0446em; 
+	line-height: 1em;
+	padding-bottom: 0.07143em;
+	text-transform: uppercase; 
+}
+
+/* etcetera... */
+view rawSection.cssThis Gist brought to you by GitHub.
+-->
+  </li>
+  <li>
+    <h3>Organize Property/Value Pairs</h3>
+    <blockquote>
+      "It's in the details that there is a spiritual power; I'd even risk calling it a soul." — Tom Sachs
+    </blockquote>
+    <p>
+      Craftsmanship is all about paying attention to details: meticulousness begets quality. I always make 
+      it a point to alphabetize the property/value pairs inside my declaration blocks. Doing so makes it much 
+      easier locate specific properties inside of long declaration blocks and adds a level of predictability 
+      and usability to my stylesheets.
+    </p>  
+    <p>
+      Of the two examples below, which do you think is easier to parse?
+    </p>
+    
+<!--
+/* Example One: Alphabetized Declarations */
+
+p[role="complementary"] a {
+	background-color: rgb(235,107,16);
+	border: 2px solid rgb(69,64,61);
+	color: rgb(255,255,255);	
+	display: block;
+        font-size: 1.2em;
+	font-weight: bold;
+	margin: 0 auto 1em auto;
+	padding: 0.75em;
+	text-align: center;
+	text-decoration: none;
+	text-shadow: 2px 2px 1px rgba(0,0,0,0.2);
+	width: 75%;
+}
+
+/* Example Two: Randomized Declarations */
+
+p[role="complementary"] a {
+        margin: 0 auto 1em auto;
+        font-weight: bold;
+	background-color: rgb(235,107,16);
+        width: 75%;
+        text-align: center;
+	border: 2px solid rgb(69,64,61);
+	color: rgb(255,255,255);	
+	font-size: 1.2em;
+	padding: 0.75em;
+	text-decoration: none;
+	text-shadow: 2px 2px 1px rgba(0,0,0,0.2);
+        display: block;
+}
+view rawOrganized-Declarations.cssThis Gist brought to you by GitHub.
+-->
+  </li>
+  <li>
+    <h3>Group Dependent Property/Value Pairs</h3>
+    <p>
+      We can take the organization of declaration blocks one step further by logically grouping dependent 
+      property/value pairs. This is a technique I use sparingly so as not to disrupt the rhythm of my 
+      markup, but I have found it helpful in two common situations: with positioning offsets and with 
+      browser specific CSS3 declarations.
+    </p>  
+    <p>
+      In the case of positioning, I feel that it makes sense to indent and group positioning offsets like 
+      "top," "right," "bottom" and "left" underneath the property they're helping to define, in this case 
+      "position." I often change the value of more than one offset at a time and to me it makes sense to 
+      place them in the context of each other in the mark up.
+    </p>
+<!--
+h1 + p:after {
+	content: url(../images/birds-in-flight.png);
+	position: absolute;
+		right: -25%;
+		top: 0;
+	width: 10.7059em;
+}
+view rawGroup-Dependencies-Offset.cssThis Gist brought to you by GitHub.
+-->
+  </li>
+  <li>
+    <h3>Quarantine CSS3 Declarations</h3>
+    <p>
+      Browser specific CSS3 declarations tend to be unruly and visually disruptive so I make it habit to 
+      quarantine them from the rest of my property/value pairs. I feel it also makes sense to separate these 
+      styles so they are easier to update as browser begin to support them natively (in which case the browser 
+      specific extensions can be dropped). Admittedly, when doing this you'll need to take the cascade into 
+      account, but as a rule I find this technique to be a helpful time-saver.
+    </p>
+<!--
+h1 + p {
+	background: rgb(250,234,207);
+	font-weight: normal;
+	line-height: 1.3em;
+	margin: 0 0 0 -2em;
+	padding: 0.4286em 3em 0.4286em 2em;
+	width: 75%;
+
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+
+	-webkit-box-shadow: 3px 3px 0px rgb(237,220,189);
+	-moz-box-shadow: 3px 3px 0px rgb(237,220,189);
+	box-shadow: 3px 3px 0px rgb(237,220,189);
+
+	-webkit-transform: skew(-10deg);
+	-moz-transform: skew(-10deg);
+	-o-transform: skew(-10deg);
+	transform: skew(-10deg);
+}
+view rawQuarantine-CSS3.cssThis Gist brought to you by GitHub.
+-->
+  </li>
+  <li>
+    <h3>Format Declaration Blocks Consistently</h3>  
+    <p>
+      The way your format your stylesheet is largely a matter of personal preference—I have seen many 
+      different approaches—but there is at least one rule that must be followed strictly: be consistent! 
+      I format my declaration blocks following a simple method:
+    </p>
+    <p>
+      If there are less than three property/value pairs, I keep the declaration block on a single line.
+    </p>  
+<!--
+section footer { background: transparent; margin: 2em 0; padding: 0; }
+view rawSingle-Line.cssThis Gist brought to you by GitHub.
+-->
+    <p>
+      If there are more than three property/value pairs, I format the declaration block using multiple 
+      lines.
+    </p>
+<!--
+header a { 
+	color: rgb(255,255,255);
+	float: right; 
+	font-size: 1.7em;
+	font-weight: bold;
+	line-height: 3em;
+}
+view rawMultiple-lines.cssThis Gist brought to you by GitHub.
+-->
+  </li>
+  <li>
+    <h3>Add Some Panache</h3>
+    <p>
+      Finally, a little trick I picked up from designer/front-end developer 
+      <a href="http://simplebits.com/">Dan Cederholm</a>: 
+      add a little panache to your stylesheet by including an ascii version of your client’s logo.
+    </p>  
+<!--
+/*
+                                         -oydNMNd+
+                                     `/yNMMMMMMMMh
+                                   /yMMMMMMMMMMMm.
+                                -sNMMMMh/.hMMMMm. 
+                 `...`        /dMMMMm+`  hMMMMd`  
+            `+ymNMMMMMMmho:`+mMMMMy:    hMMMMm`   
+           :NMMMMMMMMMMMMMMMMMMNs.     yMMMMm.    
+           +MMMho:.   ./NMMMMMM:      yMMMMN.     
+            .-`       /NMMMMMMMM+    oMMMMM:      
+                    :mMMMNo`/NMMM+  /MMMMM+       
+                  :dMMMMs`   :MMMM--MMMMMo        
+                /mMMMMy.      +MMMdNMMMMy         
+             `oNMMMMy.         NMMMMMMMh          
+           /hMMMMMs.           yMMMMMMm`          
+       ./yNMMMMmo`             sMMMMMN.           
+/hdhhdNMMMMMMy:                hMMMMM/            
+mMMMMMMMMNy/`                 `NMMMMy             
+.shddhs+-                     .mNNmy`                
+
+
+Title: artisan.css
+
+Author (unless otherwise noted): billy@8thlight.com 
+
+etcetera...
+
+*/
+view rawPanache.cssThis Gist brought to you by GitHub.
+-->
+  <p>
+    While perhaps completely unnecessary, I've always felt that taking this extra step lends an air 
+    of quality to your work. It's a memorable and surprising touch that says: I <i>care</i>.
+  </p>
+  <p>
+    Here is a link to my favorite ascii art generator: 
+    <a href="http://www.text-image.com/index.html">http://www.text-image.com/index.html</a>  
+  </p>
+  </li>
+</ol>

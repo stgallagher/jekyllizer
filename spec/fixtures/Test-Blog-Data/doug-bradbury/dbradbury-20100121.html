@@ -1,0 +1,106 @@
+<h1>Rolemodel Recap Day 2</h1>
+<p id="author">Doug Bradbury</p>
+<p id="date">2010-01-21</p>
+<h2>
+  My second day at role model found me pairing with 
+  <a href="http://www.rolemodelsoft.com/people/tim_irwin">Tim Irwin</a> on another one 
+  of Rolemodel's projects.  Tim described this project as being &ldquo;all about the 
+  data.&rdquo;  It was my first chance to work on a Rails 3 project.  My normal client 
+  work has kept me away from the Rails world for about a year and a half, so it was nice 
+  to dive back in and see what had happened while I was away.  I learned a ton of stuff 
+  from Tim as we worked together.  It's amazing to me how even after using Ruby for so 
+  long and so much, it still has some wonderful surprises up it's sleeve for me.
+</h2>
+<h3>1) Rails 3 scopes</h3>
+<p>
+  <a href="http://edgerails.info/articles/what-s-new-in-edge-rails/2010/02/23/the-skinny-on-scopes-formerly-named-scope/index.html">Scopes</a>
+  had a previous life in Rails 2, but I saw how Tim had used them to clean up a number of 
+  fairly complicated queries and made them accessible to consumers of the model.
+</p>
+<h3>2) OpenStruct</h3>
+<p>
+  It's one of those feature I've always wanted, and now that I think about it, it wouldn't 
+  be that hard to build. It's a super easy way to create a "data only" object.. From the 
+  ri for OpenStruct:
+</p>
+<script src="https://gist.github.com/1054054.js?file=dbradbury-20110121-1.rb"></script>
+<p>
+  It is a great class that helps bridge that data and code gap in ruby. We used it to 
+  create a fake record that was the result of combining two other records. The resulting 
+  combinations were temporary, didn't need to be stored in the database, and needed to be 
+  more type-tolerant than the ActiveRecord model could be.
+</p>
+<h3>3) Anonymous Blocks</h3>
+<p>
+  At some point we were working with a collection, and I was writing something like this:
+</p>
+<script src="https://gist.github.com/1054054.js?file=dbradbury-20110121-2.rb"></script>
+<p>
+  I commented that since I'd been learning Clojure, this syntax just seem clunky to me now. 
+  Tim came to the rescue with a syntax I had never seen in Ruby but it was exactly what I 
+  wanted.
+</p>
+<script src="https://gist.github.com/1054054.js?file=dbradbury-20110121-3.rb"></script>
+<p>
+  Who knew the ampersand could be so cool?  This syntax makes the parameter passed to the 
+  block anonymous and just sends the method to that anonymous parameter.
+</p>
+<p>
+  That evening we headed to the Research Triangle Park where luck would have it, two local 
+  user groups were meeting.  Last week as I tweeted about my upcoming visit to the area and 
+  the <a href="http://www.meetup.com/agileRTP/">Agile RTP</a> group invited me to come open 
+  their meeting with a short talk.  I presented my 
+  <a href="http://www.walkncode.com">Walk 'n Code</a> material and received an enthusiastic 
+  reception from many of the Agile practitioners there.  
+</p>
+<p>
+  After my talk and the groups networking time, I headed across the building to the 
+  <a href="http://www.meetup.com/raleighrb/">Raleigh.rb</a> meetup.  
+  <a href="http://twitter.com/#%21/ntalbott">Nathaniel Talbott</a> does a great job of 
+  community building with this group.  This meetup featured 
+  <a href="http://twitter.com/#%21/stuarthalloway">Stuart Halloway</a> giving an updated 
+  version of his 
+  <a href="http://confreaks.net/videos/191-rubyconf2009-clojure-for-ruby-programmers">Clojure for Ruby Programmer</a> 
+  talk.  Relevance was out in full force with many of the Clojure core team member coming 
+  along to support (or egg on) Stu.
+</p>
+<p>
+  So <a href="http://www.8thlight.com/craftsmen/colin_jones">Colin</a> recently did an 8LU 
+  session on clojure, and I've spent some time working through 
+  <a href="http://projecteuler.net">Project Euler</a> problems in an effort to get familiar 
+  with the language.  I have been having a lot fun with it. My brain has stretched in my 
+  first real study of functional programming, but to be honest with you, I hadn't really 
+  gotten it yet.   I really didn't understand why Colin and Micah are so excited about 
+  Clojure.  Stuart though, really got my attention.  I'm on the bandwagon now!
+</p>
+<p>
+  What did it for me was Stu's take on polymorphism.  He explained how object oriented 
+  languages have these great concepts like polymorphism, but they are tied to other language 
+  features like type.  Clojure presents concepts like these "al a carte."  Really, what does 
+  the type of a thing have to do with a runtime decision about which function should be called 
+  at a particular time?  Stu also blew the socks off of data encapsulation, showing how 
+  everything in Clojure uses the same collections api for data, so the need to "hide" data 
+  becomes almost absurd.  I felt as though my world was beginning to crumble, but for some 
+  reason it made me really excited.  
+</p>
+<p>
+  There is no doubt in my mind that Clojure is going to be big, but as Stuart said, nobody is 
+  really in a hurry.  The Clojure team is focusing on doing it right, learning from the 
+  feedback they are getting.  They aren't trying to take over the world by next week.
+</p>
+<p>
+  I got to meet several of the local Rubyists after the presentation and observed an epic text 
+  editor battle on the steps outside the meetup building.  Nathaniel Talbott dug his heels in 
+  on TextMate and was being assaulted on all sides by passionate VIMers.  The basic debate came 
+  down to uniformity and an editor that matched your expectations no mattter where you sat down 
+  to use it (TextMate) vs. an editor that you can completely trick out to your personal tastes, 
+  but renders anyone else sitting down at your computer helpless.  I stayed pretty quiet, but 
+  for me, the top priority in an editor is it's ability to refactor.  Extracting a method or 
+  variable and inlining are abstractions to me.  I don't want to have to think about how to do 
+  them, I want an editor to do them for me.  So as for me and my house, we'll stick with the 
+  JetBrains tools for now.
+</p>
+<p>
+  It was a very full day, and I felt privileged to have interacted with so many wonderful people.
+</p>
+

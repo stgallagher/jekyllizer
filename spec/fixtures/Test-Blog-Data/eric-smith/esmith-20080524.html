@@ -1,0 +1,63 @@
+<h1>Erlang and the OCP</h1>
+<p id="author">Eric Smith</p>
+<p id="date">2008-05-17</p>
+
+<p>
+	OCP was defined in 1988 in Bertrand Meyer’s book “Object Oriented Software Construction” 
+	as follows:
+</p>
+<p>
+	<i>Modules should be both open (for extension and adaptation) and closed (to avoid 
+		modification that affect clients)</i>
+</p>
+<p>
+	Recently we had an issue in my office with our system which uses Rinda (a Ruby implentation of 
+	Linda) as a blackboard architecture. The architecture looks a little like this crude drawing.
+</p>
+<!-- image -->
+<p>
+	This hides the OCP violation. The “rindlet,” our informal name for these subprocesses, actually 
+	removes the message from the blackboard. So if you send a message that looked like this [1, 2, 3] 
+	and one rindlet took it then no other rindlets can receive it. To repeat myself, this meant all 
+	messages had to have as their first data member the name of the rindlet they were sending the 
+	message too. This is bad. Adding another rindlet meant changing the client sending the message. 
+	Now to quote Agile Software Development: Principles, Patterns, and Practices [Martin 2003] 
+	<i>An axis of change is an axis of change only if the changes actually occur</i>. That is to say 
+	if only one rindlet cared about a message than this wouldn’t be an issue. When this became a 
+	problem was when more than one rindlet wanted the same message. Suddenly we have to send many 
+	otherwise identical messages to different rindlets. This is the heart of the OCP, the Server 
+	(in this case the one sending the messages), should be closed for implementation, but is not. 
+	In our case we changed the architecture to shield the server from those changes, and fixed 
+	the issue.
+</p>
+<p>
+	This brings me to Erlang and its message passing system. Last year I began playing with it, but 
+	lost interest as the difficulty of the syntax simply ruined the fun for me. I do know enough 
+	about it that when this issue came up in our ruby system, I was immediately reminded of Erlang’s 
+	message passing system. Specifically it has three methods [Armstrong 2007 pg. 134]:
+</p>
+<ol>
+	<li>
+		<strong>spawn</strong> - Create a new concurrent process that evaluates a passed in Fun. 
+		The new process runs in parallel with the creating process.
+	</li>
+	<li>
+		<strong>Pid ! Message</strong> - Send a message to a Pid - returned by the previous spawn.
+	</li>
+	<li>
+		<strong>receive…end</strong> Receives a message that has been sent to a process.
+	</li>
+</ol>	
+<p>
+	On a cursory glance it appears we have the same issue since you must know the Pid of the process. 
+	Aha, but the command sending a message to the process actually created the process, and therein 
+	lies the difference. The blackboard architecture deliberately decouples the constantly running 
+	processes from messages, the messages are sent to the blackboard. The sender has no right to know 
+	about the <i>constantly running</i> process, and should not need to change to add another one. 
+	Erlang on the other hand <i>spawns</i> processes as if they were objects, and sends them messages. 
+	Sending messages, heck that’s what you do with an object too isn’t it? I don’t think creating an 
+	object and sending it messages is a violation of OCP, and neither is this. The sender can be 
+	extended without effecting clients. It turns out that Erlang does not intrinsically violate the 
+	OPC like I’d originally surmised, although like any other system I could easily create an 
+	architecture that did.
+</p>	

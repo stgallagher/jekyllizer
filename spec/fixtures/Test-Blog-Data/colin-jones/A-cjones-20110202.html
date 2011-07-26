@@ -1,0 +1,44 @@
+<h1>That's not in my String!</h1>
+<p id="author">Colin Jones</p>
+<p id="date">2011-02-02</p>
+<h2>
+  We encountered a strange spec failure today in our continuous integration build. It's 
+  a Rails project, we're using RSpec, and this was the failing expectation in the 
+  controller spec:
+</h2>
+<script src="https://gist.github.com/1054726.js?file=cjones-20110202-1.rb"></script>
+<p>
+  Have you already spotted the problem? Great job if so! But for the rest of us, here's 
+  what's going on.
+</p>
+<p>
+  RSpec's include matcher calls the include? instance method on the response body, which 
+  is an instance of String. No problems here! String#include? is a perfectly reasonable 
+  thing to be testing.
+</p>
+<p>
+  The problem is the argument to include? (@thing) is an ActiveRecord object, so we know 
+  that @thing.id is going to be a Fixnum. And it was - the failure message told us that 
+  @thing.id was 16812882.
+</p>
+<p>
+  This should be starting to sound fishy. If we look at the RubyDocs, we see that 
+  String#include? &ldquo;Returns true if str contains the given string or character.&rdquo; 
+  OK, this isn't saying anything about allowing a Fixnum as input, but maybe it's 
+  treating the Fixnum as a character in this case?
+</p>
+<p>
+  Well, it turns out that's exactly what's happening. It took a few minutes longer to 
+  figure out what 16812882 was a character code for, but it turns out that Ruby just 
+  truncates to the least significant 8 bits. So since 16812882 % 256 is 82, we're left 
+  with Ruby looking for 82.chr ("R") in the given string. And because response.body 
+  included the string "RJS", 16812882 could be found in the string, and so our test 
+  failed.
+</p>
+<p>
+  The lessons here? On a micro level, make sure you're passing String arguments to 
+  String#include?, or make looking for a character explicit, with something like ?R. 
+  And stepping back a bit, remember that not every method or function in the world checks 
+  for bad input and raises exceptions to stop you. Knowing your tools includes knowing 
+  their expectations about how you use them.
+</p>

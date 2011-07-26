@@ -1,0 +1,127 @@
+---
+layout: post
+title: One Take on Configuring Rails Routes and asset_host
+tag:
+---
+
+<h2>
+  We recently had an interesting requirement surface. In anticipation of the release of a number of demo
+  environments, our customer requested that system configuration be able to be done at the server level.
+  The goal was to avoid being forced to use source control to manage configuration files.
+</h2>
+<p>
+  A little background is in order. The systems that we are working on are pretty large. There are two
+  distinct, decoupled systems, each consisting of between 10 and 40 subsystems. Of these subsystems, 
+  a handful on each side are Rails applications. Most others are small Ruby application that talk a 
+  central <a href="http://blog.8thlight.com/rinda">Rinda</a> server.
+</p>
+<p>
+  We already have a configuration strategy in place for the two systems, which involves a central 
+  configuration file per system which populates a globally-accessible configuration hash. The directory
+  structure looks something like this:
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-1.sh"></script>
+<p>
+  The <code>systemone/etc/config.rb</code> file creates the configuration hash and populates it with
+  all of the appropriate configurations (in practice, <code>config.rb</code> actually loads the 
+  appropriate configuration file based on an environment variable, i.e. <b>RAILSENV</b>, but we
+  will ignore that here for brevity and clarity):
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-2.rb"></script>
+<p>
+  From the context of a Rails application, this central configuration file is loaded from
+  <code>railsappone/config/environment.rb</code>:
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-3.rb"></script>
+<p>
+  With this configuration strategy in place already, the team was tasked with setting up multiple demo
+  environments for the entire system, each deployed on a different server and accessed through a different
+  external URL. We could have attempted to solve the configuration issues by just adding many separate Rails
+  environments, say demo1 and demo2, but there were a couple problems with that. 
+</p>
+<p>
+  First, the configurations for the different environments would have been nearly identical. Second,
+  we wanted to avoid the complexity of relying on source control to manage the configurations for each
+  deployment. In most cases, relying on the Rails convention of setting up a new environment makes a lot
+  of sense. However, in our case, the only differences between the environments would be setting the 
+  asset_host and routes. 
+</p>
+<p>
+  Storing this in source control means that in order to make a change to the external URL means that
+  files under source control need to be modified, checked in and then redeployed to the affected system.
+  It makes much more sense to have some reasonable defaults in source control and then provide a mechanism
+  to override these configurations at the server level.
+</p>
+<p>
+  The solution to this problem ended up being quite simple. We first agreed on an acceptable location for
+  the server configuration file:
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-4.sh"></script>
+<p>
+  In order to allow for overriding the system configuration, this code was added to 
+  <code>/deployment/system_one/etc/config.rb</code>:
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-5.rb"></script>
+<p>
+  The server configuration in <code>deployment/config/serverconfig.rb</code> will be loaded (and executed),
+  if it exists. If it doesn’t exist, the default configurations will be used, which is the desirable behavior.
+</p>
+<p>
+  The first task was to configure the <code>assethost</code>. To start with, we add the desired 
+  <code>assethost</code> configuration to <code>/deployment/config/serverconfig.rb</code>:
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-6.rb"></script>
+<p>
+  For each Rails environment that we want the assethost to be configurable from the server configuration file,
+  just add this line to the appropriate config file, e.g. 
+  <code>deployment/systemone/railsappone/config/environments/demo.rb:</code>
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-7.rb"></script>
+<p>
+  You would want to add a separate <code>assethost</code> configuration for each Rails application, and
+  each Rails application would set its own <code>assethost</code> to the appropriate configuration.
+</p>
+<p>
+  For a simple configuration like <code>asset_host</code>, this works great. For routes, though, it
+  gets a bit more complicated. We need a 
+  <a href="http://api.rubyonrails.org/classes/ActionController/Routing/RouteSet/Mapper.html">Mapper</a>
+  instance in order to build a route. For example, your routes configuration looks something like this:
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-8.rb"></script>
+<p>
+  We initially saw two options.
+</p> 
+<ol>
+  <li>
+    Create a data structure representing the desired routes, store it in the configuration, then from
+    the routes file iterate through the structure created in the configuration file, creating the
+    appropriate routes;
+  </li>
+  <li>
+    Store some Ruby code in the configuration so that the context (i.e. the Mapper instance) can be
+    passed to the block at the run-time.
+  </li>
+</ol>
+<p>
+  This second option eliminates the need for a secondary data structure to represent the routes.
+  How better to configure the routes than with the actual code used to configure them?
+</p>
+<p>
+  It turned out that this was nearly as simple as the <code>assethost</code> configuration. First, let’s define
+  the routes in <code>/deployment/config/serverconfig.rb</code>:
+</p>
+<script src="https://gist.github.com/1051319.js?file=jsuchy-20081202-9.rb"></script>
+<p>
+  We have used the lambda method to convert a block into a Proc object. The Proc object is stored as
+  a value in a hash which can be executed later. The rest should look familiar to anyone using Rails;
+  it is exactly what we would have had in our routes file. Now, from 
+  <code>/deployment/systemone/railsapp_one/config/routes.rb</code>, we can do this:
+</p>
+<script src="https://gist.github.com/1051313.js?file=jsuchy-20081202-11.rb"></script>
+<p>
+  In order to invoke the Proc object stored in <code>serverconfig.rb</code>, we just send the call
+  message to the Proc stored in the configuration hash, if it exists. In our implementation, we invoke
+  the Proc configured in <code>serverconfig.rb</code> before all of the other (default) routes, with
+  the assumption that the configured routes should have the highest priority. If we run into a case where
+  this isn’t the case, we can address that problem then.
+</p>

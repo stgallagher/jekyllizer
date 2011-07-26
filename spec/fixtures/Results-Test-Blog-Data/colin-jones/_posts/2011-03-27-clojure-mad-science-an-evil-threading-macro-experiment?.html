@@ -1,0 +1,176 @@
+---
+layout: post
+title: Clojure mad science (an evil threading macro experiment?)
+tag:
+---
+
+<h2>
+  <p>
+    Let's say you're confronted with a problem like this one:
+  </p>
+  <p>
+    You are a mad scientist, and you'd like to perform an experiment on your mysterious 
+    test subjects. You want half of the subjects (chosen at random) to be assigned to 
+    one of three experimental groups, and the other half of the subjects will serve as 
+    the control group. The details of the experiments are not important for now, but 
+    suffice to say they will not be condoned by the American Psychological Association.
+  </p>
+</h2>
+<p>
+  Got a solution already? OK, OK, we'll put this in more concrete, mathy terms, but 
+  everything after this sentence is really part of a solution, so don't think you're 
+  getting away with anything here, Doctor Scaryhausen.
+</p>
+<p>
+  Given a collection of length n, shuffle the elements randomly, grab the odd ones, 
+  and map those to values cycling among :x, :y, and :z. Don't forget to include the 
+  even ones in your result map, mapped to :c (for the "control" group). [1]
+</p>
+<p>
+  As a diligent student of Clojure's sequence library, you might come up with a solution 
+  like this one:
+</p>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-1.clj"></script>
+<p>
+  This works just fine, and as expected, you'll get a different result every time because 
+  of the <code>shuffle</code>:
+</p>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-2.clj"></script>
+<p>
+  However, it's pretty hard to tell what's going on here. The duplication is pretty gross: 
+  <code>(interleave (map last (filter (fn [[i subject]]</code>, and that contributes to a 
+  feeling of just too many responsibilities for one function. It's hard to read and hard 
+  to test, and that kind of thing makes the Wolfman, for one, pretty angry. Let's clean 
+  that up.
+</p>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-3.clj"></script>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-4.clj"></script>
+<p>
+  Much better. In the process of removing the duplication, we've refactored out a function 
+  <code>subject-groups</code> that has no knowledge of the algorithm we're using to split 
+  up our subjects. That strategy gets injected as the function argument <code>pred</code>, 
+  for &ldquo;predicate&rdquo;. Why not spell the whole word out? In short, because it's a 
+  convention. In slightly less short, because if you've watched 
+  <a href="http://twitter.com/unclebobmartin">Uncle Bob Martin's</a> recent 
+  <a href="http://www.cleancoders.com/codecast/clean-code-episode-2/show">video on naming</a>, 
+  you know that the convention itself is OK, because the scope of that binding is pretty 
+  small.
+</p>
+<p>
+  The other good thing about splitting these responsibilities out is that now 
+  <code>subject-groups</code> and <code>assign-indexed-subjects</code>, the most complex 
+  pieces of this solution, are now referentially transparent. They are deterministic, so they 
+  can now be more easily understood, tested, and even memoized! It's generally a good idea to 
+  partition side effects into small parts of a system in order to get these benefits.
+</p>
+<p>
+  Now, because we have some time left before the sun sets and we're able to actually perform 
+  our evil experiments, let's look more critically at <code>subject-groups</code>.
+</p>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-5.clj"></script>
+<p>
+  For an experienced Lisper, this is relatively clear. Just four lines of implementation, 
+  not too much cleverness, standard Clojure sequence functions. But what if we represented 
+  this function in terms of the way the input <code>subjects</code> is transformed into a 
+  map of subjects pointing to groups?
+</p>
+<p>
+  If you've never seen Clojure's threading macros (<code>-&gt;</code> and <code>-&gt;&gt;</code>), 
+  then today's your lucky day! The idea is that you have a series of transformations, 
+  represented by Clojure forms, inside the macro. And that macro takes the result of one 
+  form and inserts it (in some way, depending on which macro) into the next form. As an 
+  example, the <code>-&gt;</code> macro inserts into the second position (the first 
+  argument):
+</p>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-6.clj"></script>
+<p>
+  Using the <code>-&gt;&gt;</code> macro inserts into the last position:
+</p>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-7.clj"></script>
+<p>
+  Pretty simple, right? One edge case is that a bare symbol, like <code>count</code>, 
+  will be translated into <code>(count)</code> so that inserting into the form is 
+  meaningful, but we won't need that detail here.
+</p>
+<p>
+  So let's give this a shot with <code>subject-groups</code>. First, recall our current 
+  implementation:
+</p>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-8.clj"></script>
+<p>
+  Now let's use the <code>-&gt;&gt;</code> macro:
+</p>
+<script src="https://gist.github.com/1054755.js?file=cjones-20110327-9.clj"></script>
+<p>
+  Well crud. Do you see the problem? We'd like <code>(interleave (cycle groups))</code> 
+  to be the next form (a transformer form?) to thread our data through, but that'll 
+  give us a map keyed by group! This is because the previous form always gets stuck in 
+  at the <em>end</em> of the next form with the <code>-&gt;&gt;</code> macro. At this 
+  point, I've often used a cop-out, bailing out of one threading form and moving on with 
+  a different one:
+</p>
+<script src="https://gist.github.com/1054783.js?file=cjones-20110327-10.clj"></script>
+<p>
+  Gah, it's starting to feel like Clojure is doing evil experiments on us! So now what? 
+  Well, it seems we need to switch back to <code>-&gt;&gt;</code>:
+</p>
+<script src="https://gist.github.com/1054783.js?file=cjones-20110327-11.clj"></script>
+<p>
+  OK, this gets the job done&hellip;
+</p>
+<script src="https://gist.github.com/1054783.js?file=cjones-20110327-12.clj"></script>
+<p>
+  But are we really being clearer here than we were with our first version of <code>subject-groups</code>, without any threading macros? I'd argue that we're not, and I think it'd be tough to convince me otherwise.
+</p>
+<p>
+  Thankfully, there does exist a way to hack in the ordering we really want and use one threading macro the whole way down:
+</p>
+<script src="https://gist.github.com/1054783.js?file=cjones-20110327-13.clj"></script>
+<p>
+  This works as perfectly as Frankenstein's neck bolts!  Since we want our transforming 
+  data to be the <em>first</em> argument to <code>interleave</code>, but the last argument 
+  for the remainder of the transforming forms, we've just created an anonymous function 
+  that's similar to <code>interleave</code>, but swaps the argument order. Recall here that 
+  because we're using a macro (<code>-&gt;&gt;</code>), at runtime the code is nearly 
+  identical to our initial <code>subject-groups</code> solution: the only difference is 
+  this new swapped-argument <code>interleave</code>-like function that we've created. So 
+  we don't pay a performance cost at runtime for using this version to express the data 
+  transformation.
+</p>
+<p>
+  Looking back at our initial <code>subject-groups</code> implementation, I admit I'm 
+  not convinced that either one is definitively better than the other. 
+</p>
+<script src="https://gist.github.com/1054783.js?file=cjones-20110327-14.clj"></script>
+<p>
+  However, I do find the data transformation pattern encouraged by the threading macros 
+  to be a compelling way to visualize this process, and in many cases you don't even 
+  need the argument-swapping hack to make it happen.
+</p>
+<p>
+  <em>pause</em>
+</p>
+<p>
+  OK, you're right, you're not a mad scientist and therefore the example doesn't apply 
+  to you directly, but the bind it puts you into from a threading macro perspective is 
+  very real-world. The fact is that when data is being threaded through your forms, the 
+  macro depends on the position of the data being consistent throughout the flow. This 
+  problem will also come up (for instance) anytime you're using <code>-&gt;&gt;</code> 
+  to thread sequential data, and you need to <code>conj</code> something onto it, since 
+  <code>conj</code> takes a sequence as the <em>first</em> argument.
+</p>
+<p>
+  I'm interested to hear how you feel about these two versions of <code>subject-groups</code>, 
+  and what you might do differently.
+</p>
+<p>
+  Also if this stuff whets your programming appetite for Clojure, you might consider 
+  attending <a href="http://8thlight.com/courses/2-clojure-functional-programming-on-the-jvm">
+  Clojure: Functional Programming on the JVM</a>, April 14-15.  No evil experiments, 
+  guaranteed.
+</p>
+<p>
+  [1] We're choosing to represent the data structure this way because (let's say) our 
+  lookups will be by user much more frequently than by group. We'll worry about analyzing 
+  the results of the experiment later.
+</p>

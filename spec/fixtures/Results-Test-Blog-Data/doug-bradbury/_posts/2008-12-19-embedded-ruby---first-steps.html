@@ -1,0 +1,138 @@
+---
+layout: post
+title: Embedded Ruby - First Steps
+tag:
+---
+
+
+<p>
+	I spent the beginning of my career working on embedded systems for 
+	<a href="http://www.shure.com/">some audio company</a>. These embedded systems were my first love 
+	in programming and to me, no flashy css on a web page can beat the thrill of writing some code that 
+	flashes an LED. I've been working lately with Ruby a lot. I love it. I love that the language nearly 
+	disappears and I am able to express pure intent. Ok, so there is still syntax and such, but I can 
+	create so much more with so much less code.
+</p>	
+<p>
+	I hate living a fragmented existence, so I've been working the last few days on bridging these two 
+	worlds of mine. I figured that it will also give me a chance to get more familiar with linux and the 
+	latest in the embedded world.
+</p>	
+<h3>First up, pick a platform.</h3>
+<p>
+	I chose 
+	<a href="http://www.glomationinc.com/product_2440.html">
+	this single board computer from Glomation. It has an ARM920T core and an LCD / touch screen interface 
+	which may be fun later.
+</p>	
+<h3>Next, Tools.</h3>
+<p>
+	I was determined that I could get a toolchain up and running on my MAC, but eventually ended up running 
+	linux in a virtual machine. Glomation had a set of tools and a pre-patched kernel already to go on their 
+	<a href="http://www.glomationinc.com/support.html">support page</a> and our apprentice had a virtualbox 
+	linux image that he let me copy, so I was up and running quickly.
+</p>	
+<p>
+	I do want to share with you a few of the resources I found in the processes.
+</p>	
+<ul>
+	<li>I began with the <a href="http://www.gnuarm.com/">GNUARM project</a>.</li>
+	<li>Tom Walsh on the gnuarm mailing list was helpful and pointed me to his 
+		<a href="http://www.openhardware.net/Embedded_ARM/Toolchain/">scripts</a>. I came real close to a 
+		working toolchain on the Mac with his help.</li>
+	<li>I also gave the 
+		<a href="http://www.kegel.com/crosstool/">Crosstools</a> project a try but ended up in the same 
+		place I was before.</li>
+	<li>Thanks to 
+		<a href="http://rubyconf2008.confreaks.com/ruby-for-embedded-applications.html">
+		David Goodlad's RubyConf 2008 presentation</a> I discovered 
+		<a href="http://wiki.openembedded.net/index.php/Main_Page">Open Embedded</a>. This seems to be 
+		where the momentum is right now. I imagine I will give this project a careful look soon. I wish 
+		I would have started here.</li>
+</ul>			
+<h3>Cross-Compiling Ruby</h3>
+<p>
+	A few folks have had some success cross compiling ruby and Goodlad's presentation claimed that ruby 
+	is a part of the open embedded project. I built ruby 1.8.6-p111 because that what was on my linux 
+	distribution and it seems to be a well distributed release. Here is the script I used to configure 
+	ruby for cross compilation. Thanks to 
+	<a href="http://zenmachine.wordpress.com/cross-compiling-ruby-to-arm-processors-the-not-so-zen-way/">
+	The Zen Machine</a> blog for the skeleton of this script.
+</p>
+<!-- 
+#! /bin/sh
+export ARM_TOOLS=/usr/.../arm-unknown-linux-gnu/bin
+export CC=$ARM_TOOLS/arm-unknown-linux-gnu-gcc
+export LD=$ARM_TOOLS/arm-unknown-linux-gnu-gcc
+export AR=$ARM_TOOLS/arm-unknown-linux-gnu-ar
+export RANLIB=$ARM_TOOLS/arm-unknown-linux-gnu-ranlib
+export ac_cv_func_getpgrp_void=yes
+export ac_cv_func_setpgrp_void=yes
+./configure --host=arm-unknown-linux --prefix=$HOME/ruby/install 
+-->
+<p>
+	ARM_TOOLS is where I installed the cross compiler. The prefix is just the place where 'make install' 
+	will drop the results of the build. The configure script generates a file in the ruby root director 
+	called fake.rb that causes some problems when I went to 'make'
+</p>
+<!-- /ruby-1.8.6-p111/fake.rb:12: unterminated string meets end of file (SyntaxError)        --> 
+<p>
+	I opened it up and it has a very obvious syntax error in it. I added the missing backslash on line 12 
+	and ruby built fine from there.
+</p>
+          <!-- ALT_SEPARATOR = "\";     -->     
+<p>becomes . . .</p>
+
+          <!-- ALT_SEPARATOR = "\\";          -->
+<p>
+	'make' then 'make install' and I had my cross compiled ruby
+</p>	
+<h3>Getting Ruby onto the Target</h3>
+<p>
+	The last step to seeing little rubies flying on my ARM core was to get the build onto the target. 
+	The Glomation board came preloaded with a kernel and a root file system. The kernel source was 
+	provided on the 
+	<a href="http://www.glomationinc.com/support.html">support page</a> but not the root file system. 
+	I asked their support guy and he kindly 
+	<a href="http://glomationinc.com/download1/rootfs.img">posted</a> it for me. I was dreading having 
+	to rebuild a file system from scratch, so I was grateful for his help.
+	I decided that the best option would be to just have the target load of the root file system over 
+	the network on boot. I followed 
+	<a href="http://wiki.buici.com/wiki/Mounting_JFFS2_Filesystem_in_RAM">these instructions</a> for 
+	mounting the image on my linux VM and 
+	<a href="http://ubuntuguide.org/wiki/Ubuntu:Gutsy#NFS_Server">these instructions</a> for setting 
+	up an NFS Server. Mounting the file system over the network is a great option because now I can 
+	edit the file system from my Mac or linux VM and have the target see the changes without even 
+	rebooting. Perfect! The 2440 board came loaded with UBoot and all I had to do to load the file 
+	system over the network was to set the nfsroot in the bootargs from the bootloader's command line.
+</p>
+<!-- set bootargs 'nfsroot=10.0.1.151:/arm/fs rw console=ttySAC0,115200 ip=dhcp init=/linuxrc' -->
+<p>
+	Once booted, I only needed to set the RUBYLIB environment variable so that ruby knows where to find 
+	the libraries. I added this to my init script.
+</p>
+<!-- export RUBYLIB=/lib/ruby/1.8 -->
+<p>
+	And there you have it. Ruby running on my ARM board:
+</p>
+<h3>Next Steps</h3>
+<p>
+	Here is where I want to go from here.
+</p>	
+<ul>
+	<li>Sockets. I need to build openssl support for ruby so that I can talk to the world from Ruby. 
+		<a href="http://zenmachine.wordpress.com/cross-compiling-ruby-to-arm-processors-the-not-so-zen-way/">
+		The Zen Machine</a> ought to help me out here.</li>
+	<li>Sinatra - I'd like to run Sinatra on the target and start serving up some web pages</li>
+	<li>RTC - I want to get that on chip Real Time Clock working so that it's not always 1970</li>
+	<li>Drivers and extensions - I want to be able to control some hardware from Ruby. I've got a lot to learn 
+		here but I'll have to find or write a linux driver and then build a Ruby extension on top of it. I'm 
+		imagining something like led.on and led.flash.</li>
+	<li>Submit to ESC. I'm hoping to submit my work to the 
+		<a href="https://www.cmpevents.com/ESCw09/a.asp?option=N&V=1">Embedded Systems Conference</a>. I hope 
+		that Ruby can start picking up some momentum in the space and save embedded developers gobs of time 
+		like it has done in the web development world.</li>
+</ul>		
+<p>
+	Thanks for reading. Let me know if you have any ideas or suggestions!
+</p>	

@@ -1,0 +1,75 @@
+<h1>Craftsman Swap Day 4</h1>
+<p id="author">Jim Suchy</p>
+<p id="date">2009-04-17</p>
+<h2>
+  <a href="http://nuts.redsquirrel.com/">Dave Hoover</a> and I got back to the 
+  <a href="http://madmimi.com/">Mad Mimi</a> feature implementation first thing
+  in the morning. Dave had left a failing test the previous afternoon, which was
+  meant to serve as a reminder for where we left off.
+</h2> 
+<p>
+  This technique is great when you need to stop in the middle of what you’re doing,
+  and it works well as long as you know what the next step needs to be. This should
+  help you reestablish the context you were holding when you stopped. 
+</p>
+<p>
+  Of course, if you’re at a natural break point and the next step isn’t clearly defined,
+  I tend to avoid writing a failing test.
+</p> 
+<p>
+  Often when I come back to code after a break, I will find a simpler way to approach the
+  problem at hand. I don’t like short-circuiting that process by leading myself towards a
+  solution I saw when I was leaving the code.
+</p>
+<p>
+  Anyway, in this case, it was clear where we needed to go, and the failing test got us
+  right back to it.
+</p>
+<p>
+  Mad Mimi has grown organically without any traditional marketing or advertising efforts.
+  That is not to say that there aren’t a lot of users and a lot of data. There are a few
+  database tables that are quite large, and optimizations have been put into place in order
+  for the system to remain responsive.
+</p>
+<p>
+  Optimizations are usually going to make a system more complex from a code standpoint.
+  The common advice to avoid <a href="http://c2.com/cgi/wiki?PrematureOptimization">
+  premature optimizations</a> is valid exactly because of this. In addition, you’re
+  almost always going to be wrong about where the bottlenecks will occur in
+  your application.
+</p>
+<p>
+  If you were to do some premature optimization, you’ll likely find yourself with overly
+  complex code that is still slow. Mimi has been optimized only as needed, and the code
+  base is better for it. One of the optimizations that has been made is limited use of
+  stored procedures.
+</p>
+<p>
+  Stored procedures are not easy to test. The feature we were working on required us to
+  pass an additional parameter into the existing stored procedure. Once we dropped into
+  stored procedure land, we lost the safety net of our tests. So we approached the problem
+  stepwise, in a way &ldquo;test driving&rdquo; the stored procedure from the user interface. 
+</p>
+<p>
+  Fortunately, the stored procedure isn’t overly complex, and executing a couple manual test
+  cases made us confident that the change was correct.
+</p>
+<p>
+  After we finished the feature, it was time to deploy so the customer could test and
+  provide feedback. The deployment process for this project is different than just about
+  every other project I’ve ever been on.
+</p> 
+<p>
+  Dave has taught the customer, who is not a programmer, how to update from Subversion,
+  run data migrations, start/restart his local web server and BackgroudRB services, etc.
+  With just a little help, the customer has the system running in development mode on his Mac!
+  Not only that, the customer does the design work for the site.
+</p> 
+<p>
+  We just added the appropriate view files while implementing the feature with a note for
+  the customer to come through and style the HTML and provide the correct content. The customer
+  is heavily involved in the process, and clearly cares very much about the product. 
+</p>
+<p>
+  Dave is extremely lucky to have this kind of customer for this project.
+</p>

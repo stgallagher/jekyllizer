@@ -1,0 +1,212 @@
+---
+layout: post
+title: JavaScriptness.prototype = new Class(); From Classical to Prototypal
+tag:
+---
+
+<h2>
+  JavaScript is a very misunderstood language. It has gotten a bad rap because most 
+  people that use it don't look for its brighter side. Instead they will often look
+  online for some code to copy paste, or they will hack something together using tiny
+  snippets and in-lines to get a drop down menu.
+</h2>
+<p>
+  It is also a very conflicted language. By nature, JavaScript is a Prototypal 
+  language where nearly everything is an Object and there are no classes. It is also
+  somewhat Functional since all the functions are First Class Functions. They are just
+  more objects that can be passed into and returned from other functions.
+</p>
+<p>
+  The issue is that many people try to use JavaScript like they would use Java or C++.
+  They want a Classical language, where they strictly define all their types and then 
+  create instances of those types. 
+</p>
+<p> 
+  Even though JavaScript can be jammed, beaten, or even mutilated into Classical 
+  structures (in fact the book <i>JavaScript: The Definitive Guide</i> spent a 
+  chapter on exactly that), this is betraying its nature and ignoring all the
+  benefits that come with Prototypes.
+</p>
+<h3>The Classical Form</h3>
+<p>
+  Lets take a look at a basic Classical implementation of a Square using JavaScript:
+</p>
+<script src="https://gist.github.com/1049824.js?file=jmartin-20100706-1.js%20"></script>
+<p>
+  You will notice that JavaScript even has a <code>new</code> key word in an attempt
+  to match a Classical implementation. The <code>function Square()</code> defines a 
+  class with a side attribute. It also has two instance methods, <code>area</code>
+  and <code>perimeter</code>.
+</p>
+<p>
+  We can then create mySquare in almost the same way we might do it in Java.  
+  This is JavaScript though, and the <code>new</code> works differently in JS. 
+  It creates a new, empty object and then calls the <code>Square()</code> function
+  (or the constructor)  passing the empty object into <code>this</code>.
+</p>
+<p>
+  The constructor then populates that object with the specified behavior before returning
+  it.  This is particularly scary, because if you forget to put <code>new</code> in front
+  of the constructor, <code> this </code> will refer to the Global Object, as will mySquare 
+  (meaning any further changes made to mySquare would also be on the Square 'class'). 
+</p>
+<p>  
+  This is why, if you want to use JS in the Classical way, you should always capitalize
+  the first letter of a constructor.
+</p>
+<p>
+  Ok, so we have our Square, but say we want to create a square that holds a X or an O. 
+  Well, we would want to inherit the properties of our current Square &ldquo;Class&rdquo;
+  and then add to them.  We might do something like this:
+</p>
+<script src="https://gist.github.com/1049824.js?file=jmartin-20100706-2.js%20"></script>
+<p>
+  We create a new &ldquo;Class&rdquo; for the <code>ContainerSquare</code> which uses 
+  the Square's constructor to define the <code>side</code> attribute, along with the 
+  two instance methods. We then define our new <code>contents</code> attribute, along
+  with an accessor method to go with it. 
+</p>
+<p>
+  Line 6 sets up a Prototypal inheritance structure so that a <code>ContainerSquare</code>
+  object will be linked to the proper prototype chain.
+</p>
+<p>
+  The prototype chain is the hierarchy of objects that a method or attribute call will
+  traverse until it finds what it is looking for. In other words, when I call 
+  <code>myContainer.size()</code>, JavaScript will first check to see if the 
+  <code>myContainer</code> object has that function.
+</p>
+<p>  
+  If not, it will proceed to check the object's prototype, which is the 
+  <code>ContainerSquare</code>. Since <code>ContainerSquare</code> doesn't have the function,
+  next in line is ContainerSquare's prototype, which is just <code>Square</code>.
+  <code>Square</code> does in fact have a <code>size()</code> function, and since javascript
+  will use the first function it finds, it will use Square's <code>size()</code> function.
+</p>
+<p>
+  Thus, by setting ContainerSquare's prototype to <code>Square</code>, we inherit any of the 
+  attributes or methods of Square.
+</p>
+<p>
+  Although this all works, and we have successfully mashed a Prototypal language into
+  a Classical scheme, we should try this in the way JavaScript wants to be used.
+</p>
+<h3>The Prototypal Form</h3>
+<p>
+  We can start with the <code>Square</code>. There are few pretty simple ways to achieve
+  the same functionality using regular objects and their prototypes, and we will look at 
+  two of them. The first will create a square object that we can use. 
+</p>
+<p>
+  Then if we need more squares, we can make a copy of that object using its prototype.
+  The second will create a <code>squareMaker</code> function, which can then be used to
+  pop out new squares.
+</p>
+<script src="https://gist.github.com/1049824.js?file=jmartin-20100706-3.js"></script>
+<p>
+  Here, we already have a new and usable square at our disposal.  We don't need to call
+  a constructor and define any types. We can just take an object and mold it into the
+  form we want.
+</p>
+<p>
+  Say we want another square though.  We can't just write something like 
+  <code>var secondSquare = firstSquare;</code> because <abbr title="JavaScript">JS</abbr>
+  passes objects by reference, and thus the second square would just point to the
+  first square.
+</p>
+<p>
+  What we can do, and this is a technique developed by Douglas Crockford, is make
+  a copy of our object by calling a new constructor with a prototype that points to
+  our object. This new constructor creates a new empty object and assigns the values
+  of our old object to the new empty object.
+</p>  
+<p>
+  You can do this yourself, or you can use Crockford's technique as follows:
+</p>
+<script src="https://gist.github.com/1049824.js?file=jmartin-20100706-4.js"></script>
+<p>
+  You can see that we are actually defining an on the fly constructor <code>F</code>,
+  using our object <code>o</code> to define F's prototype. Then we create
+  a new object using that constructor.  This will give us a new copy of our
+  object, with all its attributes and functions.  If we now called 
+  <code>secondSquare.area();</code> we would get 36.
+</p>
+<p>
+  If you wanted to then make a <code>ContainerSquare</code>, you could simply
+  add a contents attribute to the second square, and then make copies of the
+  <code>secondSquare</code> if you need more Containers. 
+</p>
+<p>
+  Keep in mind that since <code>firstSquare</code> is the prototype of 
+  <code>secondSquare</code>, if you were to add a contents attribute to 
+  <code>firstSquare</code>, you would then have that attribute on <code>secondSquare;</code>
+  however, adding attributes to the <code>secondSquare</code> does not place 
+  them on the <code>firstSquare.</code>
+</p>
+<h3>Spawn More Protolords</h3>
+<p>
+  The other way to get squares would be to make a squareMaker function. 
+  This function will return a new object with whatever attributes you define. I am also
+  going to show you some closure so that the attributes are private, and only accessible 
+  through accessor methods.
+</p>
+<script src="https://gist.github.com/1049824.js?file=jmartin-20100706-5.js"></script>
+<p>
+  You will notice that the return value of the squareMaker is almost exactly like how we 
+  defined our firstSquare object. We are just returning the definition of a square, and
+  thats quite awesome. 
+<p>
+  Another thing you will notice is the bit of closure. We pass a value into the 
+  <code>squareMaker</code>, but it isn't stored anywhere.  It is held in the scope of the
+  <code>squareMaker</code> function, allowing those internal methods to use it, but
+  hiding it from the outside (unlike the side attribute defined in the 
+  <code>firstSquare</code>).
+</p>  
+<p>
+  This sort of closure is another wicked awesome tool you can use in 
+  <abbr title="JavaScript">JS</abbr>.  In a way, this use of closure is like defining 
+  private variables to a class.
+</p>
+<p>
+  To get the Container functionality we create a <code>containerMaker</code> using
+  the <code>squareMaker</code>, and some more closure, to make a new square object. 
+  We then dynamically add a <code>getContents</code> method to provide access to 
+  our private contents attribute.
+</p>
+<script src="https://gist.github.com/1049824.js?file=jmartin-20100706-6.js"></script>
+<h3>Conclusion</h3>
+<p>
+  So we have now seen two ways to use some of the better parts of JavaScript to get 
+  the same functionality that we could get using the Classical scheme.
+</p>
+<p>
+  We can also see some advantages in using JS in its natural form like: getting some
+  closure (which can be exceedingly powerful), very dynamic objects ready to change
+  in anyway you can think of, quickly defined objects which can be used and multiplied, 
+  and no need to predefine types. Pretty sweet right?
+</p>
+<p>
+  I will admit one slight inefficiency with the two solutions I showed you (although
+  there are ways around this). Using the <code>squareMaker</code>, or making copies
+  of the objects will make full copies, including the function objects defined inside.
+</p>
+<p>
+  If you use the Classical scheme I showed, you are defining functions on the 
+  prototype rather than the object itself, thus there will only be one copy of
+  the function.
+</p>
+<p>  
+  You can, of course, do something similar in the <abbr title="JavaScript">JS</abbr> 
+  scheme, but the optimization doesn't count for all that much in most cases 
+  (unless you are doing mobile development where you want to save everything you can!).
+</p>
+<p>
+  JavaScript isn't a Classical language, but instead a Prototypal language that is
+  powerful enough to mimic a Classical language without breaking a sweat. There is
+  much to be gained by recognizing this fact and changing your mindset to work with it. 
+</p>
+<p>
+  Trying to fit a square into a circular hole will just get you stuck.  All languages
+  are unique with a variety of their own advantages, and as good developers we should
+  recognize these differences and reap all the benefits they have to offer.
+</p>

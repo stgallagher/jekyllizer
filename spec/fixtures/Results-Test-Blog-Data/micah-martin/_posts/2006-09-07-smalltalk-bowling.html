@@ -1,0 +1,142 @@
+---
+layout: post
+title: Smalltalk Bowling
+tag:
+---
+
+
+<p>
+  I’ve been meaning to learn Smalltalk for years now. Recently Dave Astels and I have 
+  a had a few discussion on the topic. They all seem to circulate around the theme of 
+  Smalltalk being a key OO language of the past, and again in the near future. Now that
+   Ruby has finally captures the attention it deserves, it’s not long before Smalltalk 
+   is back in the spotlight.
+</p> 
+
+<p>
+  A few days ago, when he joined me for a train ride, I seized the opportunity and asked 
+  him to help me write some Smalltalk. He gave me a copy of Squeak and off we went to write 
+  the Bowling game.
+</p>
+
+<p>
+  Even though we only got through the first two test cases, Dave’s a good teacher and I 
+  was able to finish it on my own. The code is below.
+</p>
+
+<p>
+  My first impression of Smalltalk: “Damn, this requires a lot of clicking”. It requires 
+  two clicks just to run a test and another 5 clicks to see what failed. Dave gave me funny 
+  looks when I complained about this but I couldn’t believe people programmed this way. Later 
+  my dad, remembering a demo by Kent Beck, reassured me that there are keyboard shortcuts 
+  for everything. Thank goodness!
+</p>
+
+<p>
+  In general it’s a sweet language. Experience with Ruby and Objective C exposed me to many 
+  of the concepts so there weren’t many surprises. Perhaps the most peculiar thing I ran into 
+  was the Smalltalk equivalent to if/else statements. The ”ifTrue: ifFalse:” structure makes 
+  perfect sense but it was unexpected. An example can be seen in the ”score” method.
+</p>  
+
+<p>
+  This is my first Smalltalk program and I’m sure I’ve made some newbie blunders. Feel free 
+  to rip my code to pieces in your comments. I’d love to hear advise and learn Smalltalk 
+  idiosyncrasies.
+</p>  
+
+<!--
+TestCase subclass: #BowlingTest
+    instanceVariableNames: 'game'
+    classVariableNames: ''
+    poolDictionaries: ''
+    category: 'Bowling'!
+
+!BowlingTest methodsFor: 'testing' stamp: 'MDM 4/27/2006 18:11'!
+setUp
+    game := Game new! !
+
+!BowlingTest methodsFor: 'testing' stamp: 'MDM 4/27/2006 18:19'!
+testAllOnes
+    1 to: 20 do: [:i | game roll: 1].
+    self should: [game score = 20]! !
+
+!BowlingTest methodsFor: 'testing' stamp: 'MDM 4/30/2006 19:52'!
+testAllSpares
+    1 to: 21 do: [ :i | game roll: 5 ].
+    self should: [game score = 150]! !
+
+!BowlingTest methodsFor: 'testing' stamp: 'MDM 4/27/2006 18:05'!
+testGutterGame
+    1 to: 20 do: [:i | game roll: 0].
+    self should: [game score = 0]! !
+
+!BowlingTest methodsFor: 'testing' stamp: 'MDM 5/1/2006 12:26'!
+testHeartBreaker
+    1 to: 11 do: [ :i | game roll: 10 ].
+    game roll: 9.
+    self should: [game score = 299]! !
+
+!BowlingTest methodsFor: 'testing' stamp: 'MDM 4/30/2006 19:20'!
+testOneSpare
+    game roll: 5.
+    game roll: 5.
+    game roll: 1.
+    1 to: 17 do: [:i | game roll: 0].
+    self should: [game score = 12]! !
+
+!BowlingTest methodsFor: 'testing' stamp: 'MDM 4/30/2006 19:44'!
+testOneStrike
+    game roll: 10.
+    game roll: 1.
+    game roll: 2.
+    1 to: 16 do: [:i | game roll: 0].
+    self should: [game score = 16]! !
+
+!BowlingTest methodsFor: 'testing' stamp: 'MDM 5/1/2006 12:26'!
+testPerfectGame
+    1 to: 12 do: [ :i | game roll: 10 ].
+    self should: [ game score = 300 ]! !
+Object subclass: #Game
+    instanceVariableNames: 'rolls'
+    classVariableNames: ''
+    poolDictionaries: ''
+    category: 'Bowling'!
+
+!Game methodsFor: 'scoring' stamp: 'MDM 5/3/2006 19:01'!
+init
+    rolls := OrderedCollection new! !
+
+!Game methodsFor: 'scoring' stamp: 'MDM 5/3/2006 19:02'!
+roll: pins  
+    rolls add: pins.! !
+
+!Game methodsFor: 'scoring' stamp: 'MDM 5/3/2006 19:03'!
+score
+    | roll score |
+    roll := 1.
+    score := 0.
+    1 to: 10 do: [:i |
+        (rolls at: roll) = 10
+        ifTrue: [
+            score := score + 10 + (rolls at: roll + 1) + (rolls at: roll + 2).
+            roll := roll + 1
+            ]
+        ifFalse: [
+            (rolls at: roll) + (rolls at: roll + 1) = 10 
+            ifTrue: [ score := score + 10 + rolls at: roll + 2] 
+            ifFalse: [ score := score + (rolls at: roll) + (rolls at: roll + 1)].
+            roll := roll + 2
+            ].
+        ].
+    ^ score! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Game class
+    instanceVariableNames: ''!
+
+!Game class methodsFor: 'as yet unclassified' stamp: 'MDM 4/27/2006 18:23'!
+new
+    ^ self basicNew init; yourself! !
+-->

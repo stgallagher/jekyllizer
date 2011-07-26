@@ -1,0 +1,75 @@
+---
+layout: post
+title: Craftsman Swap Day 1
+tag:
+---
+
+<h2>
+  My initial impression of the Obtiva office is the relaxed atmosphere. It consists of a big,
+  open work area with lots of pairing stations. At the beginning of the day, I jumped right into
+  an internal stand up meeting with a few of the Obtiva folks. It was short, sweet and to the point.
+</h2> 
+<p>
+  One interesting difference between this and the way I’m used to doing stand ups is items that
+  would normally be handled as followups were discussed during the individual updates. The discussions
+  never wandered far, so this worked quite well. I was paired with Tom Kersten most of the day 
+  on some client work.
+</p>
+
+<p>While working with Tom, I was introduced to a few tools that I hadn’t used before.</p>
+<ul>
+  <li>
+    <a href="http://fluidapp.com/">Fluid</a>, a Site Specific Browser that basically allows
+    you to sandbox a web application in a dedicated browser process. You can Command-Tab
+    to an icon that you assign, and if (or more accurately, when) your browser crashes, Fluid does not.
+  </li>
+  <li>
+    <a href="http://www.gnu.org/software/screen">GNU Screen</a>, a window manager that removes
+    the latency from remote pairing. Of course, you need to use an editor like vi for it to work for you.
+  </li>
+  <li>
+    <a href="http://www.smileonmymac.com/TextExpander">Text Expander</a>, which does exactly what
+    it says: you specify shortcuts, e.g. brb, and it will expand it to the full text, e.g. 
+    Be right back.  
+  </li>
+  <li>
+    <a href="http://rak.rubyforge.org/">Rak</a>, a Ruby replacement for grep. It gives you
+    the line number of the matched text, which regular grep can do too but it always takes
+    me 5 minutes to figure out the right option to pass to get it to work.
+  </li>
+</ul>
+<p>
+  Tom’s editor of choice (even for Rails development, which is what we were working on) is VI. I was
+  a little worried at first, but I picked up a few tricks and it didn’t slow me down quite to a crawl
+  like I had anticipated.
+</p>
+<p>
+  We were also using Cucumber to test-drive the features we were working on; this was Acceptance Test
+  Driven Development <abbr title="Acceptance Test Driven Development">(ATDD)</abbr> in that the test
+  represents the behavior that the software should have.
+</p>
+<p>
+  I have been test-driving my Rails code at a lower level (think model and controller), and I think
+  that there is a ton of value in moving up to a higher level to define the behavior.
+</p>
+<p>
+  As we were implementing a feature, the following problem presented itself. We’re using Webrat
+  in the step definitions of the Cucumber tests. The way Webrat makes you click on buttons/links
+  is slightly problematic.
+</p>
+<p>
+  You can use the text or the id of the link to tell it to click. The text is probably the least
+  permanent part of the entire link, so by relying on the text your tests are inherently fragile.
+  By adding an id for all the links in your application, you are cluttering up the DOM. Adding an
+  id to all your elements is a valid solution, and one that have fallen back to in the past.
+</p> 
+<p>
+  But this seemed backwards; the testing is forcing us to clutter up our HTML. The testing framework
+  should be working for us, making it easier to write valid, uncluttered HTML. Perhaps we could use
+  the href attribute of the anchor tag to click a button?
+</p> 
+<p>
+  Unfortunately, Webrat doesn’t support that, but it is open-source so I ended up forking and adding
+  this feature. However, after more discussion, I’m not convinced that this approach is indeed better
+  than using the id approach.
+</p>

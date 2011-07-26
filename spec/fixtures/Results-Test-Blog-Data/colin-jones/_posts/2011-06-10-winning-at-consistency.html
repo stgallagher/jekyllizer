@@ -1,0 +1,126 @@
+---
+layout: post
+title: Winning at Consistency
+tag:
+---
+
+<h2>
+  <p>
+    Imagine this scenario: your User model <code>validates_uniqueness_of :email</code>.
+  </p>
+  <p>
+    Do you use <code>validates_uniqueness_of</code> in Rails? Do you feel confident that 
+    it works to prevent duplicate records? If you're like most of us, you won't have 
+    given it much thought, but since I'm asking, you're second-guessing yourself.
+  </p>
+</h2>
+<p>
+  And indeed you should. More and more, the Rails documentation and community blogs 
+  reflect the problems with <code>validates_uniqueness_of</code> (see Further Reading 
+  below), and the fact that you can't depend on it to prevent duplicates in your 
+  database.
+</p>
+<p>
+  &ldquo;You can't?!?&rdquo; Right. It's called <code>validates_uniqueness_of</code>, 
+  and it <em>will</em> perform that validation... right up until your project hits 
+  production.
+</p>
+<p>
+  First, let's take a look at what happens normally. When saving an Active Record, your 
+  validations run first. So by virtue of the <code>validates_uniqueness_of</code> call, 
+  ActiveRecord will check the database to see if this User is the only one with that 
+  email address. If so, great! Save away!
+</p>
+<script src="https://gist.github.com/1054847.js?file=cjones-20100610-1.txt"></script>
+<p>
+  Otherwise, the save fails, and errors are populated on the object to let you know 
+  what went wrong.
+</p>
+<script src="https://gist.github.com/1054847.js?file=cjones-20100610-2.txt"></script>
+<p>
+  Everything looks good so far. Now what's the big deal about your app going to production? 
+  Well, with any reasonably sized application, you'll need multiple application server 
+  processes or at least threads (Mongrel, Passenger, Tomcat, etc.) to handle incoming 
+  traffic. And that's when the problem strikes.
+</p>
+<p>
+  Everything looks good so far. Now what's the big deal about your app going to production? 
+  Well, with any reasonably sized application, you'll need multiple application server 
+  processes or at least threads (Mongrel, Passenger, Tomcat, etc.) to handle incoming 
+  traffic. And that's when the problem strikes.
+</p>
+<h3>The Problem</h3>
+<p>
+  Now Impatient Ian creates an account, quadruple-clicking the &ldquo;Create Account&rdquo; 
+  button after filling out his info. Let's say either there isn't any Javascripty 
+  double-click protection on that button or he has Javascript turned off.
+</p>
+<p>
+  Now somewhere in the intertubes, those four requests are all vying for your app servers' 
+  attention, and two of them happen to hit the app servers simultaneously.
+</p>
+<p>
+  Now, each process checks the database to see if the newly-constructed (but as yet unsave) 
+  object is unique for the given scoping, as before. Now, both of them say &ldquo;yes&rdquo;, 
+  and so both of them can go ahead and save. Hooray!
+</p>
+<script src="https://gist.github.com/1054847.js?file=cjones-20100610-3.txt"></script>
+<p>
+  Wait. Not hooray - the opposite of that. Now we have duplicate records in our database, 
+  after we explicitly said that we didn't want that to happen.
+</p>
+<p>
+  So that's the problem - <code>validates_uniqueness_of</code> doesn't work as our intuitions 
+  might lead us to expect. What's the solution? Well, if you need to make sure you've got no 
+  duplicate records, you'll want a database-level constraint: a unique index.
+</p>
+<p>
+  <code>has_one</code> has similar problems, though there are dozens of possible root causes 
+  of those in application logic, so I'll leave that as an exercise to the reader.
+</p>
+<h3>A Solution: <code>consistency_fail</code></h3>
+<p>
+  <a href="https://github.com/trptcolin/consistency_fail"><code>consistency_fail</code></a> 
+  is a brand-new gem I wrote that aims to make it easier to fix these problems. By installing 
+  the gem (<code>gem install consistency_fail</code> for Rails 3, or <code>gem install 
+  consistency_fail -v=0.1.1</code> for Rails 2.3), you get an executable 
+  (<code>consistency_fail</code>) that will print out a report of the indexes you're 
+  missing.
+</p>
+<p>
+  Here's an example. We've got two models in this Rails 3 project, both of which have missing 
+  indexes:
+</p>
+<script src="https://gist.github.com/1054847.js?file=cjones-20100610-4.rb"></script>
+<p>
+  So, getting an exhaustive list of missing indexes is as easy as <code>consistency_fail</code>:
+</p>
+<script src="https://gist.github.com/1054847.js?file=cjones-20100610-5.txt"></script>
+<p>
+  The first column of the report, labeled "Model", shows you where the call to 
+  <code>validates_uniqueness_of</code> or <code>has_one</code> issues from, and the 
+  &ldquo;Table Columns&rdquo; column shows you the table with the <em>database</em> 
+  columns that need a unique index. Multiple column names in parentheses mean that a 
+  composite unique index is required.
+</p>
+<p>
+  For performance reasons, you'll want to think carefully about how you order the columns 
+  in a multicolumn unique index, but for our purposes, any ordering will work to enforce 
+  uniqueness.
+</p>
+<p>
+  It's worth noting here that by adding these indexes, we <em>will</em> protect our data, 
+  but at the risk of bubbling a database-level uniqueness-violation exception to the top 
+  level, and potentially showing our user an error page. Unless, that is, we want to 
+  hack ActiveRecord up to catch the database-specific exception (done it!) and give a 
+  nice explanation. So, buyer beware - for the time being, there's application-specific 
+  code that will need to be written if handling these user-facing errors is a concern.
+</p>
+<p>
+  I'd love to hear whether you find this reporting from <code>consistency_fail</code> to 
+  be valuable, and what improvements you'd like to see.
+</p>
+<h3>Further reading about <code>validates_uniqueness_of</code></h3>
+<ul>
+<li><a href="http://api.rubyonrails.org/classes/ActiveRecord/Validations/ClassMethods.html#method-i-validates_uniqueness_of">Rails API docs</a></li>
+<li><a href="http://ar.rubyonrails.org/classes/ActiveRecord/Validations/ClassMethods.html#M000086">Rails RDocs</a>

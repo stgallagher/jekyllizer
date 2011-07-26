@@ -1,0 +1,74 @@
+---
+layout: post
+title: Embedded Ruby Sings Sinatra
+tag:
+---
+
+<h2>
+  <a href="http://blog.8thlight.com/articles/2008/12/20/embedded-ruby-first-steps">Last Time</a> 
+  I got ruby up and running on my Arm based embedded development platform. Here is a quick 
+  summary of what Santa and I did over Christmas.
+</h2>
+<h3>Sockets</h3>
+<p>
+  Getting support for sockets built into Ruby turned out to not be hard at all. 
+  All I had to do has uncomment the extensions I wanted in ext/Setup. Here is everything 
+  I decided to turn on. 
+</p>
+<script src="https://gist.github.com/1052016.js?file=dbradbury-20081230-1.txt%20"></script>
+<p>
+  After a rebuild and reinstall, I could require and use 'socket.' Welcome, Ruby, to the 
+  outside world!
+</p>
+<h3>Relocating Ruby</h3>
+<p>
+  I decided to move ruby to the 'standard' install directory (/usr/local/) instead of the 
+  root that I had done in the first iteration. This would avoid having to set the RUBYLIB 
+  environment variable and keep any mess I made out out of the main system /bin and /lib 
+  directories. First I removed the --prefix from the configure script I had written last 
+  time. This will cause Ruby to build assuming the default install location (/usr/local/). 
+</p>
+<script src="https://gist.github.com/1052016.js?file=dbradbury-20081230-2.sh"></script>
+<p>
+  After Ruby was built, but before installing it (make install), I hacked the DESTDIR in 
+  rbconfig.rb
+</p>
+<script src="https://gist.github.com/1052016.js?file=dbradbury-20081230-3.sh"></script>
+<p>
+  This created the /usr/local tree inside my install directory. I created a /usr/local/ on 
+  my file system and copied that tree over. The only problem with this process is that the 
+  sh-bang line on the top of all of the ruby scrips (irb, testrb, etc.) had the wrong path 
+  in them. They had the install path on the host machine (/~/ruby/install/usr/local/bin/ruby) 
+  instead of the actual path on the target (/usr/local/bin/ruby). I changed those by hand. 
+</p>
+<h3>Sinatra</h3>
+<p>
+  Ahh, now the good part.  Using a gem on an embedded system is an interesting problem.  I 
+  first had to get rubygems installed on the network files system.  I downloaded the 
+  <a href="http://rubyforge.org/frs/?group_id=126&amp;release_id=9501"> source code</a> and 
+  temporarily placed in on the target files system.  On the target I ran the install command.
+</p>
+<script src="https://gist.github.com/1052016.js?file=dbradbury-20081230-4.sh"></script>
+<p>
+  I found it more convenient to install the gems from the host system instead of the target. 
+  It would be faster and the 'gem' command had some ruby dependencies that I hadn't yet build. 
+  I downloaded Sinatra and Rack and then manually installed them into my target's file system 
+  on the host machine. Note that /arm/fs/ is the root of my networked file system. I switched 
+  off rdoc and ri to help keep the install small. 
+</p>
+<script src="https://gist.github.com/1052016.js?file=dbradbury-20081230-5.sh"></script>
+<p>
+  With Sinatra installed and ready to go, I wrote a quick Sinatra app. Sinatra runs on Mongrel 
+  by default, but I wanted to run on the lighter weight Webrick web server which was already in 
+  my ruby installation. 
+</p>
+<script src="https://gist.github.com/1052016.js?file=dbradbury-20081230-6.sh"></script>
+<p>
+  Drum roll please ...
+</p>
+<h3>Next Steps</h3>
+<p>
+  I've been plugging away on the linux device and ruby extension side of the project. I'm still 
+  on the steep side of the learning curve, but making progress. I'm still after that elusive blinking 
+  LED! 
+</p>

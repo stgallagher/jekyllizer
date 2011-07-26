@@ -1,0 +1,66 @@
+---
+layout: post
+title: TDD in education, they're doing it wrong
+tag:
+---
+
+
+<p>
+  This blog post originally appeared on a blog I maintain for my current game development 
+  class. Generally speaking my posts over there are pretty specific to the classes I’m taking, 
+  and aren’t appropriate for this blog. Recently however my instructor, who is an extremely 
+  smart and accomplished developer in the game development industry, described a common 
+  misconception about TDD that prompted me to rant on that blog. Since the subject is TDD I’m 
+  placing it here, edited to make more sense.
+</p>
+
+<p>
+  Recently in class our professor said something like this, “TDD says you should only write 
+  the simplest code that can possibly pass the test, and that leads to spaghetti code with a lof 
+  conditional logic.” Sadly this left me shaking my head. I’ve been doing TDD every single day 
+  for the last 3 years professionally, and intermittently for 2 years before that, and I can say 
+  for certain that TDD never caused me to write spaghetti code. Of course I’ve written spaghetti 
+  code, including some of the code I TDD’d for the previous class (I’m not real happy with my 
+  memory system) but that wasn’t caused by TDD. The crux of the professor’s argument seems to 
+  come from a mistaken understanding of TDD. He seems to have TDD as a three step process:
+</p>
+
+<ul>
+  <li>Write the test</li>
+  <li>Write the smallest amount of code to make the test pass</li>
+  <li>Repeat</li>
+</ul>
+
+<p>
+  Unfortunately it’s missing a crucial step – refactor! Yes we initially write the simplest 
+  code that can possibly pass, but we don’t leave it that way. We write that simple code so we 
+  can refactor with a green bar, something that unfortunately my professor doesn’t understand.
+</p>
+
+<p>
+  When I write the minimal amount of code refactoring becomes easier, because I have a suite 
+  of passing tests. In school students and teachers throw around the term refactoring a lot, 
+  but are usually unaware that when Martin Fowler wrote the book on Refactoring, defining it 
+  for the software development community, he required unit tests. You can’t guarantee your 
+  behavior did not change unless you have tests around the behavior, which is why I hear so many 
+  students say things like “I’m almost done refactoring but the code doesn’t build yet.” 
+  Refactoring is meant to be small steps, in a definite process, so that at the end of each 
+  refactoring (such as extract method) I have the same behavior as before, but better code. 
+  Most people who refactor don’t have tests, take huge steps and eventually end up hacking 
+  and slashing something back together that is close to (but not the same) as their original 
+  behavior. That’s not refactoring, that’s hacking - and most students clearly don’t know the 
+  difference.
+</p>
+
+<p>
+  At this point the blog went into a description of how you’re supposed to do TDD, but if 
+  you’re reading this blog you probably already know how to do that. The point of moving this 
+  here is to point out that TDD is making inroads at the university level, but it has a long 
+  way to go. Those doing TDD are a distinct minority, those that are are doing it wrong, and 
+  they’re getting bad information. Furthermore let’s remember these are smart people. The 
+  professor for my class is frakking brilliant, and the students are amongst the best in the 
+  university, and yet in spite of that when they start their first job they’ll do so without 
+  writing unit tests. The good news is that smart people are trying out TDD, in an industry 
+  (games) that is notoriously slow to adopt software development methodologies, so we are 
+  winning. It’s just taking longer than we thought.
+</p>  

@@ -24,7 +24,7 @@ module Jekyllizer
     
     def remove_header_tags_from_title
       @title_line.gsub!(/<h1>/, "")
-      @title_line.gsub!(/<\/h1>/, "")
+      @title_line.gsub!(/<\/h1>|<\/h3>/, "")
     end
     
     def remove_newline_from_title

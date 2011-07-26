@@ -1,0 +1,30 @@
+---
+layout: post
+title: Test Driving Module Methods - part two
+tag:
+---
+
+
+<p>
+	Ever write an entire blog post, spend significant time on it, correct it, and eventually 
+	grow to love it - only to discover two months later you did things the hard way?
+</p>
+<p>
+	That’s what I’ve just discovered about my post 
+	<a href="http://blog.8thlight.com/articles/2007/05/03/test-driving-module-methods">
+	Test Driving Module Methods</a>. 
+	Turns out I’d been missing an important feature of RSpec, the and_yield command. Whereas 
+	previously I had written static methods and monkey patched the SFTP, I simply could have 
+	written:
+</p>
+<!-- 
+	@mock_session.should_receive(:close_handle)
+     Net::SFTP.start.should_receive(:start).with("test_server", "user", "password").and_yield(@mock_session) 
+-->
+<p>
+	That lets me test that the session I’m passing in is getting the right parameters like any 
+	normal code, and is far cleaner. Frankly I should have added the feature to RSpec for my 
+	original solution - if it didn’t already exist that is. Too bad about my lovely blog post - 
+	I guess I’ll stick to <a href="http://blog.8thlight.com/articles/2007/06/05/no-really-we-do-that">
+	push-ups</a>.
+</p>	

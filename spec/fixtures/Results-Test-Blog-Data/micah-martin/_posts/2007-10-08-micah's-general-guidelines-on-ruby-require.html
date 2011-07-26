@@ -1,0 +1,100 @@
+---
+layout: post
+title: Micah's General Guidelines on Ruby require
+tag:
+---
+
+
+<p>
+	Ruby files have to require other files. There’s not avoiding it. Techniques to manage require 
+	statements are numerous and varied. Having tried most of them, I’ve found a system that works 
+	well for me. What follows are the guidelines I use to manage Ruby require statements.
+</p>
+<h3>1. Establish a Convenient Search Path</h3>
+<p>
+	Although it’s possible to use absolute paths or complex relative paths such as below,
+</p>	
+<!-- 
+require "/Users/micahmartin/Projects/ttt/lib/game"
+require File.dirname(__FILE__) + "../../../lib/ai/winner" 
+-->
+<p>
+	this should be avoided as much as possible. Otherwise you’ll be fixing dozens of require statements 
+	every time you move a file. It’s no fun. You’ll want your <code>require</code>s to look like this:
+</p>
+<!-- 
+require "game"
+require "ai/winner" 
+-->
+<p>
+	To achieve this, add your lib directory to the ruby search path.
+</p>
+<p>
+	$: << File.expand_path(File.dirname(<strong>FILE</strong>) + “/../lib”))
+</p>
+<p>
+	This will have to go in one of the first files that gets loaded. If you’ve got a standalone 
+	Ruby app, you could add this to the startup script. In a Rails app, it can go in environment.rb. 
+	If you’re using RSpec, you may want to add it to spec_helper.rb.
+</p>
+<h3>2. Independent Requiring over Require Farms</h3>
+<p>
+	In some projects, you’ll find files that contain nothing but <code>require</code> statements. 
+	It’s common in gem projects. The advantage is that users of the library need only require one 
+	file which in turn requires everything else you’ll need. Convenient huh? Sure is. But there are 
+	2 major consequences of this:
+</p>
+<ol>
+	<li><i>Maintenance Mayhem</i> - Every time you add, delete, or rename a file you have to remember 
+		to update the require farm file. It’s easy to forget. And the order of requires can get very 
+		hard to manage especially if you end up with cyclic dependancies.
+	</li>
+	<li><i>Drowning in Dependancies</i> - Require Farms have a tendency to require more than you want. 
+		If there’s only a portion of the library you’d like to use, with the Require Farm you get the whole 
+		thing. The extra dependancies will consume more memory at run time and they may add undesired behavior 
+		to your system. In general, this is a violation of the 
+		<a href="http://www.objectmentor.com/resources/articles/dip.pdf">Dependancy Inversion Principle</a>.
+	</li>
+</ol>		
+<p>
+	Rather than build Require Farms, allow each file to be responsible for it’s own dependancies. Let 
+	each file require the files it needs to work. This approach can be a bit annoying as you’ll find 
+	your self using altogether more require statements, but it’ll pay off in the long run. With each 
+	file independently managing it’s dependancies, the system will be easier to maintain and it’s 
+	components more reusable.
+</p>
+<h3>3. Building Absolute Paths</h3>
+<p>
+	Try as you may, you can’t always avoid using absolute file paths in your require statements. The 
+	following is reliable way to refer to other files.
+</p>
+<!-- 
+File.join(File.expand_path(File.dirname(__FILE__)), "..", "spec_helper")
+-->
+<p>Let me break it down. First:</p>
+<!-- 
+File.dirname(__FILE__)
+--> 
+<p>
+	This gives you the directory of the current file that is being executed. However, you never know 
+	what you’re gonna get since the form of the path is based on how the program was executed. This 
+	might give you an absolute path or it might give you a relative path from anywhere on the system. 
+	In some cases, Ruby won’t do what you expect with relative paths so it’s best to expand this into 
+	an absolute path.
+</p>
+<!-- 
+File.expand_path(File.dirname(__FILE__) 
+-->
+<p>
+	Now you’ve got an absolute file path and you just have to add a relative path to the desired 
+	file. Normally I’d do this:
+</p>
+<!-- 
+File.expand_path(File.dirname(__FILE__) + "../spec_helper") 
+-->
+<p>
+	However, this is not quite portable since I’m using forward slashes. To get this to work on any system 
+	independent of file separator, use <code>File.join</code> as shown above. Use this technique to require 
+	files when you don’t have your search path configured.
+</p>
+<p><i>Happy Requiring!</i></p>

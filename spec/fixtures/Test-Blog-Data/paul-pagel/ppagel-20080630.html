@@ -1,0 +1,82 @@
+<h1>Apprenticeship month one report</h1>
+<p id="author">Paul Pagel</p>
+<p id="date">2008-06-27</p>
+
+<p>
+	8th Light has an apprenticeship program whereby an 8th Light craftsman will mentor an individual for three months. 
+	During that time, the craftsperson becomes responsible for a single apprentice. I am one month into a mentorship 
+	with an apprentice. This blog is about observations I have made about myself as a mentor.
+</p>
+<h3>Curiosity</h3>
+<p>
+	He asks me questions that I wouldn’t ask myself. I had him do an exercise about 
+	<a href="http://en.wikipedia.org/wiki/Law_Of_Demeter">Law of Demeter</a>, to find Law of Demeter violations in my 
+	code base. He found something like:
+<p>
+<p>
+	Law of Demeter
+</p>
+<p>
+	“Ted Williams”.to_s.strip.upcase
+</p>
+<p>
+	He was counting the periods, which is what I explained is often good measurement of Law of Demeter violations. 
+	Yet this is not a Law of Demeter violation. Each one of those methods returns itself (a string) in a changed state. 
+	It is not a string of implementation details- this example is just changing a single object. The pivotal piece 
+	of information is that all of these methods on string return the string itself. Also, is anything inside of Ruby 
+	core language capable of Law of Demeter? It is unlikely to change, and is there a problem being coupled tightly to 
+	your language?
+</p>
+<p>
+	I sometimes get desensitized to the original premises of good development. When I first learn something, I remember 
+	the example of the rule more than the value of the rule. The value of learning about Demeter is rooted in encapsulating 
+	logic in such a way to hide implementations from an object’s clients. When I first learned about Demeter, all I could 
+	do was point out violations. The more I developed, the more it was internalized as a guide for a higher development 
+	idea. I want to keep my modules as decoupled as possible. However, that notion only came with development experience. 
+	Now I don’t think in terms of violations or non-violations of Demeter when I read a piece of code. It is just ingrained 
+	in my developmental context that I should develop my modules in such a way that they are autonomous. This weeds out most 
+	Law of Demeter violations by itself. Bringing these premises back up in my development as a craftsman gets my curiosity 
+	started. Like a good song or piece of writing, every time I come back to it, I take something different from it, because 
+	I am in a state of constant change.
+</p>
+<h3>Teaching</h3>
+<p>
+	Sometimes I forget how important teaching is to the craftsmanship model, because I am still an extreme novice at it. 
+	It is one of the steps involved with internalizing development skills. When I pair with my mentor, I am constantly 
+	amazed at how he skips steps in the development rational process. Instead of following a linear thought pattern to 
+	a solution, it seems there is a giant shortcut in the rational processes I go through. That gap is a lookup table of 
+	solutions in his head. It appears so easy and effortless. Teaching is part of a formula that has given him a 
+	development context that is superior to mine. The more I am able to teach, the more I internalize the ideas about 
+	development.
+</p>
+<p>
+	There is a 
+	<a href="http://sports.espn.go.com/espnmag/story?id=3336514&campaign=rss&source=MLBHeadlines">baseball story</a> 
+	from about a year ago. Greg Maddux was warming up before a game and his catcher exclaimed to the pitching coach, 
+	“I bet I could catch him with my eyes closed.” Well, after much effort, they convinced Maddux to give it a shot. 
+	The catcher was going to call his pitch, then close his eyes. When the ball was about to hit his mitt, the pitching 
+	coach with his eyes open was going to yell “now”, whereupon the catcher would squeeze his glove on the ball. Well, 
+	on the third try, the catcher caught the ball. The degree of difficulty of the exercise is incredible, but Greg 
+	Maddux had spent so many years internalizing the mechanics of his craft that he could effortlessly hit the catcher’s 
+	mitt. There probably are only a few pitchers in the long history of baseball who could match that exercise. I am 
+	not anywhere near that kind of skill in development, but that is my goal. When you get the mechanics of your craft 
+	to be intuition, it frees your mind to think about and solve larger problems. I have been fortunate to spend time 
+	with enough great developers to see this mastery in action.
+</p>
+<h3>Communication</h3>
+<p>
+	For me, what is special about teaching is the commitment of thoughts to sound. Forcing something outside of my 
+	internal monologue always changes it, even if it is a small change. When I explain something, I often have to 
+	explain it multiple ways (this is telling of my communication skills, not of my apprentice’s learning skills). 
+	So, the more I am forced to answer questions on the spot, the better I get at quickly thinking through a question 
+	and giving a good answer. This dialogue is another one of the mental exercises which translates into my everyday 
+	development. It makes me a better pair programmer, better presenter, and better writer. Being able to accurately 
+	explain a problem and a solution using the language of software development is a very important tool in being a 
+	successful craftsman, and a tool that I fight uphill to improve upon. When I go to a talk at a conference and the 
+	presenter hits the problem and solution perfectly, it is a wonderful experience. The same is true when a team 
+	member can explain a solution in such intuitive terms that everyone gets it immediately.
+</p>
+<p>
+	Apprenticeship for me is as much about internalizing and expanding my own skill set as it is about expanding 
+	my apprentice’s.
+</p>	

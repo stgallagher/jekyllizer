@@ -1,0 +1,45 @@
+---
+layout: post
+title: Fresh Testing
+tag:
+---
+
+
+<p>
+	Sometimes I sit down to write a test on something I haven’t worked on before or don’t know 
+	intimately, and I just can’t write the first test. I need a context of the system and a state 
+	of existing code. Then I generally do one of two things: look at how things are implemented 
+	in the code, or look at other tests that exercise similar behavior. Using either of these as a 
+	strict model to write a test is problematic to the flow of TDD.
+</p>
+<p>
+	By using the implementation code as a model, I am limiting one of the great things about TDD 
+	from the beginning, the fact the design should evolve as a byproduct of making the test pass. 
+	This TDD complacent method tends to ingrain existent design into my mind. These strict models 
+	resign to existing design, even if your story/test/problem isn’t exactly the same, just similar 
+	enough to convince you of the model.
+</p>
+<p>
+	Copy/pasting a similar test and editing is a developer mistake I commit sometimes when it looks 
+	like a freebie is being tossed at me: duplicate then abstract. It is very tempting, yet I have 
+	found it painfully regressive. Especially when the tests themselves have begun to rot, as their 
+	ability to act as developer docs are deprecated. It causes a lie in logic which is always painful. 
+	Either the debugger gets fired up or the test gets scrapped in order to handwrite anyway. 
+	Copy/pasting something which is similar is starting from a false expectation most of the time. 
+	It is more important to me to have faith in the integrity of my tests.
+</p>
+<p>
+	The most powerful TDD I see is at the beginning of a project, since there is a state of tabula rasa 
+	allowing you to move infinitely lateral. Before tests depreciates provides the best model for TDD. 
+	Test depreciation is unavoidable, as with design changes, the tests are changed with regularity to 
+	accommodate the new structures. The reason for having the tests is to have a safety net to make the 
+	code easy to change. It becomes important to keep tests “fresh” when there is already design in place. 
+	Otherwise good design appears to degrade due to over/improper use.
+</p>
+<p>
+	Handwriting a test from scratch can seem like an extra step, like reinventing the wheel. Most of 
+	the time the extra step is exactly that, an extra step, but in those cases where you are following 
+	a false model it is very expensive. It introduces the worst type of design into the system, the kind 
+	with little to no smell, but with false premises. Introducing bad design into tests or failing to 
+	maintain test code ends up introducing bad design into production code.
+</p>	

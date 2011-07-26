@@ -1,0 +1,66 @@
+<h1>Beware the Freebie</h1>
+<p id="author">Micah Martin</p>
+<p id="date">2006-09-07</p>
+
+<p>The milestones in the life of a story:</p>
+
+<ol>
+  <li>Creation: customer creates the story</li>
+  <li>Estimation: the story is estimated by developers</li>
+  <li>Selection: the story is selected for an iteration</li>
+  <li>Specification: tests are written the story</li>
+  <li>Implementation: the story is implemented to make the tests pass</li>
+  <li>Acceptance: the customer acknowledges completion of the story after seeing the 
+      passing tests and witnessing the new functionality</li>
+</ol>
+
+<p>
+  It is unavoidable. Every story must go through these milestones of life in order. A 
+  story cannot be estimated if it has not been created. A story cannot be selected for an 
+  iteration if it has not first been estimated. You can attempt to specify a story before 
+  it has been selected but you run the risk of being wrong, for the system may change many 
+  times before the story is selected. Implementing a story before it has been specified will 
+  lead to false implementations. And accepting a story that hasn’t been implemented is just 
+  plain silly.
+</p>
+
+<p>
+  It happens with some frequency, however, that a story gets implemented before it is ever 
+  selected, estimated, or perhaps even created. How? A developer may be look at a piece of 
+  code and think, “Hey, the customer mentioned he wanted to change this doohickey. I might as 
+  well change it now.”. Or a developer may working on one feature and say, “You know, I bet the 
+  customer would really like it if I improved this thing-a-magigger”. When this happens, the 
+  developer pridefully demonstrates the extra functionality to the customer and says with a 
+  smile, “You got a Freebie this iteration!”.
+</p>  
+
+<p>
+  BEWARE THE FREEBIE! A Freebie, by it’s nature, has skipped at least one milestone in it’s 
+  life. Most Freebies skip the Selection milestone. This is unfortunate because maybe the 
+  customer didn’t really want that story after all. But that’s small potatoes compared to the 
+  real danger… Almost all Freebies have skipped the Specification milestone.
+</p>
+
+<p>
+  Skipping the specification milestone is blasphemous. If a feature has not been specified 
+  with tests, how do you know it really works? Worse, how will you know if it still works 2 
+  months from now. Very often Freebies break and nobody knows about it.
+</p>
+
+<p>
+  I’ve seen it over and over and it’s regrettable every time. A perfectly innocent story is 
+  wronged by an overzealous developer. The poor story, out of sync from his peers, strays from 
+  the trodden path and becomes a Ghost Story. Becoming a Ghost Story is dreadful fate. They are 
+  those stories that were at one time complete, but have since become incomplete. You may never 
+  actually see a ghost story but they will surely haunt you. They cause users to have delusions 
+  of non-existant functionality and to make exclamations like “Hey! Why doesn’t this stupid app 
+  work like it used to?” or “What happened to my favorite feature?”. They keep customers up at 
+  night wondering if they actually selected the Ghost Story for an iteration of not. They torment 
+  developers forcing them to write code they’ve already written.
+</p>  
+
+<p>
+  Avoid Ghost Stories by avoiding Freebies. Give every story a complete life with all it’s 
+  milestones. The next time a developers shows you extra functionality and calls it a Freebie, 
+  say “That’s nice. I’ll consider selecting a story for that in a future iteration.”
+</p>  

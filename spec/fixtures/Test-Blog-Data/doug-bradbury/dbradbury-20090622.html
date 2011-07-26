@@ -1,0 +1,44 @@
+<h1>Meta-programming Comes Naturally to Intern</h1>
+<p id="author">Doug Bradbury</p>
+<p id="date">2009-06-22</p>
+<h2>
+  We have a couple of interns in the office this summer.  They are kind of like Jr. Apprentices 
+  - distinguished mostly by the fact that they are in school and will be returning to school 
+  in the fall.  I've been working with Andrew this summer.  He just finished his Sophomore year 
+  of High School and is just learning to program.  He's been working through a couple of ruby 
+  tutorials:  Chris Pine's <a href="http://pine.fm/LearnToProgram/">Learn to Program</a> in Ruby 
+  and the ever-so-entertaining-especially-for-a-high-schooler 
+  <a href="http://poignantguide.net/ruby/">Why's Poignant Guide to Ruby</a>.
+</h2>
+<p>
+  He was working on the <a href="http://pine.fm/LearnToProgram/?Chapter=09">Orange Tree</a> 
+  example for Pine's tutorial.  He had the class written and want to write a command line 
+  interface to it.  This was what he tried to do.
+</p>
+<script src="https://gist.github.com/1052087.js?file=dbradbury-20090622-1.rb"></script>
+<p>
+  "What are you trying to do Andrew?"
+</p>
+<p>
+  "I want to get a command from the user and call that command on the tree object."
+</p>
+<p>
+  Now I had expected that Andrew would write a big if-else chain comparing strings and calling 
+  methods. In my mind that's what a beginning programmer should learn. I learned to program in C++ 
+  and that's the way I had to do it! I wasn't even sure that we would even touch meta-programming 
+  this summer.
+</p>
+<p>
+  But I had a second thought. "Why not show him some Meta Programming now?" I don't want to be 
+  responsible for destroying the future career of an aspiring programmer, but what the heck? How 
+  much damage could it possibly do?
+</p>
+<p>
+  So I explained to Andrew how methods in Ruby aren't really methods, they are messages and how 
+  you can "send" a message to an object. We modified his program to do what he wanted.
+</p>
+<script src="https://gist.github.com/1052087.js?file=dbradbury-20090622-2.rb"></script>
+<p>
+  I'm not sure that he completely understood all that, but there it is. Ruby let Andrew do the 
+  thing that he naturally wanted to do.
+</p>

@@ -1,0 +1,109 @@
+<h1>Lost in Portland, and Thinking</h1>
+<p id="author">Eric Smith</p>
+<p id="date">2007-05-20</p>
+
+<p>
+	Did I say I was tired yesterday? That wasn’t tired, <i>this</i> is tired. I’m currently training 
+	for the marathon, and today I was scheduled for a 13 mile run. Sadly marathon training does not wait 
+	for RailsConf so I was up at five this morning, viewing the fair city of Portland. Say what you will 
+	about running, but it’s a great way to see a new city.
+</p>
+<p>
+	It’s also a great way to get lost. I used the great website at USA track and field where people post 
+	their runs in order to find a place to go and promptly wrote down a street name incorrectly. I ended 
+	up wandering around Portland’s lovely Willamette river, which fortunately provides a great landmark 
+	for a poor lost tourist. This led to running, and running, and running…and finally a Runners High.
+</p>	
+<p>
+	Runners High is a phenomenon cause by your brain releasing endorphins, as a defense mechanism against 
+	the way your body feels. When I run my brain feels extremely active, and jumps from topic to topic 
+	making associations, breaking down problems, etc. It’s not unheard of for me to fix a bug I’d been 
+	struggling with while on a run, in a sudden burst of insight. Today, when I wasn’t wondering where 
+	the hell I was, I started thinking about quite a few things one of which is related to the new IDE’s 
+	being developed and the barrier to entry on Rails. Bear with me because this is a little out there, 
+	and I haven’t quite figured out how to articulate the concepts.
+</p>
+<p>
+	Right now Ruby and Rails are still strange and unusual things to most developers. When introduced to 
+	the language they want an IDE, and upon hearing there is no visual debugger or that they have to use 
+	Textmate, Eclipse or god-forbid emacs they turn away. They stick with Java or C++ and wizards and 
+	comfortable development, and will wait until they need to use Ruby.
+</p>
+<p>
+	Then one day their boss hears about Rails. They tell the developer, ‘you should be using this!’ and 
+	so he goes and he gets an IDE, real slick one with lot’s of bells and whistles. He goes to generate 
+	a model - only he doesn’t use script/generate. He uses a wizard, he sees he can add his methods and 
+	data members right there, so he does. Test? What test? Then he goes to the controller and has his 
+	controller manipulate the data all day, and develops a view in a WYSIWYG editor. He spends all day 
+	in the debugger, and his methods get bigger and bigger. Of course that’s no big deal, because he 
+	uses cold folding to hide their size. Then testers write Test::Unit code to test his code, and he’s 
+	done, because developers don’t test. Meanwhile we’ve all left Ruby because, “so much of the code is 
+	crap.” Haven’t we done this cycle before?
+</p>
+<p>
+	Chad Fowler described us as arrogant in the introduction, and clearly if you look above we are. I 
+	say we because nobody reading this had a problem with my rant, so you’re just as arrogant as I am. 
+	Caught you. We think we’re smarter than everybody else don’t we? Actually I don’t and most of you 
+	probably don’t either. I just know that there is a right and wrong way to do things, and so does 
+	Rails. That’s why it’s so opinionated. An attendee, 
+	<a href="http://jackcanty.com/">Jack Canty</a>, put it better than I can by saying “Rails is 
+	opinionated, and this takes away those opinions.”
+</p>
+<p>
+	So how do we fix it? Well let me steal some of Micah’s DSL thunder by using an analogy I 
+	thought of while running. It’s morning, and you want a coffee. So you go to a certain 
+	ubiquitous chain and say, “I’d like a big coffee please,” only said ubiquitous chain doesn’t 
+	have big. They have Tall, Grande and Venti. If you do this there will be a noticeable pause 
+	while the guy behind the counter takes a second to think about what you just said. He’s not 
+	a moron, take off his green smock and he knows what a big coffee is, but he’s got to translate 
+	it. What’s big - is it grande? Venti? That’s because you’re not speaking his language. You 
+	eventually do get your coffee, because he can figure out what you mean, but it takes just a 
+	little bit longer. While you wait in line you hear other people say, “I’ll have a grande 
+	half-caf no-foam latte,” and the guy behind the counter immediately repeats it. Eventually 
+	you learn the language they speak, and you get your coffee just a little bit faster. You’ve 
+	adapted to the idioms of the coffee shop, and you’ve been rewarded for it.
+</p>
+<p>
+	So what the heck does that have to do with code? I kind of gave it away by using the phrase 
+	idioms, didn’t I? Well let’s say you’re a C++ programmer and you start on Ruby. You don’t 
+	write Unit Tests, which despite what we sometimes think most developers do NOT do, and you 
+	sit down to iterate through an array. So you write:
+</p>
+<!-- 
+index = 0
+while index < array.length do
+  puts index
+end 
+-->
+<p>
+	Much like ordering a big coffee at the Green Angel, that will work, but it’s completely incorrect. 
+	It’s not speaking Ruby even if it’s in the Ruby language, and unfortunately I believe that if we 
+	do not work hard to enforce and teach the best practices of the Rails and Ruby ways, we will 
+	witness this kind of thing propagated. I’ve done the C++ without test thing and lived in the 
+	debugger, and it drove me nuts. Unfortunately <i>many developers don’t think anything is wrong 
+	with that</i>. If they did they’d be here already. That’s what programming is to them. The 
+	good news is that we are the early adopters, and when they come around they will adapt to 
+	our rules but only if we make them. Remember what I said about the pause at Starbucks? Well 
+	the code above won’t pause. Ruby will execute it just as nicely as anything else, and maybe 
+	it shouldn’t, I’m not sure. What I do know is that the IDE’s now being created should not be 
+	catering to the developer that wants to do the things the way they’ve always done them. 
+	Instead of opening ‘choices’ up and making things ‘easier’, our IDEs should enforce the 
+	opinions of Rails. You see the late adopters aren’t lazy, or stupid, they’re just being 
+	rewarded improperly. If it’s easy to make a model without tests, they’ll make one, even if 
+	they are hurt by it later on. They’ll even stay until 1 AM to debug it, and their boss will 
+	think ‘gosh this Rails thing isn’t so great after all, thank God my programmers are so 
+	dedicated.’ Fortunately we control this. There’s a reason the IDE makers are here, and that’s 
+	because they know that late adopters ask the early adopters what they use. Tell the IDE 
+	makers that you want an IDE that does not allow bad habits. I want an IDE that is integrated 
+	with subversion, but I also want it to yell at me if I have untested code, and run ZenTest. 
+	If it gives me a wizard the first question it should ask is “what is the name of the test?.” 
+	Instead of code folding to hide bad code, it should identify refactoring opportunities. 
+	Finally, I’m not sure I even want a debugger. Debugging sucks, and it’s a crutch. I can test 
+	behavior rather than step through it and look at it. I realize people do want debuggers, I 
+	just worry for the day when Rails code can’t be properly understood without stepping through it.
+</p>
+<p>
+	Tell the IDE developers that you want an IDE that helps create good code, not easy code. If 
+	they don’t do that, then when developers ask you what you use say emacs. If the developer 
+	still turns away, we probably aren’t losing much.
+</p>	

@@ -1,0 +1,137 @@
+---
+layout: post
+title: International Craftsman Swap Day 3
+tag:
+---
+
+
+<!-- image description
+Got Ruby?
+-->
+
+<p>
+  After attending tonights got:ruby I became obsessed with and started installing rvm. 
+  It worked swimmingly, and I’m looking forward to getting my development machine off 
+  of the embarrassingly low version of Ruby and experimenting on the latest versions 
+  without (unintentionally) screwing up my production environment. Indeed after this 
+  week I’ve got a lot to google, lookup, and research. I’ve decided I have got to get 
+  good at JQuery - probably using it on a small Rails 3 project in the near future - and 
+  learned that Jasmine has it all over ScrewUnit. This may mess up my Haskell plans - 
+  not that I’ve ever messed that up before. After that we played a lot of ping-pong, 
+  then I decided to clean up my hard drive, because it was really time. Then I realized 
+  if I’m gonna do this project as Rails3, I better make sure I can deploy it on dreamhost 
+  with bundler.
+</p>  
+
+<p>
+  If this sounds like procrastinating it’s cause it is. I also checked email, read Anders’ 
+  blog on the elabs.se site, and watched some of Germany beating Ghana. None of this is 
+  writing the blog post and that’s because today’s blog post is going to be hard. Let’s 
+  get this out of the way first. Today was another great day at ELabs. With my Jet Lag 
+  finally kicked I really was able to contribute, using a couple ideas we’ve had before 
+  on 8th Light projects to get some cool work done on the project I’ve been working on this 
+  week. I even wrestled for the keyboard a bit (although they have two keyboards - so it was 
+  lonely, I wrestled with Pixie) then we topped it all off a cool Ruby user group meeting. 
+  The meeting was last minute, so they had lightning talks where CJ talked about Bundler and 
+  rvm, Jonas talked about a Javascript testing plugin he’s working on, we puzzled over a 
+  problem one of the other developers was having and even looked at Omni Graffle. Now that 
+  I’m awake the ELabs guys had to suffer my jokes like the 8th Light guys do all the time. 
+  Now they know why they sent me out of the country.
+</p>
+
+<p>
+  What’s been really nagging at me has to do with the way that the ELabs boys work. See 
+  they are what Brian Marick would call “classicist” TDDers - they essentially never use 
+  mocks. I on the other hand generally mock out a lot. What Jonas said to me was, and I’m 
+  going from memory here, “I’d rather the tests run slow than be right.” Of course taken as 
+  stated, this is a truism. Nobody is voting for slow tests, although I might argue that the 
+  tests that verify correctness are often different than unit tests, and that unit tests are 
+  verifying a different thing. Aside from speed mocks provide value in designing apis by 
+  letting you design it with a client using it, before the object itself exists, and in thinking 
+  of systems as objects passing around messages you can really focus on their interactions 
+  instead of the implementation details. Mocks lead to a cleaner design all told….except….
+</p>
+
+<p>
+  Except I usually stub out things for speed. Objects I’m stubbing are webservices, database 
+  objects, file access, etc. And in the best cases the benefit I get is speed, and in the worst 
+  cases I get a tangled mess of mocks where my code and tests are coupled, but nothing necessarily 
+  works. I’ve completely traded speed for correctness. Why is that? Why am I not getting all 
+  the purported benefits of mocking.
+</p>
+
+<p>
+  In a related note on the way here I started reading “growing object oriented software, guided 
+  by tests” by Steve Freeman and Nat Pryce. In a throw away comment they say, “Never mock out 
+  third party API’s, write thin classes that wrap those with integration tests, and mock out 
+  your objects interaction with those classes.” Now maybe you think you haven’t done this, but 
+  let me give you some typical examples of mocks:
+</p>
+
+<ul>
+  <li>IO.stub!(:read).and_return(mock_file)</li>
+  <li>ActiveRecord.should_receive(:find).with(1)</li>
+</ul>
+
+<p>
+  Well look at that - those are two third party API’s aren’t they? And they are often mocked 
+  out everywhere! Trading speed for correctness again. “Okay fancy boy”, you’re saying - and 
+  really why are you calling me that, “Then we shouldn’t use mocks. Problem solved.” Not so fast. 
+  Have you ever had the problem where you are testing that an object gets saved and you do this:
+</p>  
+
+<p>
+  object.should_receive(:update_attributes).with({:my => value})
+</p>  
+
+<p>
+  but then you think, “Gosh I really don’t care how they save the values, I just care that it 
+  gets saved.” Right now you have to call update_attributes to make this pass, but you could call 
+  update_attribute, or set the object and save!, or hell use SQL although you shouldn’t. This makes 
+  for a crappy test - one you’re likely to break then fix later instead of changing in the deliberate 
+  process of TDD. What if instead you did this:
+</p>
+
+<p>
+  object.should_receive(:update_my_value_to).with(value)
+</p>  
+
+<p>
+  Of course the other things are still true - assuming it’s an active record object, but maybe 
+  it’s not. Maybe it’s a wrapper around it, or maybe it’s datamapper object, I don’t really don’t 
+  care. I’ve gone ahead and mocked this call because that’s the call I really want to see - and 
+  somewhere else I’ve test driven that call against the database. Now let’s imagine you’ve got 
+  more complicated scenarios. Ever done this?
+</p>
+
+<p>
+  object.should_receive(:get_this).and_return(object2)
+  <br>
+  object2.should_receive(:is_true?).and_return(false)
+</p>
+
+<p>
+  This is a simple example - but I’m sure you’ve seen worse. The problem is again that you really 
+  need one method, maybe two, but you probably figured out in your head the algorithm beforehand, 
+  then test drove it. Maybe you know if object2 was true you needed to set unrelated object3’s flag 
+  - so you started writing those tests. Let’s look at that rule again though - don’t mock a third 
+  party API. Well what defines a third party API? Is it a third party if another company wrote it? 
+  How about the same company - but on a different project? Or the same project but a long time ago? 
+  Or YOU six weeks ago and you forgot it. Isn’t it a third party API again? What’s the difference? 
+  Should you then mock out objectnew - and test drive it with real objects? Because it’s pretty 
+  clear the API you want doesn’t exist yet, and that’s the crux of my long wrambling argument that 
+  I’ll probably better express and codify when it’s not late and I’m not tired:
+</p>
+
+<h3>Stop mocking the API you already have - mock the API you need</h3>
+
+<p>
+  And then if by chance it matches the API you already have - by all means just substitute the 
+  real object in. But write the implementation with mocks first - without using any real API unless 
+  it matches coincidentally. Pretend the object doesn’t exist yet, and then mock. And maybe then 
+  you’ll get what you’re looking for.
+</p>  
+
+<p>
+  Eh - or maybe I should go write some Javascript.
+</p>

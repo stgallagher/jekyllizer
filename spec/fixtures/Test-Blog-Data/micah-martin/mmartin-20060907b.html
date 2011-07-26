@@ -1,0 +1,184 @@
+<h1>Buffer to the Rescue</h1>
+<p id="author">Micah Martin</p>
+<p id="date">2006-09-07</p>
+
+<p>
+  Recently I was working on FitNesse to solve the problem of large file uploading 
+  and downloading. Previously when a file was downloaded FitNesse would happily 
+  build a response in memory including the entire contents of the file. If the file 
+  being downloaded was 10k then the response was just over 10k and if the file was 
+  10M then the response was just over 10M. With larger files FitNesse would run 
+  out of memory before it could finish building the response. Similarly, when 
+  uploading large files, FitNesse would attempt to read the entire uploaded file 
+  into memory.
+</p>  
+
+<p>
+  For downloading the solution was to build a response that used an InputStream 
+  to read a few bytes at a time and write them. That was simple. For uploads a similar 
+  approach had to be taken where the uploaded file is read in a few bytes at a time an 
+  saved in a temporary file. But reading the uploaded file from the request was a very 
+  interesting problem. Here is a sample HTTP request for a file upload:
+</p>
+
+<!--
+>POST /files/ HTTP/1.1
+Content-Type: multipart/form-data; boundary=----------x0xKhTmLbOuNdArY
+Content-Length: 273
+
+------------x0xKhTmLbOuNdArY
+Content-Disposition: form-data; name="responder"
+
+upload
+------------x0xKhTmLbOuNdArY
+Content-Disposition: form-data; name="file"; filename="sampleFile.txt"
+Content-Type: text/plain
+
+This is a sample file.
+------------x0xKhTmLbOuNdArY--
+-->
+
+<p>
+  Notice that this is a multipart request and the parts are separated by bunch of 
+  characters called a boundary. The first part is called <b>responder</b> and has the 
+  value <b>upload</b>. This tells FitNesse that the user wants to upload a file. The 
+  second part is the file. It’s name <b>sampleFile.txt</b> and its content is <b>This is 
+  a sample file..</b> Notice that there is no indication of the length of the file content. 
+  The Content-Length header says that the body of the request has 273 bytes but that 
+  includes all the parts. FitNesse has to read this request one or more bytes at a time 
+  without reading even one byte too many. Think about how FitNesse should read that file 
+  content. We know that it starts just after <b>Content-Type: text/plain</b> and ends 
+  just before the boundary <b>(————x0xKhTmLbOuNdArY)</b> but we don’t know how long it 
+  will be.
+</p>  
+
+<p>
+  The original implementation for reading the file content looked something like this:
+</p>
+
+<!--
+public void read(InputStream input) throws Exception
+{
+    int b = input.read();
+    if(b == -1)
+        changeState(FINAL_STATE);
+    else
+        bufferByte((byte) b);
+
+    if(bytesEndWith(bufferIndex, bufferedBytes, boundary))
+    {
+        bufferIndex -= boundary.length();
+        changeState(FINAL_STATE);
+    }
+}
+
+public static boolean bytesEndWith(int index, byte[] bytes, String boundary)
+{
+    int boundaryLength = boundary.length();
+    if(index >= boundaryLength)
+    {
+        String subString = new String(bytes, index - boundaryLength, boundaryLength
+        return boundary.equals(subString);
+    }
+    else
+        return false;
+}
+-->
+
+<p>
+  This code, though plagued with two significant problems, served it’s purpose well in 
+  production use for almost two years. The first problem is it’s blatant inefficiency. 
+  For every byte it reads allocates a new String object, copies N bytes into the new String, 
+  and performs a String.equals(…). This would take forever for large files but it never gets 
+  the chance because the second problem is that it stores the file contents in memory and 
+  it runs out of memory for files larger than 2M.
+</p>
+
+<p>
+  So I began to change the code to copy the bytes to a temporary file instead of storing 
+  them in memory. This presented another problem. The code above stops reading after it reads 
+  the last character of the boundary. This side effect left all the uploaded files ending with 
+  the boundary characters. So the I had to change the algorithm so that it only saved a given 
+  byte if it was not part of the boundary, all the while not reading one byte past the boundary. 
+  This was a fun problem to solve and I’ll leave it up to the reader to figure it out.
+</p>
+
+<p>
+  Then it worked!. I uploaded a 1k file…. Perfect! 1M file… no problem. 10M file… chug chug 
+  done. It worked! These were bigger files than FitNesse could ever upload before. I started 
+  to search my hard drive for bigger and bigger files to upload. I zipped up a Norah Jones 
+  album of MP3s into a 55M file and tried to upload it…. chug chug chug chug… chug chug… nothing 
+  was happening. Hmmmph. This was strange. After some unsuccessful investigation I decided to put 
+  some debugging print statements. At one second intervals it printed the number of bytes that it 
+  copied from the uploaded file. Here’s what I got.
+</p>
+
+<!--
+1: 186111
+2: 406326
+3: 614362
+4: 832503
+5: 1055980
+6: 1276115
+7: 1498393
+8: 1718883
+9: 1939458
+10: 2159426
+11: 2383254
+12: 2606731
+13: 2831223
+14: 3055475
+15: 3278818
+16: 3502605
+17: 3727047
+18: 3951934
+19: 4175221
+20: 4397783
+...
+-->
+
+<p>
+  After a minute my browser, Safari, got tired of waiting. It would cancel the request and send 
+  it again. I suppose if it was patient or another browser was used it would successfully upload 
+  the file after a few minutes. But what gives? I was uploading the file from my laptop, to my laptop. 
+  Why the heck was it copying the bytes so slowly. I figured it must be the algorithm for finding the 
+  ending boundary of the file contents. After all it was reading one byte at a time and performing 
+  comparisons for each byte. Considering that there were 54818697 bytes in the file, that’s a lot 
+  of work. So I pulled out my microscope and tweezers to fine tune and optimize the algorithm. After 
+  about an hour I felt confident that I had significantly improved the performance so I tried to 
+  upload the file again. … I was disappointed to see that there was no significant difference. I tried 
+  again to optimize it…. no improvement. I tried again. In fact I work all evening, slept on it, and 
+  continued the next morning. Nothing I did seemed to improve the speed of the upload.
+</p>
+
+<p>
+  Boy was I huffed. What was I doing wrong? I knew that the upload shouldn’t take nearly as long yet 
+  nothing I did improved the speed. I went out on the balcony to enjoy the landscape of southern France. 
+  The scenery there is soothing. Gentle mountains meet the sky to create an intricate horizon where you 
+  can see in the distance tiny man-made structures silhouetted atop hills and cliffs.
+</p>  
+
+<p>
+  Then, like the sun shining in the night sky, the solution hit me. There was nothing wrong with my 
+  algorithm except that it was reading one byte at a time. Of course! It was the hardware. Each call 
+  to read() goes to the hardware and it’s the hardware that so damn slow! After decorating the 
+  InputStream with a BufferedInputStream it worked like a well oiled machine. The upload speed was 
+  almost 20 times faster. See the timed results below.
+</p>
+
+<!--
+1: 3695256
+2: 7848677
+3: 11930853
+4: 16097509
+5: 20253106
+6: 24413788
+7: 28577127
+8: 32724919
+9: 36883849
+10: 41037989
+11: 45198658
+12: 49365492
+13: 53519640
+done copying: 54818697
+-->

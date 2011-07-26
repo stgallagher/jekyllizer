@@ -1,0 +1,22 @@
+<h1>Want clean code? Stop using the editor.</h1>
+<p id="author">Eric Smith</p>
+<p id="date">2007-12-21</p>
+
+<p>
+	Recently I was adding some accessors to a ruby class on the fly, and I kept getting confused by 
+	this block:
+</p>
+<!-- eval <<-eof def> -->
+<p>
+	The code isn’t particularly complicated, just creating a quick accessor to get at the underlying 
+	hash. Yet I had a couple bugs simply because without the editor to give me hints, the code was 
+	that much harder to follow. This turns out to be a blessing in disguise, as I am forced to write 
+	extremely clean code just to keep from confusing myself. Opening up the String class cleans this 
+	up a bit, and removes duplication:
+</p>
+<!-- eval <<-eof def> -->
+<p>
+	There much better. So the next time you think your code isn’t as clear as it could be, or maybe 
+	if you think it’s perfect, try reading it without any syntax highlighting. If you can still follow 
+	it quickly and easily, then maybe it doesn’t entirely suck.
+</p>	

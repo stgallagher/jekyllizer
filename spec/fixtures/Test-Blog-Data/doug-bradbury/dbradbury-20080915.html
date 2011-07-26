@@ -1,0 +1,92 @@
+<h1>Own Your Tools</h3>
+<p id="author">Doug Bradbury</p>
+<p id="date">2008-09-15</p>
+
+<p>
+	I spent a lot of time with my grandpa growing up. He has spent much of his retirement ‘fooling 
+	around’ in a workshop he built on his slice of Pike County, Illinois farmland. From a very early 
+	age I spent a lot of weekends and entire weeks of the summer as Grandpa’s little helper. I’d work 
+	on the things he was working on while helping and learning. When I was about 7 years old, I was 
+	helping Grandpa refinish a dresser. I had a flat paint scraper in my little hands and was trying 
+	to dig into the layers of flaking paint that gripped the dresser. I really didn’t have the strength 
+	to get under the paint with that big blade, so I turned the tool on edge and started scratching 
+	deeply into the wood. I was making progress now, but tearing the heck out of the surface. Now in 
+	Grandpa’s version of this story, he says that when he saw what I was doing he corrected me too 
+	harshly and sharply and later found me teared up in a corner of the workshop sorry for what I’d 
+	done. I honestly don’t remember being that hurt by his rebuke, but I do know how to use a paint 
+	scraper and dozens of other tools properly because of that time I spent ‘helping’ grandpa in his 
+	shop.
+</p>
+<p>
+	As software crafts-people our tools are other bits of software. We spend every minute of every day 
+	using software. Our editors, compilers, interpreters, source code repositories, IDEs, debuggers, and 
+	test frameworks enable every stage of our work. Everything we do to create and add value to a software 
+	project requires some other software tool to make it happen.
+</p>
+<p>
+	At many of the places I’ve worked, the developers have a laundry list of complaints about their software 
+	tools. Often, teams develop elaborate rituals and incantations to dance around the shortcomings of their 
+	tools. “Before you check in, copy this file over there then add a note to that file then spin around in 
+	your chair three times and your check-in should succeed.” Now I agree that there are lots of poorly 
+	designed tools out there. Some tools do things that just don’t make sense and others crash all the time, 
+	but I have a challenge for us as software crafts-people: Own your tools. Tools are software, you are a 
+	software crafts-person. You can find or make a tool to do anything you need.
+</p>
+<p>
+	Groups decide to invest in a tool, often at great cost, but very few people end up understanding or even 
+	using the tool. The tools usually gets blamed for its shortcomings before anyone has really made the effort 
+	to get them to work. They give up on it far to early. Own your tools. Understand everything it can do, and 
+	if it isn’t enough, find a way to make it do what you want.
+</p>
+<p>
+	One of the cool things that happens is that investing time in your tools may give you the chance to 
+	explore a new language. One of our goals as craftsmen at 8th Light is to learn a new language every year, 
+	but often its hard to justify the time spent in a new language when you are heads-down in a project. Using 
+	a new language to create a tool for yourself may give you just the excuse you need to spread out a bit and 
+	learn something new.
+</p>
+<p>
+	Is it really worth it? Can the time spent writing “non-production” code really be justified? Let’s take a 
+	task, say the creation of a new class in C++. Most people when creating a new class, will open up the last 
+	class they worked on, copy the entire thing, paste it into a new file, delete all the methods and data, 
+	then do a find/replace on the class name. There are probably a few comments that need editing, the revision 
+	history needs to be cleaned out and maybe there is a comment header or footer that needs to be updated. 
+	This entire process could take maybe 2 minutes. It hardly seems like it’s worth automating. Except … Wait! 
+	It won’t compile, because you mistakenly didn’t remove the parameters from the constructor and the compiler 
+	can’t resolve the dependencies. This is a manual process, so it’s error prone. So you spend maybe another 
+	3 minutes getting the thing to compile. Then we need a test harness so you do the same copy, paste, delete, 
+	find / replace process. 8 minutes later we have a new class and test harness and we are ready to start 
+	working. The hour or so investment to build a tool for yourself will surely be worth it now. If you share 
+	your work with the rest of your team and suddenly everyone is saving 8 minutes every time a new class is 
+	generated, you might have your hour back by the end of the week.
+</p>
+<p>
+	Some IDEs and editors have some class generation utilities for you. This may get you part of the way there, 
+	but it probably won’t put your company’s header on the top or put in your source control keywords. It may 
+	not make your destructor virtual or create a private copy constructor to start like I like to do. The tool 
+	doesn’t do exactly what you want. Own your tool. You are a software craftsmen. You can create software that 
+	generates a class for yourself. If you are in an editor that supports macros or bundles, you may be able to 
+	implement the tool in the editor’s macro language.
+</p>
+<p>
+	In this spirit, the craftsmen at 8th light have contributed to open source software tool projects for 
+	several years. Micah is the author of the widely used <a href="http://www.fitnesse.org/">Fitnesse</a> 
+	acceptance test framework and Eric has taken over the management of 
+	<a href="http://seleniumhq.org/projects/on-rails/">Selenium on Rails</a>. Micah’s also been 
+	working on a whole new development framework called 
+	<a href="http://limelight.8thlight.com/">LimeLight</a>. We love open source tools because they let anyone 
+	own the tool.
+</p>
+<p>
+	Grandpa used to make things out of sliced walnuts. He’d glue together little baskets or crosses and fill 
+	the walnut cavities with colorful beads. As you can imagine, a walnut is a pretty difficult thing to slice. 
+	At the very least it’s awfully dangerous to get your fingers that close to a band saw. Grandpa showed me 
+	a while ago the tool that he made to save his lower digits. It’s a pretty simple block of wood with a 
+	half-walnut sized divot carved out of it. It was a woodworker using his woodworking skills to create 
+	(and own) a tool for woodworking.
+</p>
+<p>
+	If you’d like my class generator, you can have it 
+	<a href="http://blog.8thlight.com/files/NewClass.zip">here</a>. Chances are, it won’t do exactly what 
+	you need it to do, so … own your tool.
+</p>

@@ -1,0 +1,157 @@
+---
+layout: post
+title: A Tale of Two Forms (Part 2)
+tag:
+---
+
+
+<p>
+  Last week, I wrote a 
+  <a href="http://blog.8thlight.com/articles/2011/4/14/marking-up-a-semantic-form">brief article</a> 
+  that demonstrated how to build a form with well structured, semantic markup. In that article, I started 
+  with a form built using HTML table elements and converted it to a form built with lighter weight divs 
+  and form specific elements. To recap, we were left with a form that looked like this:
+</p>
+<p>
+  <a href="http://www.flickr.com/photos/rocketspops/5619548335/" 
+     title="semantic-form by rocketspops, on Flickr">
+  <img src="http://farm6.static.flickr.com/5068/5619548335_3e6de77879_o.png" 
+       height="400" 
+       alt="semantic-form" 
+       width="600" 
+       style="border:1px solid #dddddd; margin:20px 0;">
+  </a>
+</p>
+<p>
+  The main point of last week's article was to demonstrate that semantic HTML and CSS could be used to create 
+  a form identical in appearance to one built using tables, which lend an inherent structure at the expense of 
+  accessibility and maintainability. Of particular note last week was that both forms used the same amount of 
+  CSS, which I know came as a surprise to a number of my developer colleagues. You can 
+  <a href="https://gist.github.com/920320">review last week's semantic form markup</a>.
+</p>  
+<p>
+  And while this conversion represented a step in the right direction, we can take the transformation of our 
+  original "tabular" form further by making it even more accessible and usable. To do this, we'll add a few 
+  more descriptive HTML elements and attributes.
+</p>
+<h3>Attributes to make your forms <i>more</i> accessible</h3>
+<p>
+  The "semantic" form we created last week really did the bare minimum as far as accessibility was concerned. 
+  By including few special HTML form attributes in our markup, we can grab some low hanging fruit and instantly 
+  improve the accessibility of our form. It's a great first step. Here's how:
+</p>
+<ol>
+  <li>
+    For those users who have difficulty using a mouse, we can make it possible to navigate, interact with, and 
+    complete our form using only the keyboard. The two attributes that will aid with this are 
+    <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.11.2">accesskey</a> and 
+    <a href="http://www.w3.org/TR/html401/interact/forms.html#adef-tabindex">tabindex</a>.
+  </li>  
+<!--
+<input accesskey="f" name="first-name" tabindex="1" type="text">
+view rawkeyboard-attributes.htmlThis Gist brought to you by GitHub.
+-->
+<p>
+  <i>Accesskey</i> will allow users to activate the :focus state of any input using its associated value in 
+  combination with a browser specific key combination. In the above example, one could trigger the first name 
+  field in Chrome by typing: ctrl + option (alt) + f. We can clue users into this possibility by wrapping the 
+  appropriate character in a span tag and styling it a little differently, like so:
+</p>
+<p>
+  <a href="http://www.flickr.com/photos/rocketspops/5641004198/" 
+     title="Screen shot 2011-04-21 at 10.59.00 AM by rocketspops, on Flickr">
+  <img src="http://farm6.static.flickr.com/5149/5641004198_dfb606a0fe_o.png" 
+       height="50" 
+       alt="Screen shot 2011-04-21 at 10.59.00 AM" 
+       width="377"></a>
+</p>
+<p>
+  By ordering our inputs correctly using the tabindex attribute, we can insure that users will engage with 
+  our form's inputs (or the elements on the rest of our webpage for that matter) in the correct order as they 
+  press the tab key. This becomes increasingly important as forms become complex.
+</p>
+  <li>
+    <a href="http://www.w3.org/TR/wai-aria/">WAI ARIA</a> role attributes offer a semantic way for us to layer even 
+    more meaning into our form attributes. According to the W3: <i>"These semantics are designed to allow an author 
+    to properly convey user interface behaviors and structural information to assistive technologies in document-level 
+    markup."</i> Using predefined roles, we can be ultra-specific about the intent of our HTML elements. In turn, 
+    this will help screen readers and other assistive devices enable impaired users to complete our forms. Implementing 
+    these roles is simple:
+  </li> 
+<!-- 
+<form role="form">
+<input role="input" type="text">
+view rawroles.htmlThis Gist brought to you by GitHub.
+-->
+</ol>
+<ol>
+  <li>
+    <h3>Attributes to make your forms <i>more</i> usable</h3>
+    <p>
+      It should come as no surprise to you that most people don't like filling out forms, which makes it hugely 
+      important that you reduce the amount of friction involved in filling them out. Luckily, there are a few 
+      HTML attributes (some specific to HTML 5) we can use, with little cost, to enhance the usability of our 
+      forms:
+    </p>  
+      <a href="http://www.flickr.com/photos/rocketspops/5641081138/" 
+         title="Screen shot 2011-04-21 at 11.34.02 AM by rocketspops, on Flickr">
+      <img src="http://farm6.static.flickr.com/5145/5641081138_b001a7d899_o.png" 
+           height="60" 
+           alt="Screen shot 2011-04-21 at 11.34.02 AM" 
+           width="372">
+      </a>
+  </li>  
+  <li>
+    The HTML 5 
+    <a href="http://dev.w3.org/html5/spec-author-view/common-input-element-attributes.html#the-placeholder-attribute">
+      placeholder</a> attribute allows us to leave visible hints about how to complete a particular input. This comes in 
+      especially handy in situations where there might be a number of different ways to complete a field, like when asking 
+      for a user's phone number. Using the placeholder attribute, we can alleviate confusion, uncertainty and frustration 
+      by providing an upfront example for how we expect users to enter their phone numbers:
+    <a href="http://www.flickr.com/photos/rocketspops/5641081138/" 
+       title="Screen shot 2011-04-21 at 11.34.02 AM by rocketspops, on Flickr">
+    <img src="http://farm6.static.flickr.com/5145/5641081138_b001a7d899_o.png" 
+         height="60" 
+         alt="Screen shot 2011-04-21 at 11.34.02 AM" 
+         width="372">
+    </a>
+<!--
+<input name="phone" placeholder="8004156309" type="text">
+view rawplaceholder.htmlThis Gist brought to you by GitHub.
+-->
+  </li>
+  <li>
+    In addition to the <i>placeholder</i> attribute, we can aid users in filling out fields correctly by placing contraints 
+    on the values they input. Continuing with the phone number example from above, if your system expects inputs of a certain 
+    length, why allow the user to input more characters than what's allowed? Using the 
+    <a href="http://dev.w3.org/html5/spec-author-view/common-input-element-attributes.html#the-maxlength-attribute">maxlength</a>
+    attribute, we can limit the number of characters a user can enter into a field specifying a value that corresponds to our 
+    system's contraints, like so:
+<!--    
+<input maxlength="10" name="phone" type="text">
+view rawmaxlength.htmlThis Gist brought to you by GitHub.
+-->
+  </li>
+  <li>
+    With the HTML 5 <a href="http://blog.8thlight.com/articles/2011/4/21/a-tale-of-two-forms-part-2#">autofocus</a> 
+    attribute, we can save our users some time (and a click) by offering the convenience of "pre-focusing" the first input 
+    of our form. While certainly not a show stopper, it's a nice touch that can benefit those users who either have trouble 
+    with a mouse or prefer not to use one:
+<!--
+<input autofocus name="first-name" type="text">
+view rawautofocus.htmlThis Gist brought to you by GitHub.
+-->
+    <a href="http://www.flickr.com/photos/rocketspops/5641152028/" 
+       title="Screen shot 2011-04-21 at 12.04.12 PM by rocketspops, on Flickr">
+    <img src="http://farm6.static.flickr.com/5144/5641152028_bdbdf5791d_o.png" 
+         height="67" 
+         alt="Screen shot 2011-04-21 at 12.04.12 PM" 
+         width="380">
+    </a>
+  </li>
+</ol>
+<h3>To Be Continued...</h3>
+<p>
+  In Part 3, the final installment of this series, we'll delve deeper into form <i>design</i> and examine a few layout 
+  techniques you can use to improve the efficiency and usability of your forms.
+</p>  

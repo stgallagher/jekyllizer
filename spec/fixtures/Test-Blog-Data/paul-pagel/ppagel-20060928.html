@@ -1,0 +1,34 @@
+<h1>Rails Migrations and Subversion</h1>
+<p id="author">Paul Pagel</p>
+<p id="date">2006-09-28</p>
+
+<p>In rails, migrations are generated like so</p>
+<p>
+	<code>paul-pagels-computer:~/RailsProjects/project paulpagel$ ruby script/generate migration 
+		CreatePacketTimestamp exists db/migrate create db/migrate/013createpacket_timestamp.rb
+	</code>	
+</p>
+<p>
+	This creates a numbered migration with an up and a down schema direction. This has been 
+	incredibly helpful when dealing with the schema changes. The problem our team has found is 
+	doing migrations with subversion.
+</p>
+<p>
+	You run migrations by
+</p>
+<p>
+	<code>paul-pagels-computer:~/RailsProjects/project paulpagel$ rake migrate</code>
+</p>	
+<p>
+	Which looks in the schema_info table to find which version of the schema your database is 
+	representing, and updates it to the most recent version (the highest number).
+</p>
+<p>
+	The problem comes into play when you have multiple people making migration scripts on their 
+	local machine at the same time. If two different people did a migration at the same time and 
+	committed them you would end up with two migrations. Which one gets run?
+</p>
+<p>
+	I am not sure how to solve this one yet. I have been loving rails, but this has already 
+	has put a dampener on it.
+</p>	

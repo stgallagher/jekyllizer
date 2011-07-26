@@ -1,0 +1,47 @@
+---
+layout: post
+title: Storing Binary Data in Postgres? Beware!
+tag:
+---
+
+
+<p>If your situation matches the following conditions, beware!</p>
+<ol>
+	<li>You’re working in rails.</li>
+	<li>You’re using Postgresql.</li>
+	<li>You’re storing binary data in the database.</li>
+</ol>
+<p>
+	This was the situation on a project of mine. We were storing PDFs and PNG images in our 
+	Postgrs database. Everything was fine during development and testing where we used files 
+	that ranged up to a few dozen kilobytes in size. The situation went rapidly downhill when 
+	file sizes got up in the hundreds of kilobytes to megabytes. The worst part about it was 
+	that the errors we got were misleading and seemingly random. They included:
+</p>
+<ul>
+	<li><code>undefined method `<<' for nil:NilClass</code></li>
+	<li><code>invalid end of buffer</code></li>
+	<li><code>undefined class/module Packet (Packet being a model class which was definitely defined)</code></li>
+</ul>
+<p>
+	These errors sent us on a wile goose chase. The clue that finally pointed us toward the 
+	problem was the fact that it took 6 seconds to load a 4M PDF document from the database. 
+	That was far too long especially considering the same document could be loaded from a file 
+	instantaneously.
+</p>
+<p>
+	Apparently, binary data stored in Postgresql’s bytea data type has to be parsed on save and load 
+	to escape and unescape certain characters. Unfortunately the native C postgres gem doesn’t do the 
+	parsing. It’s done in the <code>PostgreSQLAdapter.unescape_bytea</code> and 
+	<code>PostgreSQLAdapter.escape_bytea</code> methods (Ruby code) of ActiveRecord and the parsing 
+	is a bit too intensive for Ruby. This is where the meltdown begins. It consumes too much memory, or 
+	too much processing power, or … well I don’t know exactly. But I know it breaks.
+</p>
+<p>
+	We refactored our model such that all the binary data gets stored in flat files on disk rather 
+	than in the database. After this, our Rails app came back to life. It was MUCH faster too!
+</p>
+<p>
+	Here’s hoping that if and when you encounter this problem, Google points you to this blog entry 
+	and you find it helpful.
+</p>	

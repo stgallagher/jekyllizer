@@ -1,0 +1,93 @@
+---
+layout: post
+title: Ethical approach to Software Bugs
+tag:
+---
+
+<h2>
+  Software bugs are errors or omissions in the work we create.  They are our mistakes as 
+  software developers.  I am going to leave defining and dealing with bugs to a 
+  <a href="http://blog.8thlight.com/articles/2008/6/24/some-thoughts-on-software-defects">
+  blog post I wrote last summer</a>.  I would like to take a closer look at software bugs, 
+  using an ethics metaphor to examine some of the rationale.  For the sake of this blog, 
+  we fall into three camps: Software Utility, Software Relativism, and Software 
+  Craftsmanship.
+</h2>
+<h3>Software Utility</h3>
+<p>
+  &ldquo;Fixing bugs is only important when the value of having the bug fixed exceeds the 
+  cost of the fixing it.&rdquo; -- 
+  <a href="http://www.joelonsoftware.com/articles/fog0000000014.html">Joel Spolsky</a>
+</p>
+<p>
+  This is the camp of software utilitarianism.  I understand applying this rubric in 
+  terms of return on investment might have J.S. Mill turning over in his grave, but 
+  there is a strong correlation here.  According to wikipedia, utilitarianism &ldquo;is 
+  the idea that the moral worth of an action is determined solely by its contribution 
+  to overall utility.&rdquo;
+</p>
+<p>
+  Let’s take an example using Mr. Spolsky’s argument.  We need to be able to quantify 
+  in dollars the value of Bug X.  It is worth $1,000 to the company, because the 
+  ramifications of not fixing it means we only lose 2% of our user base.  The cost of 
+  fixing this bug is $3,000 worth of development time.  According to Software Utility, 
+  this is a no-brainer.  Let the bug go, find something more important and more 
+  financially inviting to work on.  
+</p>
+<p>
+  The problem here is there are so many unquantifiable variables in the equation.  
+  How do you put a dollar amount on instability?  When someone tries to reuse the code 
+  that has a bug in it, you are spreading the bug throughout the system, literally, like 
+  a disease.  You can deal with smaller known bugs now, or you can have them bubble up 
+  as diseases later on, where the price of fixing them will grow much higher.  The 
+  software craftsmanship approach means you don’t have to get into the tricky business 
+  of quantifying everything.
+</p>
+<h3>Software Relativism</h3>
+<p>
+  I have heard that, &ldquo;my team doesn’t test drive their code, and so I don’t.&rdquo;  
+  This is software relativism.  Famous moral relativist J. L. Mackie &ldquo;argu[ed] 
+  against the objective existence of right and wrong as intrinsically normative entities 
+  on fundamental grounds unsure what kinds of things such entities would be, if they 
+  existed.&rdquo;  In software, this is saying that whatever works, works.
+</p>
+<p>
+  Or, &ldquo;We try to keep the bug list low.&rdquo;  Specific practices will be chosen 
+  due to their ease or convenience, rather than due to their inherent worth.  If I join 
+  a team that is making money writing software without testing it, I shouldn’t judge, 
+  but do the same.  There are no objective rights and wrongs, just a series of things 
+  that will work for specific circumstances.  
+</p>
+<p>
+  One of the problems is when you get into a negative feedback loop.  When everyone is 
+  sprinting for the finish line and there are no objective standards, you are going to 
+  end up with junk at the other end.  We need a threshold of quality we will not fall 
+  below.  Otherwise you will end up with a system of piecemeal quality, with parts that 
+  are stable and parts that are not stable.  This is arguably worse than an unstable 
+  system.  Either way, if becomes costly to maintain or just plain unmaintainable.  The 
+  software craftsmanship approach avoids this problem of relativity by placing minimum 
+  objective standards.
+</p>
+<h3>Software Craftsmanship</h3>
+<p>
+  I am calling the third section software craftsmanship because it fits conveniently in 
+  line with the software craftsmanship movement.  It is based on the ethics of Immanuel 
+  Kant, specifically his first formulation of moral theory.  It stated, &ldquo;Always act 
+  according to that maxim whose universality as a law you can at the same time will.&ldquo;  
+  The classic example is dealing with lying.  Can lying for the sake of some other good 
+  be considered moral?  Kant says to ask yourself: &ldquo;If everyone lied, would the maxim 
+  still hold?&ldquo;  No, our society functions based on a presumption of honesty.  Well, 
+  if everyone overlooked bugs or shipped with known bugs would the maxim still hold?  No, 
+  software functions based on the presumption of quality.  The user expects the software 
+  to work.  To me, this means as an aspiring software craftsman, I can not ship with any 
+  known bugs.  If you make lying acceptable, your neighbor will start to lock their doors.  
+  I am afraid that many software users have already locked their doors.  So, a software 
+  craftsman can not live with bugs in their system.
+</p>
+<p>
+  I ship with no known bugs.  As Thomas Jefferson says, &ldquo;In matters of principle, 
+  stand like a rock; in matters of taste, swim with the current.&rdquo;  Shipping with no 
+  bugs and cleaning up my own messes is a matter of pride and principle.  It can’t always 
+  be done with ease or convenience.  Sometimes it means fixing some obscure feature you 
+  are sure no one will use. 
+</p>

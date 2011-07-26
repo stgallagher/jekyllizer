@@ -1,0 +1,73 @@
+---
+layout: post
+title: Code Less: A Language Keystroke Expirement
+tag:
+---
+
+
+<p>
+	When I first started writing code in ruby, it was a breath of fresh air after writing C# code 
+	for a year. Ruby had a thesis, a clear purpose, rather than a hodgepodge of features strung 
+	together. It was a language obviously written by someone who cared about what the code looked 
+	like. So I jumped into it and loved writing ruby code (still do!). Recently I had to write a 
+	project in Java using IntelliJ, and the powerful IDE was also a breath of fresh air after 
+	using text editors to write ruby code. The IDE helps me in the same way ruby helped me. I 
+	write less code that does the same thing, without loosing expressiveness or transparency of 
+	intent. Less code in this case meaning less keystrokes.
+</p>
+<p>
+	So, I am going to do a little experiment using two editors and languages: ruby with textmate 
+	and java with IntelliJ. I want to see how many lines of code I have to write. The application 
+	I am going to start is a simple baseball at bat scorer. First lets see the ruby version.
+</p>
+<!-- IMAGE -->
+<p>
+	We have about 27 lines of code written, and other than the describe method, which I have a macro 
+	for, I typed them all by hand. Lets look at the java code. This is just the JUnit test I wrote, 
+	there is no production code yet.
+</p>
+<!-- IMAGE -->
+<p>
+	It is about 16 lines of code, which I wrote all of but the import statement. By doing a few 
+	alt-enters on the squiggly lines, I can get a stub of a class looking like this.
+</p>
+<!-- IMAGE -->
+<p>
+	That is 13 more lines of code, without really typing, just hitting enter a few times. Now, 
+	lets start to make the method pass. I am going to write the algorithm without worrying about 
+	all the type definition java wants. Here is what it looks like.
+</p>
+<!-- IMAGE -->
+<p>
+	So the code written is around 4 lines of code. Lets use the IntelliJ autocomplete features to 
+	help us make a passing test, which looks like.
+</p>
+<!-- IMAGE -->
+<p>
+	So roughly, the ruby version was 23 lines of written code and the java version was about 20 
+	lines of written code. There is an expense to doing all of the alt-enters to auto-generate the 
+	method and variable stubs, but IntelliJ is pretty smart about what it generates. Also, I 
+	understand a single test doesn’t tell the whole story, but it is a good indication. I found 
+	as I wrote more tests for this application, a smaller amount of keystrokes was needed for the 
+	java version, and the same amount was needed for ruby. This is due to the refactoring tools, 
+	and intellisense. As applications get larger, I find the IntelliJ refactorings become more useful. 
+	Inversely, ruby refactorings become more painful, as they are mostly done by hand.
+</p>
+<p>
+	So, in the end the constraints on a static language allows the IDE to make the refactoring tools 
+	better. Specifically, when writing java code, I can lean on the IDE to generate all the uninteresting 
+	stubs for me. All I do is fill in the algorithms: the fun part. When I start to see places where my 
+	code can be cleaned up a bit, I can lean on the IDE again to do those refactorings for me once I 
+	recognize the need for them. Removing and optimizing the code is something which is easily deducible 
+	in static languages, as it is mostly pattern matching, with no monkey patches, meta-programming, and 
+	evals to worry about. This is a limitation which frustrates me as a developer who wants to have a 
+	large set of tools in my bag, but is helpful when it comes to developing a powerful IDE.
+</p>
+<p>
+	The number of lines of code I need to type isn’t the reason I choose a language over another. In fact, 
+	it would be pretty low on the list of deciding factors. However, it is interesting to see what each 
+	language and its sets of tools do best. Hopefully the ruby community can take some notes from them. 
+	I would rather solve the other end of the equation, get a powerful ruby IDE. I know Eclipse and Net 
+	Beans have some preliminary refactoring tools, but they are still aways from being as seamless as 
+	their java counterparts.
+</p>

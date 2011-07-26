@@ -1,0 +1,197 @@
+<h1>Getting started with Rails and FitNesse</h1>
+<p id="author">Paul Pagel</p>
+<p id="date">2006-09-28</p>
+
+<p>
+	This is intended to be a tutorial to get you started using FitNesse with ruby on Rails. 
+	There is some explanation needed about FitNesse, Fit, and Rails. Smart people have written 
+	about such things, I will leave you to google them as interested. Two good references are 
+	listed at the bottom of this tutorial. 
+</p>
+<p>
+	So lets get started. Our customer has just written a test that looks like this:
+</p>
+<!-- 	
+	|vending machine|
+	|check|amount|$0.00|
+	|enter|currency|$.35|
+	|press|add change|
+	|check|amount|$.35|
+	|enter|selection|juicy fruit|
+	|press|vend|
+	|check|amount|$0.00| 
+-->
+<p>
+	This would be a common first fixture for a product, as it is limited in scope, it is 
+	a very specific example from which to build a conversation about requirements about. 
+	Anyway, the first thing to making this pass is getting some of the FitNesse infrastructure 
+	in place around your rails app.	
+</p>
+<p>
+	First, lets create a rails app for our vending machine
+</p>	
+<p>
+	<code>$rails vending_machine</code>
+</p>
+<p>
+	We see all the normal rails stuff, all the creates.
+</p>	
+<p>
+	Lets download FitNesse and place it in our vending_machine root directory. FitNesse 
+	can be downloaded at http://fitnesse.org. And start the FitNesse server.
+</p>	
+<p>
+	So, now we go to the FitNesse main page and create the page for our acceptance test. Then 
+	put the test from the customer into the page and try to run it. Failures? We need to set 
+	up the environment to run with ruby fit. Follow the instructions here 
+	(http://fitnesse.org/FitServers.RubyFit) to set up the right test runner for ruby. Lets write 
+	our first fixture in a fixtures directory we create in the root folder.
+</p>
+<p>
+	Our new test with the path and test runner set up looks like this
+</p>
+<!-- 	
+	!define COMMAND_PATTERN {ruby -I%p ruby/bin/FitServer.rb}
+	!path 
+
+	!3 Make one transaction with a vending machine
+
+	!|fixtures.VendingMachine|
+	|check|amount|$0.00|
+	|enter|currency|$.35|
+	|press|add change|
+	|check|amount|$.35|
+	|enter|selection|juicy fruit|
+	|press|vend|
+	|check|amount|$0.00|
+-->	
+<p>
+	There are a few things to notice about the changes.
+</p>
+<ul>
+	<li>The path is the rails root dir.</li>
+	<li>Fixtures.VendingMachine is mapping to the folder name/module name of where the fixutures 
+		are located. In this instance it is a folder in the rails directory called fixtures.</li>
+	<li>If you run the test, you will get all sorts of exceptions, because the fixture code is not 
+		written yet.</li>
+</ul>
+<p>
+	<i>Note: If the table is not even showing up when you run the fixture go here.</i>
+</p>	
+<p>
+	Now it is time to write a fixture to make this test fail without any exceptions. In the fixtures 
+	directory, create a file called vending_machine.rb. The naming of your fixtures maps with the 
+	name of your file, which it will require. Lets make a stub file to make the test fail without 
+	exceptions.
+</p>	
+<!-- 
+require 'ruby/lib/fit_helper'
+module Fixtures
+  class VendingMachineFixture < Fit::ActionFixture
+    attr_accessor :currency, :selection
+    
+    def initialize
+      super
+      @@actor = self
+    end
+    
+    def add_change
+    end
+    
+    def vend
+    end
+   
+  end
+end 
+-->
+<p>
+	Now we should have failures with the amount not changing.
+</p>	
+<p>
+	Lets create our controller for the vending machine and start to implement the code. I am 
+	going to leave out the specs I use to write the controller, just show the code. Here is the 
+	first version of the controller. Note it has the same stubbed methods the fixture has.
+</p>	
+<!-- 
+class VendingMachineController < ApplicationController
+  def add_change
+  end
+  def vend
+  end
+end 
+-->
+<p>
+	Lets hook up the fixture to the imaginary controller. There is a fair amount of set up which 
+	is rails related. First, we need to load up the environment and the controllers. Add these 
+	lines to the beginning of your fixture.
+</p>	
+<!-- 
+require File.expand_path(File.dirname(__FILE__) + "/config/environment")
+require File.expand_path(File.dirname(__FILE__) + '/app/controllers/application') 
+-->
+<p>
+	Which should allow us to change the initialize method to:
+</p>	
+<!-- 
+def initialize
+      super
+      @@actor = self
+      @controller = VendingMachineController.new
+      @controller.params = {}
+    end 
+-->
+<p>
+	Which creates the controller, and initializes its params to an empty dictionary. There are other 
+	ways to do this, like creating test params, but for simplicity, we are going to create our own for 
+	now.
+</p>	
+<p>
+	Next, we set up the values in the params and call the controller methods.
+</p>	
+<!-- 
+		def add_change
+          @controller.params[:amount] = @currency
+          @controller.add_change  
+        end
+        
+        def vend
+          @controller.params[:selection] = @selection
+          @controller.vend
+        end 
+-->
+<p>
+	Now, we make the test pass by implementing the controller.
+</p>	
+<!-- 
+class VendingMachineController < ApplicationController
+  
+  def initialize
+    @items = {"juicy fruit" => 35 , "doublemint" => 45 }
+    @session = {} if not @session
+    @session[:amount_entered] = 0.0;
+  end
+  
+  def add_change
+    @session[:amount_entered] += params[:amount].to_f
+  end
+  
+  def vend
+    @items.each_pair do |key, value|
+      if(params[:selection] == key)
+        @session[:amount_entered] = 0.0
+      end
+    end
+  end
+end 
+-->
+<h3>Missing Requires</h3>
+<p>
+	There is some weirdness around the way RubyFit collects exceptions after failing to find the 
+	file to require. If this occurs, dig into ruby fitâ€™s FixtureLoader, specifically the find_class 
+	method. Usually you can get some information from the exceptions being silently caught.
+</p>	
+<h3>References</h3>
+<p>
+	http://fit.rubyforge.org/basics.html - RubyFit 
+	http://www.cornetdesign.com/2005/12/fitnesse-and-ruby-basic-tutorial.html - Fitnesse and Ruby
+</p>

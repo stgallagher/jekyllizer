@@ -1,0 +1,120 @@
+<h1>Fast-Talking ActiveRecord Migrations</h1>
+<p id="author">Craig Demyanovich</p>
+<p id="date">2011-05-06</p>
+<h2>
+  Most migrations do very little and run very quickly. Add a column or two; run in a second or two. Other
+  migrations need to do much more, but we still want them to run just as quickly or nearly so. And, if
+  they're going to take a little longer, we want to know why.
+</h2>
+<h3>The Ace Ventura Migration</h3>
+<p>
+  In <a href="http://www.imdb.com/title/tt0109040/">Ace Ventura</a>, as Ace is about to search a drained
+  dolphin tank for clues of the crime, he says to those nearby, &ldquo;If I'm not back in five minutes, just wait
+  longer.&rdquo; While good for a laugh, that's not good &ldquo;advice&rdquo; from a migration.
+</p>
+<p>
+  Here's a migration that reminds me of Ace:
+</p>
+<script src="https://gist.github.com/1049961.js?file=cdemyanovich-20110506-1.rb"></script>
+<p>
+  A fairly typical migration, right? Add a column and give it a value for all existing records. But,
+  look at the output from running it:
+</p>
+<script src="https://gist.github.com/1049961.js?file=cdemyanovich-20110506-2.rake"></script>
+<p>
+  12 minutes?!? That makes for a long feedback cycle, not to mention a long deploy. What's more,
+  that 12 minutes silently passes between the <code>add_column</code> call and the end of the migration.
+</p>
+<p>
+  Another developer who pulls down this migration and runs it is going to wonder what the hell is
+  taking so long.
+</p>
+<h3>Be Talkative</h3>
+<p>
+  Whether this migration runs for 12 minutes or 12 seconds, we can be open about what it's doing by
+  using 
+  <a href="http://api.rubyonrails.org/classes/ActiveRecord/Migration.html#method-c-say">
+    <code>say</code>
+  </a>
+  or 
+  <a href="http://api.rubyonrails.org/classes/ActiveRecord/Migration.html#method-c-say_with_time">
+    <code>say_with_time</code>.
+  </a>
+  Use <code>say</code> to display a message about what's being done in the block that you pass to it. 
+  Use <code>say_with_time</code> to also display the elapsed time after the block executes. 
+  We'll use <code>say_with_time</code>.
+</p>
+<script src="https://gist.github.com/1049961.js?file=cdemyanovich-20110506-3.rb%20"></script>
+<p>
+  Here's the output.
+</p>
+<script src="https://gist.github.com/1049961.js?file=cdemyanovich-20110506-4.rake"></script>
+<p>
+  That's much more informative, but it isn't any faster.
+</p>
+<h3>I Feel the Need...the Need for Speed</h3>
+<p>
+  Like Maverick and Goose from <a href="http://www.imdb.com/title/tt0092099/">Top Gun</a>,
+  we feel the need for speed.
+</p>
+<p>
+  <code>find_each</code> (Rails 2.3.x) finds records in batches of one thousand (which is configurable)
+  and loads them into memory. Though there are no guarantees, hopefully garbage collection will run and
+  free that memory. 
+</p>
+<p>
+  Since we're working with several hundred thousand records in this migration, using
+  <code>find_each</code> is a great way to avoid exhausting memory. We're not just finding records, though.
+  We're also updating them...one at a time...with the same value. Oh.
+</p>
+<p>
+  If you have any experience with SQL, you know that it operates on sets of records. ActiveRecord
+  enables us to work that way when we need to with methods like 
+  <a href="http://api.rubyonrails.org/classes/ActiveRecord/Relation.html#method-i-update_all">
+    <code>update_all</code>.
+  </a> 
+  <code>update_all</code> constructs one SQL UPDATE statement and sends it to the database without
+  loading the affected records.
+</p>
+<p>
+  Update all records without having to find and load any of them first? Sounds perfect. Let's try it.
+</p>
+<script src="https://gist.github.com/1049961.js?file=cdemyanovich-20110506-5.rb"></script>
+<p>
+  And the result?
+</p>
+<script src="https://gist.github.com/1049961.js?file=cdemyanovich-20110506-6.rake"></script>
+<p>
+  128x faster! I can wait 6s for feedback or as part of a deploy. We're not quite done, though.
+</p>
+<h3>Dotting the i's and Crossing the t's</h3>
+<p>
+  In our migration, we add a column and then use its ActiveRecord model to set its value for all existing
+  records. To be sure we have immediate access to this new column via the model, we can call 
+  <code>reset_column_information</code>. This method tells ActiveRecord to re-read the model's column 
+  information from its backing database table. 
+</p>
+<script src="https://gist.github.com/1049961.js?file=cdemyanovich-20110506-7.rb"></script>
+<p>
+  I don't think I've ever seen a migration fail due to stale column information, but I wouldn't 
+  chance it, since Murphy's Law will probably only be proven true during a production deploy.
+</p>
+<h3>(Code) Review</h3>
+<p>
+  Use 
+  <a href="http://api.rubyonrails.org/classes/ActiveRecord/Migration.html#method-c-say">
+    <code>say</code>
+  </a> 
+  or 
+  <a href="http://api.rubyonrails.org/classes/ActiveRecord/Migration.html#method-c-say_with_time">
+    <code>say_with_time</code>
+  </a> 
+  to be talkative about what migrations are doing when they do more than usual or, <i>by necessity</i>,
+  take longer than a few seconds. Ensure migrations do their work quickly for rapid feedback in development
+  and when deploying. 
+  <a href="http://api.rubyonrails.org/classes/ActiveRecord/Relation.html#method-i-update_all">
+    <code>update_all</code>
+  </a> 
+  and related methods let you work closer to SQL metal when you need their speed and efficiency of 
+  working with large sets of data.
+</p>

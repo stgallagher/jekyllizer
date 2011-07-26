@@ -1,0 +1,109 @@
+<h1>Test Driven Debugging</h1>
+<p id="author">Eric Smith</p>
+<p id="date">2007-10-11</p>
+
+<p>
+	I hate debugging. Loathe it, despise it, pick your synonym and I’ll use it. Computer programming 
+	is building something out of nothing, making the computer do things it didn’t know how to do, until 
+	I told it. I absolutely love code refactoring, moving code around, organizing it better, cleaning 
+	it up and watching tests pass. But stepping through code looking for the place where I accidentally 
+	typed quesiton instead of question? Shoot me in the head. In addition to the frustration of debugging, 
+	a bug can only be explained by one thing: I screwed up. I hate screwing up even more than I hate 
+	debugging. My hatred of debugging is one of the reasons I started practicing TDD. After all Test 
+	Driven Design means I never debug right?
+</p>
+<p>
+	Of course we all debug some of the time, usually as a deadline hangs over our heads. This tends 
+	to be where practices break down. You hack and slash, desperately trying to make the program JUST 
+	WORK only to watch it fail and fail again. Eventually you get the bug fixed, probably with an ugly 
+	hack right before (or right after) a customer demo. I won’t claim that “Test Driven Debugging” is 
+	a solution, but it certainly helps me in times of need.
+</p>
+<p>
+	Let me take an example from real life. As our last iteration ended I was on a roll. I had a TODO 
+	list of items and everything kept clicking into place. I’d implement a feature, and it work the way 
+	I wanted to the first time. There was just one last part of the story, moving the items on the screen. 
+	I wrote a test, it passed. I wrote another, made it pass. I got everything working the way I wanted 
+	too - then tried the actual application, and it went boom. Moving just wasn’t working the way I 
+	expected. Items would jump around the screen seemingly at random. I realized what the bug was - items 
+	retrieved from the database were not coming back in the right order. So how do I go about fixing it?
+</p>
+<p>
+	Well I don’t always practice what I preach, so I started hacking and slashing. I threw order_by and 
+	find statements around, and even wrote a method that wasn’t tested in a desperate effort to make the 
+	demo. Of course I didn’t make the demo, and then sat down and calmly did what I should have done. I 
+	wrote some tests. Well first I wept quietly, but that’s none of your business.
+</p>
+<p>
+	In our application there’s an ActiveRecord called Design, and it has Widgets which use acts_as_list 
+	to keep track of themselves within the Design with a position. Don’t worry about the details if you 
+	aren’t familiar with Ruby on Rails, the important thing is the steps. First I wrote a test in the 
+	Design.
+</p>
+<!-- 
+it "should order widgets by position" do
+  widget1 = Admin::Widget.create(:design => @design)
+  widget2 = Admin::Widget.create(:design => @design)
+  widget3 = Admin::Widget.create(:design => @design)
+
+  widget3.insert_at(0)
+  widget3.save
+  @design.reload
+
+  @design.widgets[0].id.should eql(widget3.id)
+  @design.widgets[1].id.should eql(widget1.id)
+  @design.widgets[2].id.should eql(widget2.id)
+  widget3.position.should eql(0)
+  widget1.position.should eql(1)
+  widget2.position.should eql(2)
+end 
+-->
+<p>
+	Hmmm… it passed. That’s interesting. It’s coming back correct from the model. I guess it’s time to 
+	write a test in the controller:
+</p>
+<!-- it "should have the widgets ordered by position - requires real data" do
+  question = Admin::Question.create(:name => "question")
+  design = Admin::Design.create
+  widget_pos2 = Admin::Widget.create(:question => question, :design => design)
+  widget_pos1 = Admin::Widget.create(:question => question, :design => design)
+  widget_pos2.position.should eql(1)
+  widget_pos1.position.should eql(2)    
+
+  widget_pos2.insert_at 2
+  widget_pos2.save!
+  widget_pos1.reload
+  widget_pos2.reload
+
+  widget_pos2.position.should eql(2)
+  widget_pos1.position.should eql(1)
+
+  get :edit, :id => design.id
+
+  assigns[:design].should be_instance_of(Admin::Design)
+  assigns[:design].widgets[0].position.should eql(1)
+  assigns[:design].widgets[1].position.should eql(2)
+end -->
+<p>
+	There’s a couple things worth noting in this test. I used real data instead of mocks, although 
+	RSpec style would typically use mocks. The reason I didn’t use mocks is that while they are great 
+	at decoupling data just like this, in the case of a bug I could very well pass my mock, only to 
+	discover that I’ve been calling the wrong methods all the time. I want the real data here. Some 
+	would argue this doesn’t make it a Unit Test, and I’d be hard pressed to disagree, but it still 
+	is a valuable test. The second is that I’m doing should eql before I call get, which is the method 
+	under test. The reason for that is I want to test my assumptions. Often times when you have a bug 
+	it’s because you made a mistake in your assumptions, such as thinking the widgets were always 
+	being returned in position order, and I want to tease out any issues in mine. The last thing I need 
+	is a test that passes by coincidence.
+</p>
+<p>
+	So I ran the test - and it passed! Then I started the application again, and it worked! Did tests 
+	have a magical power that fixed the bug? Of course not. I had fixed the bug during my hacking and 
+	slashing, but I was frantic so I hadn’t calmly restarted my server and had a passing test. Had I 
+	done this from the get go I would have recognized the bug ( which was using an explicit 
+	design.widgets.find(:all) instead of design.widgets, thereby retrieving the data from the DB in 
+	id order ) and likely passed the demo. Once again lesson learned, sometimes I have to learn more 
+	than once. I’ll clean up the test above to remove the now unneeded extra checking, but I’ll leave 
+	it in the code, so that this bug never shows itself again. Thou art commanded - never ever 
+	reintroduce a bug. Now go forth and program my son.
+</p>	

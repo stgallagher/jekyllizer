@@ -1,0 +1,60 @@
+---
+layout: post
+title: Clean Acceptance Tests
+tag:
+---
+
+<h2>
+  Acceptance testing was one of the first challenges I had to tackle during my apprenticeship. The complexity
+  of acceptance testing scales in proportion to the number of components of your system under test and the 
+  number of scenarios and configurations your system can have showed me that there here is no one solution
+  that will solve all our problems.
+</h2>
+<p>
+  Having said that, I have noticed a few patterns that tend to stall the proceeding of acceptance testing
+  practices. Incidentally, these patterns are largely identical to the rules from Clean Test section in 
+  Clean Code (132).
+</p>
+<h3>First rule of writing Clean Acceptance Tests: fast</h3>
+<p>
+  Acceptance testing automates the process of walking through the application interface and checks for 
+  intended behaviors. Unlike unit testing, which drills down to a very specific function, testing for
+  behaviors requires launching several components, and sometimes the entire system in order to get a result.
+</p>
+<p>
+  To save time, we schedule our test suites to run on a separate machine. We integrate with Hudson CI server,
+  in particular, for its friendly user interface and various plugins that support the scripting tools and
+  testing frameworks we employ in our project.
+</p>
+<h3>Second rule of writing Clean Acceptance Tests: independent</h3>
+<p>
+  Ideally, we want to set up each test in a fresh environment and tear-down all the side effects it
+  introduced to the environment afterward. A side effect can be an altered registry key, an idle process,
+  a dirty table, or browser cache and history. If we neglect to clean up after ourselves, it will make diagnosis
+  more difficult.
+</p>
+<h3>Third rule of writing Clean Acceptance Tests: repeatable</h3>
+<p>
+  Testing interactions with a user from the outside world is very different from testing functions. The latter
+  has a set of well-defined inputs and outputs. On the other hand, behaviors can vary from browser to browser
+  and platform to platform.
+</p>
+<p>
+  This is often the largest hurdle we have to leapt through in our acceptance testing process. It's also the
+  most valuable because we learn cross-platform, cross-browser, and other configuration issues before release.
+</p>
+<h3>The last rule and possibly most important: communication</h3>
+<p>
+  User acceptance testing is a great opportunity to work with our client. We sit down together and write down
+  specifications of the project and turn them into test code that can be easily understood by any stakeholder
+  regardless of their technical background.
+</p>
+<p>
+  Through user acceptance testing we involve clients in production work and are able to adjust to their
+  expectation much faster.
+</p>
+<p>
+  All in all, writing acceptance tests was probably one of the best ways for me to come into a project.
+  A well-written suite of acceptance tests is a great source of compiled documentation that can tell you exactly
+  what the application does and what the client wants.
+</p>

@@ -1,0 +1,183 @@
+---
+layout: post
+title: Fast-Talking ActiveRecord Migrations
+tag:
+---
+
+
+<p>
+	Most migrations do very little and run very quickly. Add a column or two; run in a second or 
+	two. Other migrations need to do much more, but we still want them to run just as quickly or 
+	nearly so. And, if they're going to take a little longer, we want to know why.
+</p>
+<h3>The Ace Ventura Migration</h3>
+<p>
+	In 
+	<a href="http://www.imdb.com/title/tt0109040/">Ace Ventura</a>, 
+	as Ace is about to search a drained dolphin tank for clues of the crime, he says to those nearby, 
+	“If I'm not back in five minutes, just wait longer.” While good for a laugh, that's not good "advice" 
+	from a migration.
+</p>
+<p>
+	Here's a migration that reminds me of Ace:
+</p>
+<!--
+class AddApplicationToCe < ActiveRecord::Migration
+  def self.up
+    add_column :continuing_educations, :origin_application, :string
+    ContinuingEducation.find_each do |ce|
+      ce.update_attribute(:origin_application, "bank")
+    end
+  end
+
+  def self.down
+    remove_column :continuing_educations, :origin_application
+  end
+end
+-->
+<p>
+	A fairly typical migration, right? Add a column and give it a value for all existing records. But, 
+	look at the output from running it:
+</p>
+<!--
+==  AddApplicationToCe: migrating =============================================
+-- add_column(:continuing_educations, :origin_application, :string)
+   -> 2.9832s
+==  AddApplicationToCe: migrated (724.5134s) ==================================
+-->
+<p>
+	12 minutes?!? That makes for a long feedback cycle, not to mention a long deploy. What's more, that 12 
+	minutes silently passes between the <code>add_column</code> call and the end of the migration. Another 
+	developer who pulls down this migration and runs it is going to wonder what the hell is taking so long.
+</p>
+<h3>Be Talkative</h3>
+<p>
+	Whether this migration runs for 12 minutes or 12 seconds, we can be open about what it's doing by using 
+	<code><a href="http://api.rubyonrails.org/classes/ActiveRecord/Migration.html#method-c-say">say</a></code> or 
+	<code><a href="http://api.rubyonrails.org/classes/ActiveRecord/Migration.html#method-c-say_with_time">
+	say_with_time</a></code>. Use say to display a message about what's being done in the block that you pass to it. 
+	Use <code>say_with_time</code> to also display the elapsed time after the block executes. We'll use 
+	<code>say_with_time</code>.
+</p>	
+<!--
+class AddApplicationToCe < ActiveRecord::Migration
+  def self.up
+    add_column :continuing_educations, :origin_application, :string
+
+    say_with_time "Setting origin_application for all existing CEs" do
+      ContinuingEducation.find_each do |ce|
+        ce.update_attribute(:origin_application, "bank")
+      end
+    end
+  end
+
+  ...
+end
+-->
+<p>
+	Here's the output.
+</p>
+<!--
+==  AddApplicationToCe: migrating =============================================
+-- add_column(:continuing_educations, :origin_application, :string)
+   -> 2.1238s
+-- Setting origin_application for all existing CEs
+   -> 722.3896s
+   -> 254703 rows
+==  AddApplicationToCe: migrated (724.5134s) ====================================
+-->
+<p>
+	That's much more informative, but it isn't any faster.
+</p>
+<h3>I Feel the Need...the Need for Speed</h3>
+
+<p>
+	Like Maverick and Goose from 
+	<a href="http://www.imdb.com/title/tt0092099/">Top Gun</a>, we feel the need for speed.
+</p>	
+
+<p>
+	<code>find_each</code> (Rails 2.3.x) finds records in batches of one thousand (which is configurable) 
+	and loads them into memory. Though there are no guarantees, hopefully garbage collection will run and 
+	free that memory. Since we're working with several hundred thousand records in this migration, using 
+	<code>find_each</code> is a great way to avoid exhausting memory. We're not just finding records, though. 
+	We're also updating them...one at a time...with the same value. Oh.
+</p>
+<p>
+	If you have any experience with SQL, you know that it operates on sets of records. ActiveRecord enables 
+	us to work that way when we need to with methods like 
+	<code><a href="http://api.rubyonrails.org/classes/ActiveRecord/Relation.html#method-i-update_all">update_all</a></code>. 
+	<code>update_all</code> constructs one SQL UPDATE statement and sends it to the database without loading 
+	the affected records.
+</p>
+<p>
+	Update all records without having to find and load any of them first? Sounds perfect. Let's try it.
+</p>	
+<!--
+class AddApplicationToCe < ActiveRecord::Migration
+  def self.up
+    add_column :continuing_educations, :origin_application, :string
+
+    say_with_time "Setting origin_application for all existing CEs" do
+      ContinuingEducation.update_all "origin_application = 'bank'"
+    end
+  end
+
+  ...
+end
+-->
+<p>
+	And the result?
+</p>
+<!--
+==  AddApplicationToCe: migrating =============================================
+-- add_column(:continuing_educations, :origin_application, :string)
+   -> 2.1238s
+-- Setting origin_application for all existing CEs
+   -> 3.5165s
+   -> 254703 rows
+==  AddApplicationToCe: migrated (5.6485s) ====================================
+-->
+<p>
+	128x faster! I can wait 6s for feedback or as part of a deploy.
+</p>
+<p>
+	We're not quite done, though.
+<p>
+<h3>Dotting the i's and Crossing the t's</h3>
+<h3>
+	In our migration, we add a column and then use its ActiveRecord model to set its value for all existing 
+	records. To be sure we have immediate access to this new column via the model, we can call 
+	<code>reset_column_information</code>. This method tells ActiveRecord to re-read the model's column 
+	information from its backing database table.
+</h3>
+<!--
+class AddApplicationToCe < ActiveRecord::Migration
+  def self.up
+    add_column :continuing_educations, :origin_application, :string
+
+    ContinuingEducation.reset_column_information
+    say_with_time "Setting origin_application for all existing CEs" do
+      ContinuingEducation.update_all "origin_application = 'bank'"
+    end
+  end
+
+  ...
+end
+-->
+<p>
+	I don't think I've ever seen a migration fail due to stale column information, but I wouldn't 
+	chance it, since Murphy's Law will probably only be proven true during a production deploy.
+</p>
+<h3>(Code) Review</h3>
+<p>
+	Use 
+	<code><a href="http://api.rubyonrails.org/classes/ActiveRecord/Migration.html#method-c-say">say</a></code> or 
+	<code><a href="http://api.rubyonrails.org/classes/ActiveRecord/Migration.html#method-c-say_with_time">
+	say_with_time</a><code> to be talkative about what migrations are doing when they do more than usual or, 
+	<i>by necessity</i>, take longer than a few seconds. Ensure migrations do their work quickly for rapid 
+	feedback in development and when deploying. 
+	<code><a href="http://api.rubyonrails.org/classes/ActiveRecord/Relation.html#method-i-update_all">
+	update_all</a></code> and related methods let you work closer to the SQL metal when you need their speed 
+	and efficiency of working with large sets of data.
+</p>

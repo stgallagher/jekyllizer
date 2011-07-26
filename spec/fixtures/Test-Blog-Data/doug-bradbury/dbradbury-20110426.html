@@ -1,0 +1,213 @@
+<h1>10 Ways to Do Acceptance Testing Wrong</h1>
+<p id="author">Doug Bradbury</p>
+<p id="date">2011-04-26</p>
+<h2>
+  If there is one thing I’ve learned about Acceptance Testing (<abbr title="Acceptance Testing">AT</abbr>) 
+  it’s that there are a lot of ways to mess it up. I’ve made my fair share of mistakes and thought 
+  it would be nice to know that I’m not alone. I did an informal and unscientific survey on some 
+  acceptance testing mistakes to find out how many of us do it wrong. Here are the results.
+</h2>
+<h3>10) Does your team document the system in word docs? </h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">4% Yes</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">94% No</h3>
+</div>
+<img src="https://img.skitch.com/20110426-tq63pqhud8rtnd2t9n2k92qyi6.jpg">
+<div style="clear: both;">
+
+<p>
+  A great benefit of writing acceptance tests is that they become a living documentation 
+  for your software.  They live because they are executable.  They have bits that turn green 
+  when they work and red when they fail.
+</p>
+<p>
+  Any static document that is written in the process of developing a piece of software is 
+  destined to become a lie.  These documents get lost and abandoned and provide very little 
+  value.  The truth is in the code.  Acceptance tests that execute against the code 
+  <span class="caps">MUST</span> stay up to date.
+</p>
+<h3>9) Are acceptance tests handed off to you?</h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">7% Yes</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">91% No</h3>
+</div>
+<img src="https://img.skitch.com/20110426-xd1iar6cr3sss7gxym1wewajia.jpg">
+<div style="clear: both;">
+
+<p>
+  Acceptance tests are a communication medium.  They are not a communication mode.  They 
+  aren’t a message written over on one side of a wall and passed to the other.  They are a 
+  common medium that enables the conversation between the People Who Know What The Software 
+  Should Do (<abbr title="People Who Know What The Software Should Do">PWKWTSSD</abbr>) and 
+  the People That Know How To Make The Software 
+  (<abbr title="People That Know How To Make The Software">PTKHTMTS</abbr>).  Out of this 
+  interaction comes the development of a common language that everyone can use to communicate 
+  about the system.  That language will never develop unless the authorship of the tests is 
+  shared between the two groups of people.
+</p>
+
+<h3>8) Do you begin each new test with copy-paste?</h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">18% Yes</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">80% No</h3>
+</div>
+<img src="https://img.skitch.com/20110426-x3iphk5p297uqwspqaaw4x44wx.jpg">
+<div style="clear: both;">
+
+<p>
+  Duplication is just as abhorrent and problematic in tests as it is in code.  It is the 
+  easiest way to begin a new test, but will lead to massive maintenance burdens down the road.  
+  Duplication is often the result of lots and lots of workflow type tests (do this, click that, 
+  check that, do this other thing&hellip;)  These test are a great place to start, but after 
+  you have a few of them, it’s time to extract out higher level scenarios that get rid of the 
+  duplication. 
+</p>
+<p>
+  In FitNesse, you can use scenario tables to transform a script table into a decision table.  
+  In Cucumber, you can use a scenario outline to transform a scenario into an example table.  
+  Both techniques result in cleaner tables, little duplication, and more expressive tests.
+</p>
+<h3>7) Are your tests kept in source control?</h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">22% No</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">76% Yes</h3>
+</div>
+<img src="https://img.skitch.com/20110426-xdwj61x9ibgkrfnwucdpk9jdb9.jpg">
+<div style="clear: both;">
+
+<p>
+  The acceptance tests should live right alongside the code.  When the source code is branched 
+  or tagged, then so should the tests be.  This means that everyone needs access to the repository 
+  and everyone needs to know how to use it.  
+  <abbr title="People Who Know What The Software Should Do">PWKWTSSD</abbr> and 
+  <abbr title="People That Know How To Make The Software">PTKHTMTS</abbr> alike.
+</p>
+
+<h3>6) Are your tests generic or specific?</h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">27% Generic</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">71% Specific</h3>
+</div>
+<img src="https://img.skitch.com/20110426-dxep4hbc6er3p12em8p4u6hp4u.jpg">
+<div style="clear: both;">
+
+<p>
+  This is how most software specification begins.  We don’t want to limit or constrain what our 
+  new app will do, so we make the specifications as general as possible.  The problem with these 
+  documents is that they are entirely works of fiction.  They can never be built.
+</p>
+<p>
+  Software is best specified by example.  Tell me about one person and how they will use the 
+  software to accomplish one thing.  Give me a <span class="caps">SPECIFIC</span> example.
+</p>
+
+<h3>5) Do you write acceptance tests alone?</h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">35% Yes</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">64% No</h3>
+</div>
+<img src="https://img.skitch.com/20110426-8u8rm9anbxerc4qdcqct8dwrqp.jpg">
+<div style="clear: both;">
+
+<p>
+  The number one purpose of Acceptance Tests is to be a communication medium between 
+  <abbr title="People Who Know What The Software Should Do">PWKWTSSD</abbr> and 
+  <abbr title="People That Know How To Make The Software">PTKHTMTS</abbr>
+  It’s perfectly valid for a <abbr title="People That Know How To Make The Software">PTKHTMTS</abbr> 
+  to sit alone and write some tests.  There is just no point in using an acceptance testing 
+  tool like FitNesse or Cucumber to write the tests.  These tools are excellent as a bridge 
+  between the natural language world and the world of code, but if you are already writing code, 
+  then just write the test in a programming language.  There a much fewer hoops to jump through 
+  and a lot more powerful tools at your disposal.
+</p>
+<h3>4) Are you are using a “QA Test Tool?”</h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">40% Yes</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">58% No</h3>
+</div>
+<img src="https://img.skitch.com/20110426-by7p3s7mbnawbgswd327gxnunw.jpg">
+<div style="clear: both;">
+
+<p>
+  Making acceptance tests tool-centric is a big mistake.  FitNesse and Cucumber are no 
+  silver bullet tools that will suddenly fix all the quality problems in your project.  
+  It’s not about the tool, it’s about the communication.  The tool is just, well, a tool.
+</p>
+<p>
+  If your goal is simply automation, then FitNesse and Cucumber both make poor scripting 
+  languages.  Use a scripting language if you want to automate a repetitive task.
+</p>
+<h3>3) Are your tests running?</h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">18% Not Locally</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">27% Not on CI</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">71% Running</h3>
+</div>
+<img src="https://img.skitch.com/20110426-d239g6cterqk7yirjk5ap1kqiu.jpg">
+<div style="clear: both;">
+
+<p>
+  If your tests aren’t running, why did you bother to write them?  They ought to run on 
+  <abbr title="People Who Know What The Software Should Do">PWKWTSSD</abbr> and 
+  <abbr title="People That Know How To Make The Software">PTKHTMTS</abbr>’s machines and 
+  on a common integration server.  Running acceptance tests overnight is not running them.  
+  That feedback is too long in coming.  By the time you come in the next morning, you’ve 
+  lost your context and it’s expensive to go back and figure it out.  This either slows 
+  development down, or test failures start to be ignored.
+</p>
+<h3>2) If you test the entire system, you might be doing AT wrong. </h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">62% Yes</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">36% No</h3>
+</div>
+<img src="https://img.skitch.com/20110426-e6c8bwfqmfcgkmctxxaa2kq4bt.jpg">
+<div style="clear: both;">
+
+<p>
+  It’s a pretty common desire.  We want to know that the entire system works all together, 
+  so we write the tests exercising the entire stack. The problem here again is the time that 
+  it takes to bring the entire system up and back down for every test.  Even a couple of 
+  seconds will exponentially turn into minutes and hours as a test suite grows. 
+</p>
+<p>
+  Integration tests are still an important thing, but Integration tests should test the 
+  integration of systems, not the integrated system.  What we need are thin tests on the 
+  boundaries of systems.  These tests are run (and subsequently break) for reasons very 
+  different than acceptance tests.  For example, an integration test may fail when some 
+  third party server goes down, or a server has been misconfigured.
+</p>
+<h3>1) Do you test through the <abbr title="Graphical User Interface">GUI</abbr>?</h3>
+
+<div style="float: left;">
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/x.png" align="middle">80% Yes</h3>
+<h3><img src="https://s3.amazonaws.com/dougbradbury/images/check.png" align="middle">18% No</h3>
+</div>
+<img src="https://img.skitch.com/20110426-c1jkfsdmubd6qcgm55i21ay362.jpg">
+<div style="clear: both;">
+
+<p>
+  It’s so seductive.  More and more tools continue to pop up allowing you to automate the 
+  UI of your application.  Tests through the <abbr title="Graphical User Interface">GUI</abbr> 
+  all share two problems: they are fragile and they are slow.  They are fragile because they 
+  change for lots of reason unrelated to the code and because a small change to one element 
+  on the screen can mean dozens of changes to tests that reference that element. You can 
+  mitigate this cost though by avoiding duplication.  But even then, the tests are destined to 
+  be too slow and put you in the situation where you stop running the tests because they take so long.
+</p>
+<p>
+  And here is the thing about the <span class="caps">GRAPHICAL</span> user interface.  It’s 
+  graphical.  The only way to really test it is to look at it.  
+  <abbr title="Graphical User Interfaces">GUIs</abbr> must <span class="caps">LOOK</span> right.  
+  There is no way to automate that.  It’s okay to have a few tests that hit the 
+  <abbr title="Graphical User Interface">GUI</abbr>, but you need to be able to get to the core 
+  business rules (read models) without exercising the <abbr title="Graphical User Interface">GUI</abbr>.
+</p>

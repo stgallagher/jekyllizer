@@ -1,0 +1,77 @@
+<h1>Sharing a Database Among Multiple Rails Applications</h1>
+<p id="author">Jim Suchy</p>
+<p id="date">2007-02-20</p>
+<h2>
+  A sign of the success of Ruby on Rails is the size of applications being written with it.
+  Currently, we are working on a project with many interconnecting modules that we split up
+  into separate Rails applications.
+</h2>
+<p> 
+  However, the business domain was the same among the projects, resulting in the different
+  projects sharing the same database. This article discusses the way we’ve accomplished this.
+</p> 
+<h3>Create a Lib Project</h3> 
+<p>
+  We first need a place to pull our common classes into. This will not be a Rails application;
+  it will just be a Ruby module that your Rails application will require. Our directory structure
+  will look something like this:
+</p>
+<script src="https://gist.github.com/1051156.js?file=jsuchy-20070220-1.sh"></script>
+<p>
+  Now we can move on to the actual refactoring.
+</p> 
+<h3>Pull the Models Out</h3> 
+<p>
+  The first step is the easiest: pull out the models from the app/models directory of your Rails
+  application into the lib directory of your new library.
+</p>
+<p>
+  In the config/environments.rb file within your Rails application, you will need to add this
+  new directory to your Ruby search path by adding this line to the end of the file.
+</p>
+<script src="https://gist.github.com/1051156.js?file=jsuchy-20070220-2.rb"></script>
+<p>More on the Ruby search path later.</p>
+<h3>Pull the Tests Out</h3> 
+<p>
+  Let’s move on to making our specs pass. Now that we don't have the Ruby environments loaded
+  up as part of our test helpers (spec_helper for the rspecers out there), we need to establish
+  an Active Record connection ourselves. 
+</p>
+<p>
+  Create a spec helper for our lib specs and start it with the connection to the database like so:
+</p>
+<script src="https://gist.github.com/1051156.js?file=jsuchy-20070220-3.rb%20"></script>
+<p>
+  This is the same way Rails sets up your database connections for active record when you load
+  the Rails environment. Now your specs just need to require this new spec_helper in order to
+  get Active Record functioning.
+</p> 
+<h3>Use Models Across Projects</h3> 
+<p>
+  Now you are free to use the same database across many projects. To do this, you just need
+  to either require a single lib file that loads all the models, or you could put the lib 
+  directory in your Ruby search path.
+</p> 
+<h3>Ruby Search Path vs. Lib Require File</h3> 
+<p>
+  The new common library will need to be included in your rails application. There are two
+  methods we have used to do this. The first is to create a library file that does nothing more
+  than requires all of the common lib files, looking something like the following:
+</p>
+<script src="https://gist.github.com/1051156.js?file=jsuchy-20070220-4.rb%20"></script>
+<p>
+  The problem with this approach is it requires you to sequence the require statements in the
+  appropriate order, or else you will get errors about missing objects. The benefit is that you
+  load the entire environment in one place rather than adding require statements at the top of
+  each file to include the needed external dependencies.
+</p>
+<p>
+  These code files that do nothing but require files are no stranger to Ruby; however, they must
+  be managed properly as they become temperamental and irritable when dependencies are mixed up.
+</p>
+<p>
+  The other approach we have used is what I recommended above. In your Rails application’s environment,
+  add the lib directory to your search path, and include the require statements as needed in each model file.
+  Of course, by including one file you will be implicitly including all of the dependencies. Using this
+  technique, you can eliminate files that just require other files.
+</p>

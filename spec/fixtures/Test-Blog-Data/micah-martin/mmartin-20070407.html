@@ -1,0 +1,105 @@
+<h1>Understanding Statemachines, Part 4: Superstates</h1>
+<p id="author">Micah Martin</p>
+<p id="date">2007-02-18</p>
+
+<h3>Superstates</h3>
+<p>
+	Often in statemachines, duplication can arise. For example, the vending machine in our examples 
+	may need periodic repairs. It’s not certain which state the vending machine will be in when the 
+	repair man arrives. So all states should have a transition into the Repair Mode state.
+</p>
+<!-- 
+
+Image
+
+Image Description:
+Diagram 1 - Without Superstates
+
+-->
+<p>
+	In this diagram, both the <code>Waiting</code> and <code>Paid</code> states have a transition to 
+	the Repair Mode invoked by the repair event. Duplication! We can dry this up by using the 
+	<b>Superstate</b> construct. See below:
+</p>
+<!-- 
+
+Image
+
+Image Description:
+Diagram 2 - With Superstates
+
+-->
+<p>
+	Here we introduce the Operational superstate. Both the <code>Waiting</code> and <code>Paid</code> 
+	states are contained within the superstate which implies that they inherit all of the superstate’s 
+	transitions. That means we only need one transition into the <code>Repair Mode</code> state from the 
+	<code>Operational</code> superstate to achieve the same behavior as the solution in <i>diagram 1</i>.
+</p>
+<p>
+	One statemachine may have multiple superstates. And every superstate may contain other superstates. 
+	ie. Superstates can be nested.
+
+<h3>History State</h3>
+<p>
+	The solution in <i>diagram 2</i> has an advantage over <i>diagram 1</i>. In <i>diagram 1</i>1, once 
+	the repair man is done he triggers the operate event and the vending machine transitions into the 
+	<code>Waiting</code> event. This is unfortunate. Even if the vending machine was in the <code>Paid</code> 
+	state before the repair man came along, it will be in the <code>Waiting</code> state after he leaves. 
+	Shouldn’t it go back into the <code>Paid</code> state?
+</p>
+<p>
+	Superstates come with the <b>history state</b> which solves this problem. Every superstate will 
+	remember which state it is in before the superstate is exited. This memory is stored in a pseudo state 
+	called the <b>history state</b>. Transitions that end in the history state will recall the last active 
+	state of the superstate and enter it.
+</p>
+<p>
+	You can see the history state being use in <i>diagram 2</i>. In this solution, the history state allows 
+	the vending machine to return from a repair session into the same state it was in before, as though nothing 
+	happened at all.
+</p>
+<h3>Code</h3>
+<p>
+	The following code builds the statemachine in diagram 2. Watch out for the <code>_H</code>. This is how 
+	the history state is denoted. If you have a superstate named <code>foo</foo>, then it’s history state 
+	will be named <code>foo_H</code>.
+</p>
+<!-- 
+require 'rubygems'
+require 'statemachine'
+
+vending_machine = Statemachine.build do
+  superstate :operational do
+    trans :waiting, :dollar, :paid
+    trans :paid, :selection, :waiting
+    trans :waiting, :selection, :waiting
+    trans :paid, :dollar, :paid
+
+    event :repair, :repair_mode,  Proc.new { puts "Entering Repair Mode" }
+  end
+
+  trans :repair_mode, :operate, :operational_H, Proc.new { puts "Exiting Repair Mode" }
+
+  on_entry_of :waiting, Proc.new { puts "Entering Waiting State" }
+  on_entry_of :paid, Proc.new { puts "Entering Paid State" }
+end
+
+vending_machine.repair
+vending_machine.operate
+vending_machine.dollar
+vending_machine.repair
+vending_machine.operate
+-->
+<p>Output:</p>
+<!--
+Entering Repair Mode
+Exiting Repair Mode
+Entering Waiting State
+Entering Paid State
+Entering Repair Mode
+Exiting Repair Mode
+Entering Paid State
+-->
+<p>
+	Next we should cover pseudo states.
+</p>	

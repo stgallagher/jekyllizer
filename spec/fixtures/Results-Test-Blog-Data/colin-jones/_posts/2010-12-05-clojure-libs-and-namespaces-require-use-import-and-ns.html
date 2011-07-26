@@ -1,0 +1,369 @@
+---
+layout: post
+title: Clojure Libs and Namespaces: require, use, import, and ns
+tag:
+---
+
+<h2>
+  Whenever I'm showing a newcomer to Clojure how to bring in code from other namespaces,
+  I inevitably find myself apologizing that it's a bit complex and at times confusing. 
+</h2>
+<p>
+  Now, I won't spend time moaning about the current state of namespaces (see 
+  <a href="http://groups.google.com/group/clojure-dev/browse_thread/thread/46559fd9eb127bdd">
+    this Clojure mailing list discussion
+  </a>
+  and 
+  <a href="http://dev.clojure.org/display/design/Loading,+Compiling,+and+Namespaces">
+    the design discussion around namespaces in the Clojure Confluence
+  </a>), but I thought it might be helpful to give an overview of the various calls you
+  can make to require a Clojure lib.
+</p>
+<p>
+  Let's start a Clojure REPL, where we'll outline the baseline commands to pull in libs.
+  If you don't know how, <a href="http://clojure.org/downloads">download Clojure</a> and use
+  <a href="http://clojure.org/getting_started">these instructions</a> to get a REPL up and
+  running. If you already have the jar, just fire up a REPL using 
+  <code>java -jar clojure-1.2.0.jar</code>.
+</p>
+<p>
+  Later, we'll see the <code>ns</code> macro, which is much more idiomatic, and that's what
+  you'll use in real Clojure projects. However, since <code>require</code>, <code>use</code>,
+  and <code>import</code> are what you'll often use in the REPL, and because those are used
+  behind the scenes, we'll start there.
+</p>
+<h3>The baseline: <code>require</code></h3>
+<p>
+  Let's say we want to use some of Clojure's built-in string operations. In the current 
+  version of Clojure (1.2), there's a library called <code>clojure.string</code> which
+  contains some useful functions like <code>split</code>, <code>join</code>, and 
+  <code>capitalize</code>.
+</p>
+<p>Let's try to use <code>split</code> to break up the first line of a CSV file:</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-1.clj"></script>
+<p>
+  Whoops! We forgot to actually tell Clojure that we're going to be using that namespace.
+  There are a few namespaces (<code>clojure.core</code>, <code>clojure.set</code>, etc.) 
+  that get auto-required into the <code>user</code> namespace when the <abbr>REPL</abbr> starts up,
+  but <code>clojure.string</code> isn't one of them. So let's tell the <abbr>REPL</abbr> that we're
+  going to be using <code>clojure.string</code>:
+</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-2.clj"></script>
+<p>
+  Great, so that worked. Let's take a moment to examine this, the most basic syntax for
+  pulling in other Clojure code. <code>require</code> is just a Clojure function that
+  takes a few different types of arguments.
+</p>
+<p>
+  First, we could pass a single quoted symbol, and <code>require</code> will make the
+  namespace named by that symbol available with the full <code>namespace/var-name</code>
+  syntax in later code. We can also pass multiple quoted symbols, as below:
+</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-3.clj"></script>
+<p>
+  Keep in mind that I'm starting a fresh REPL for each of these examples, to
+  demonstrate what happens the first time you load a lib. In general, if you require a lib 
+  a second time, nothing will happen.
+</p>
+<p> 
+  There's a way around that (mainly for interactive development), as we'll see later on,
+  but for now, just start up a new <abbr>REPL</abbr> as you're trying these out.
+</p>
+<p>
+  It's worth noting here that the name of the lib itself parallels the directory structure,
+  so in order to require <code>clojure.string</code>, you'd need a directory named 
+  <code>clojure</code> relative to your classpath, and a file called <code>string.clj</code> 
+  within that directory.
+</p>
+<p>
+  That particular case is already true within the clojure jar, but it's something to keep
+  in mind as you write your own Clojure code and have need to require it outside of the
+  namespace where it lives.
+</p>
+<p>
+  There's also a way to alias namespaces when you require them, such that you could
+  refer to a <code>string</code> namespace rather than a <code>clojure.string</code>
+  namespace, and you'd get the same result:
+</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-4.clj"></script>
+<p>
+  The strange-looking quoted vector is a shorthand to avoid having to quote every
+  individual symbol within the vector. You could type:
+</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-5.clj"></script>
+<p>
+  The same concepts apply to using requiring multiple namespaces: <code>require</code>
+  will take an arbitrary number of &ldquo;libspecs&rdquo;, such as the quoted symbol 
+  and vector we've just seen. You can also mix and match symbols with vectors here:
+</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-6.clj"></script>
+<p>
+  One last way to use <code>require</code> simplifies things when a prefix is the
+  same in several libraries you want to load:
+</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-7.clj"></script>
+<p>
+  Here, <code>clojure</code> is the prefix for both of the libraries we want, so
+  we only need to type &ldquo;clojure&rdquo; once. <code>string</code> and 
+  <code>test</code> are just libspecs in these situations, so you can use the
+  <code>:as</code> option here as well:
+</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-8.clj"></script>
+<p>
+  At this point, the variation between list and vector notation (parentheses and
+  square brackets, respectively) may be driving you a bit bonkers.
+</p>
+<p>
+  Never fear, the main thing to remember here is that a libspec should be either
+  a quoted symbol or vector. So whenever you want to use something like <code>:as</code>,
+  that thing (the libspec) should be a vector.
+</p>
+<p>
+  It's become somewhat idiomatic to use lists for many other places we'll see later,
+  but often that isn't actually enforced by the language, and there are in fact 
+  situations where either vectors or lists might make more sense than the other
+  from a semantic perspective.
+</p>
+<p>
+  Phil Hagelberg has 
+  <a href="http://p.hagelb.org/import-indent.html">some thought-provoking advice on this matter</a>.
+  Just stick with the syntax you see here and in the Clojure documentation, remembering
+  that you <em>must</em> use vectors for libspecs, and you'll be fine.
+</p>
+<p>
+  If you're interested, you can see more details about what happens under the covers
+  by appending a <code>:verbose</code> flag to the end of the argument list to 
+  <code>require</code> (note that the <code>:verbose</code> flag is <i>outside</i>
+  the libspec vector that pulls in <code>clojure.string</code>):
+</p>
+<script src="https://gist.github.com/1054713.js?file=cjones-20101205-9.clj"></script>
+<p>
+  As you can see, <code>clojure.core/load</code> does the low-level loading, then we
+  switch back to the <code>user</code> namespace (loading <code>clojure.string</code>
+  made it the current namespace for a brief, shining moment), and finally we create
+  an alias in the <code>user</code> namespace so that we can refer to 
+  <code>clojure.string</code> as simply <code>string</code>. 
+</p>
+<p> 
+  You'll see significantly more complex output from this if you do something similar
+  with <code>clojure.test</code>, as it requires other libraries itself:
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-11.clj"></script>
+<p>
+  That might have seemed intimidating at the start of the article, but you're likely
+  now at a point now where you can guess the things that are being required under
+  the covers.
+</p>
+<p>
+  Finally, I promised an example of reloading code from a particular namespace for
+  interactive development, so here's how it works:
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-12.clj"></script>
+<p>
+  Nothing happens the second time, as you can see. However, we can change that
+  with the <code>:reload</code> flag:
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-13.clj"></script>
+<p>
+  As you'd expect, the code gets loaded again with the <code>:reload</code> flag.
+  The <code>reload-all</code> flag works similarly, but it will also make sure that
+  all dependencies of the namespace in question are also reloaded.
+</p>
+<p>
+  Now don't get overwhelmed yet. This is a lot of information for one function,
+  but <code>require</code> is quite similar to other code-including functions
+  and macros, so you'll see the same patterns again.
+</p>
+<h3>Using other namespaces' code as though it's yours: <code>use</code></h3>
+<p>
+  Sometimes, including any namespace information at all seems too verbose 
+  (unit tests for a namespace are a good example). In these cases, we want
+  to refer to vars as though they were ours, and that's where 
+  <code>use</code> comes in. 
+</p>
+<p>  
+  <code>use</code> actually uses two other functions to do the bulk of its work:
+  <code>require</code> and <code>refer</code>. We've covered <code>require</code>
+  already, and you'll rarely have a need to use <code>refer</code> directly, 
+  so let's stick to the syntax of <code>use</code>.
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-14.clj"></script>
+<p>
+  This is pretty heavy-handed. We've just blown away the definitions of 
+  <code>replace</code> and <code>reverse</code> in <code>clojure.core</code>,
+  so if we wanted to use those again, we'd have to fully qualify those 
+  functions (something like <code>clojure.core/replace</code>. 
+</p>
+<p>
+  In addition, this kind of wholesale inclusion of vars into our current 
+  namespace can make it difficult do decipher where the definitions live.
+  It's not something we want to do very often&mdash;=;maybe in the case of a unit test.
+  It would be much better to limit the vars being referred to a named subset, like this:
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-15.clj"></script>
+<p>
+  It still works, but now we're very clear about what we want. Anyone peeking into 
+  this code for the first time will know immediately that <code>split</code> comes 
+  from the <code>clojure.string</code> namespace, with no need to grep the whole
+  project for the function definition. 
+</p>
+<p>  
+  Note that the libspecs here are strikingly similar to what we used for 
+  <code>require</code>! We have a new option, <code>:only</code>, where we used 
+  <code>:as</code> before, and that option is associated with a list rather than a
+  symbol, but it's easy to see that they're really the same sort of data structure.
+</p>
+<p>
+  There are other options with <code>use</code> as well:
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-16.clj"></script>
+<p>
+  This eliminates one of the problems with the first <code>use</code> example 
+  (shadowing the <code>clojure.core</code> functions), but it's still not obvious
+  at a glance where <code>split</code> comes from. I prefer <code>:only</code>
+  in most situations. 
+</p>
+<p> 
+  I've seen a quote come across my Twitter stream, attributed to Stuart Halloway
+  (<a href="http://coding.derkeiler.com/Archive/Fortran/comp.lang.fortran/2004-05/0971.html">also discussed in the context of Fortran</a>),
+  that recommends: &ldquo;Only use <code>use</code> with :only.&rdquo; With rare exceptions,
+  I think that advice is pretty sound.
+</p>
+<p>
+  There's one more available option, <code>:rename</code>, that lets us specify a map
+  of vars to rename in the context of the current namespace:
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-17.clj"></script>
+<p>
+  The most common of these options in the wild is certainly <code>:only</code>,
+  but knowing that all of these are available will prepare you for that moment 
+  when they're <em>exactly</em> what you need.
+</p> 
+<p>
+  It's also worth pointing out here that you can also use <code>:as</code>,
+  in the same way that we did with <code>require</code>, to provide a shorter
+  alias for a namespace:
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-18.clj"></script>
+<p>
+  So it turns out that we could use <code>use</code> for exactly the same 
+  purposes as <code>require</code>, if we supply an empty list to the <code>:only</code>
+  option. I don't recommend that use, as <code>require</code> itself is more idiomatic,
+  but it's there!
+</p>
+<h3>Working with Java and deftypes/defrecords: <code>import</code></h3>
+<p>
+  In terms of syntax, <code>import</code> is much simpler than either <code>require</code>
+  or <code>use</code>&mdash; there are no options to specify various behaviors.
+</p> 
+<p>
+  In general, you can think of <code>import</code> as the way you get ahold of
+  Java code. The specifics are only a bit more complex. Let's take a look.
+</p>
+<p>
+  As long as the Java class you want it on the classpath, you can already
+  refer to it using the fully-qualified name:
+</p>
+<script src="https://gist.github.com/1054725.js?file=cjones-20101205-19.clj"></script>
+<p>
+  If you're at all familiar with Java already, you already know that <code>import</code>
+  can be used in a way similar to <code>use</code>, so that you can just talk about a
+  <code>Date</code> in your code, rather than specifying the packages every time as
+  <code>java.util.Date</code>:
+</p>
+<script src="https://gist.github.com/1054737.js?file=cjones-20101205-21.clj"></script>
+<p>
+  You're probably already wondering if you can use a libspec instead of a plain
+  old symbol! It's actually not a libspec in this case, but you can indeed get
+  some different behavior here by using a quoted list, similarly to the shared-prefix
+  example for <code>require</code>:
+</p>
+<script src="https://gist.github.com/1054737.js?file=cjones-20101205-22.clj"></script>
+<p>
+  So here we're specifying a package as the first element of the vector, and the
+  classes from that package that we want to import as the remaining elements. 
+</p>
+<p>
+  You actually don't need a vector here (a list would do just fine), but it seems 
+  more symmetrical to the other functions to use a vector, so that's what I prefer here.
+  I haven't seen a strong trend emerge here, but particular projects generally stick
+  to one or the other.
+</p>
+<p>
+  It's very important to note here that <code>import</code> actually applies to <em>any</em>
+  classes you need to get ahold of, including Clojure defrecords and deftypes. Pretend 
+  you have a namespace <code>stuff</code> which contains a defrecord called 
+  <code>BigWidget</code>.
+</p>
+<script src="https://gist.github.com/1054737.js?file=cjones-20101205-23.clj"></script>
+<p>
+  One important detail here is that the initial <code>require</code> is necessary&mdash;without
+  it, you'll get a <code>ClassNotFoundException</code>. Defypes work identically, though their
+  printed representation will of course vary. You can use the same vector notation as with Java
+  classes, but here you'd specify a namespace rather than a Java package as the first element
+  of the vector.
+</p>
+<p>
+  This difference in code-loading requirements between deftypes/defrecords and other Clojure code
+  may be surprising at first (it was to me, anyway), but the capitalization (along with several 
+  semantic differences) is a good hint that something different needs to happen.
+</p>
+<p>
+  And once you've <code>require</code>d the Clojure namespace, you can refer to defrecords and 
+  deftypes by their fully-qualified names (e.g. <code>stuff.BigWidget</code>), in a similar way
+  that you could with Java classes.
+</p>
+<h3>Bringing it all together: <code>ns</code></h3>
+<p>
+  While <code>require</code>, <code>use</code>, and <code>import</code> are the basis for all
+  of your expeditions into other people's code in Clojure, you won't often be using them 
+  directly in your actual Clojure projects. 
+</p>
+<p>
+  It's far more idiomatic to use the <code>ns</code> macro, which pulls all of these together.
+  The most basic use of <code>ns</code> gives just the namespace for the code that comes 
+  afterwards&mdash;you'll see at least this much in just about every Clojure file you come across:
+</p>
+<script src="https://gist.github.com/1054737.js?file=cjones-20101205-24.sh"></script>
+<p>
+  Because we have so much background already, let's jump right into a much more complex 
+  <code>ns</code> example:
+</p>
+<script src="https://gist.github.com/1054737.js?file=cjones-20101205-25.clj"></script>
+<p>
+  There's a lot here to look at, but take heart! Our trusty old <code>use</code> has been
+  reincarnated as <code>:use</code>, the first element of a list within the <code>ns</code>
+  macro body. 
+</p>
+<p>  
+  The same goes for <code>require</code> -&gt; <code>:require</code> and <code>import</code>
+  &ndash;&gt; <code>:import</code>. The other syntax change to get used to is that we no longer
+  need to quote any of our libspecs&mdash;that's done internally. If you know much about how writing
+  Clojure macros works, it'll make a good bit of sense.
+</p>
+<p>
+  You can take any of our previous examples and plug them into the <code>ns</code> macro with
+  only these small changes. Multiple <code>:use</code>, <code>:require</code>, or 
+  <code>:import</code> forms are OK here:
+</p>
+<script src="https://gist.github.com/1054737.js?file=cjones-20101205-26.clj"></script>
+<p>
+  But it's more often the case that you'd eliminate the duplication there by rolling those into
+  the same <code>:require</code> form:
+</p>
+<script src="https://gist.github.com/1054737.js?file=cjones-20101205-27.clj"></script>
+<p>
+  Another point of style: unless you're using the prefix form (as in <code>(clojure template walk)</code>
+  from the first <code>ns</code> example above, you generally want to stick to one namespace per
+  line, and left-align the libspecs.
+</p>
+<p>
+  Once you've made these small syntax leaps, you've got all the knowledge you'll need to use 
+  Clojure libs. Remember that you should prefer <code>ns</code> in any non-REPL code that you
+  write&mdash;the basic <code>require</code>, <code>use</code>, and <code>import</code> are 
+  just the building blocks.
+</p>
+<p>
+  Libs can be among the most confusing areas of Clojure, but with a little effort and practice,
+  they start to make a lot more sense. I hope this has been helpful&mdash;happy requiring!
+</p>

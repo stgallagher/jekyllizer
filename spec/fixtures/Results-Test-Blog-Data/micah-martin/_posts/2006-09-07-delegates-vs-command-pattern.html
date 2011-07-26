@@ -1,0 +1,488 @@
+---
+layout: post
+title: Delegates Vs Command Pattern
+tag:
+---
+
+
+<p>
+  Delegates: one of the few unique aspects of .NET. How useful are they?
+</p>
+
+<p>
+  Here’s a delegate declaration.
+</p>
+
+<!--
+private delegate double Operation(double a, double b);
+-->
+
+<p>
+  That syntax can take some getting used to. In order to use the <b>Operation</b> 
+  delegate we’ll need some methods that match the <b>double (double, double)</b> 
+  form.
+</p>
+
+<!--
+public static double Add(double a, double b)
+{
+    return a + b;
+}
+
+public static double Subtract(double a, double b)
+{
+    return a - b;
+}
+
+public static double Multiply(double a, double b)
+{
+    return a * b;
+}
+
+public static double Divide(double a, double b)
+{
+    return a / b;
+}
+-->
+
+<p>
+  There’s nothing special about that. Now to create an instance of the <b>Operation</b> 
+  delegate.
+</p>
+
+<!--
+Operation math = new Operation(Add)
+-->
+
+<p>
+  Again the syntax can throw you off a bit. This line instantiates an instance of 
+  <b>Operation</b> with the <b>Add</b> method and stores it in a variable named 
+  <b>math</b>. To use <b>math</b> you invoke it as though you were calling a method.
+</p>
+
+<!--
+double result = math(1, 2);
+Console.WriteLine("result: {0}", result);
+>> 3
+-->
+
+<p>
+  Invoking <b>math</b>, with parameters 1 and 2, actually called <b>Add</b> with 
+  the same parameters, hence the result of 3. The oposite behavior can be achieved 
+  by using the <b>Subtract</b> method instead of <b>Add</b>.
+</p>
+
+<!--
+Operation math = new Operation(Subtract);
+double result = math(1, 2);
+Console.WriteLine("result: {0}", result);
+>> -1
+-->
+
+<p>
+  <b>math</b> just delegated the call with parameters 1 and 2 to <b>Subtract</b> 
+  and so the result was -1. So far this isn’t very useful. We can wrap methods up 
+  in delegates and call methods through the delegate but that’s just a lot of extra 
+  work. The power of Delegates comes into play when you don’t know which method to 
+  use. Assume this code was used in a bank system. A frequent action of a bank 
+  system is to adjust the balance of an account.
+</p>
+ 
+<!--
+private double balance = 0;
+public void AdjustBalanceBy(double adjustment, Operation operation)
+{
+    double newBalance = operation(balance, adjustment);
+    LogAdjustment(balance, newBalance);
+    balance = newBalance;
+}
+-->
+
+<p>
+  Notice that <b>AdjustBalanceBy</b> takes an <b>Operation</b> Which means it could be 
+  <b>Add</b>, <b>Subtract</b>, <b>Multiply</b>, or <b>Divide</b> to adjust the balance. 
+  There might be operations we haven’t considered yet like applying interest. 
+  <b>AdjustBalanceBy</b> could take care of that for us as long as we give it a delegate 
+  that calls <b>ApplyInterest(double, double)</b>. The code in <b>AdjustBalanceBy</b> 
+  would never have to change and that’s exactly how the Open/Closed Principle says it 
+  should be. How would this be done without delegates? The Command Pattern would work 
+  great!
+</p>
+
+<!--
+public interface Operation
+{
+    double Run(double a, double b);
+}
+
+public class Add : Operation
+{
+    public double Run(double a, double b)
+    {
+        return a + b;
+    }
+}
+
+public class Subtract: Operation
+{
+    public double Run(double a, double b)
+    {
+        return a - b;
+    }
+}
+...
+public void AdjustBalanceBy(double adjustment, Operation operation)
+{
+    double newBalance = operation.Run(balance, adjustment);
+    LogAdjustment(balance, newBalance);
+    balance = newBalance;
+}
+-->
+
+<p>
+  There’s a bit more code without delegates but we’re saved from the wacky syntax. 
+  Considering the extra language complexity of delegates, I feel the Command pattern 
+  has the upper hand here. Point for Command Pattern. !meta Delegates 0 - Command 
+  Pattern 1
+</p>
+  
+<h3>What about multicasting?</h1>
+
+<p>
+  Delegates have this feature called multicasting that allows you to add multiple 
+  delegates together. Here’s an example.
+</p>
+  
+<!--
+Operator math = new Operator(Add);
+math += new Operator(Subtract);
+math += new Operator(Multiply);
+math += new Operator(Divide);
+math(1, 2);
+-->
+
+<p>
+  When <b>math</b> is called at the bottom, all four operations are performed. In this case it’s not particularly useful but for something like a button, where, when clicked, multiple actions need to take place, multicasting is very convenient. But what happens to all the return values? Each of the methods combined in the math delegate above returns a value but <b>math</b> can only return one value.
+
+<!--
+Operation math = new Operation(add);
+double result = math(1, 2);
+Console.WriteLine("result 1: {0}", result);
+
+math += new Operation(subtract);
+result = math(1, 2);
+Console.WriteLine("result 2: {0}", result);
+
+math += new Operation(multiply);
+result = math(1, 2);
+Console.WriteLine("result 3: {0}", result);
+
+math += new Operation(divide);
+result = math(1, 2);
+Console.WriteLine("result 4: {0}", result);
+
+OUTPUT
+>>result 1: 3
+>>result 2: -1
+>>result 3: 2
+>>result 4: 0.5
+-->
+
+<p>
+  Interesting. Multicasted delegates only return one value from the combined execution. 
+  This suggests that multicasting should only be used when you don’t really care what 
+  the return values are. The Command Pattern alone can’t compete with multicasting 
+  but along with his good buddy Composite, they’ve got things under control.
+</p>  
+
+<!--
+public class Composite : Operation
+{
+    IList operations = new ArrayList();
+
+    public double Run(double a, double b)
+    {
+        double result = 0;
+        foreach(Operation o in operations)
+            result = o.Run(a, b);
+
+        return result;
+    }
+
+    public void AddOperation(Operation o)
+    {
+        operations.Add(o);
+    }
+}
+-->
+
+<p>
+  This version of Composite mimics the delegate’s handling of the return values 
+  but it could easily average them, store them in a list, or do whatever else 
+  your funny bone fancies. Composite gives much more control over combined 
+  execution and so I say it earns another point for Command Pattern. !meta 
+  Delegates 0 - Command Pattern 2
+</p>
+  
+<h3>Events</h3>
+
+<p>Oh gosh. Get a load of this syntax.</p>
+
+<!--
+button.Click += new System.EventHandler(SomeAction);
+-->
+
+<p>
+  An intuitive interpretation: <b>button.Click</b> - Telling the button that 
+  it was clicked <b>button.Click +=</b> - Adding something to the clicking of 
+  the button… Huh? <b>new System.EventHandler(SomeAction) - SomeAction</b> must 
+  be a method the fits the <b>EventHandler</b> method form. An instance of 
+  <b>EventHandler</b> is created with <b>SomeAction</b>. After those logical 
+  steps a developer concludes that <b>Click</b> must be a public field (or 
+  property) of <b>Button</b> of <b>EventHandler</b> which is a delegate. And 
+  the developer would be wrong! <b>Click</b> is actually an Event. The 
+  declaration looks something like this:
+</p>
+
+<!--
+public event System.EventHandler Click;
+-->
+
+<p>
+  The whole Event construct is rather silly because, as far as I can tell, 
+  it could just as easily be replaced with a public field (or property). 1 
+  point deduction from delegates for flagrant misuse of syntax.
+</p>
+  
+<h3>
+  Final Score
+  Delegates: -1
+  Command Pattern: 2
+</h3>
+  
+p>
+  —- !commentForm “There’s a bit more code without delegates but we’re saved 
+  from the wacky syntax. Considering the extra language complexity of delegates, 
+  I feel the Command pattern has the upper hand here” What is complex about 
+  the keyword delegate followed by the required signature of your choosing? 
+  In what way is this “wacky”? Clutching at straws is the phrase that springs 
+  to mind. * The declaration of delegates is not terribly complex. It’s the use 
+  of delegates that’s complex. <b>Operation operation</b> - It looks like a regular object 
+  but you can’t use it like a regular object. <b>operation(…)</b> ”Why is operation being 
+  invoked as though it were a method? Why can’t all objects be invoked like methods?” 
+  When you come across delegates in code there’s moment of confusion where you have 
+  to figure out that the variable that you thought was an object is really a delegate. 
+  - MicahMartin ”Delegates make functions first class objects, this is actually what 
+  the command pattern is trying to emulate, how can you possibly object to that? 
+  In version 2.0, anonymous delegates extend this to make lambda’s possible, this 
+  is fantastic, and far better than the command pattern.” “How would this be done 
+  without delegates? The Command Pattern would work great!” Yes it would and as 
+  much as we would like everyone to be aware of and study design patterns not everyone 
+  will. Therefore when they study dotnet and come across this concept supported in 
+  their language they will be able to use and benefit from it without even being aware 
+  of the command pattern. If and when they move on to design patterns they will be in 
+  the comforting position of knowing two approaches to a particular problem and can 
+  weigh up for themselves the pros and cons of each method. * Good point. Having 
+  delegate-like functionality built into the language is very powerful. In fact Ruby, 
+  my favorite language, would not be half as wonderful without blocks. Languages like 
+  Ruby and Smalltalk have very elegant implementations of blocks and closures. 
+  Delegates are not elegant. - MicahMartin “The Command Pattern alone can’t compete 
+  with multicasting but along with his good buddy Composite, they’ve got things under 
+  control.” And so we keep on adding patterns just to get the same level of functionality 
+  that multi-cast delegates offer? Aren’t you people the same ones that tell us not to 
+  add patterns for the sake of it? Refactoring to Patterns by Josh Kerievsky, anyone? 
+  How often will you need the return values from multi-cast delegates? Depends, is the 
+  answer. Therefore if you don’t, multicasting is fine and less work. * Agreed. When 
+  programming in .NET there’s no point in fighting it; you have to use delegates. When 
+  you don’t need the return value, multicasting is easier. - MicahMartin ”delegates make 
+  multicast commands first class, that’s better than a command composite.” “The whole 
+  Event construct is rather silly because, as far as I can tell, it could just as easily 
+  be replaced with a public field (or property).” Not sure what you are getting at here 
+  but then I’m not sure what you are getting at in the whole article. Your remark “as far 
+  as I can tell” implies to me that you haven’t actually spent that much effort getting 
+  to know dotnet. It seems to me an exercise in Microsoft bashing yet again. I’m guessing 
+  you’re a Sun worshipper (of the Java kind). Perhaps you should applaud MS for its efforts 
+  in helping “mortal” developers get good code written quickly instead of finding any excuse 
+  to criticize. * Do an experiment. Next time you’re about to declare an event, declare a 
+  public instance of a delegate instead: <b>public Operation myEvent = new Operation(Add);</b>. 
+  It’ll work just like an event. One benefit of this alternative to events is that you 
+  won’t have to worry about the annoying null pointers that Thomas describes below. - 
+  MicahMartin ”Incorrect, event is an access modifier, all events are delegates, event 
+  simply means that only += and -= can be used, with a public delegate, one could replace 
+  the entire delegate via assignment, killing all previous subscribers. The event keyword 
+  enforces the observer pattern. Public delegates allow aButton.Click = new EventHandler(MyAction), 
+  Public event delegates allow aButton.Click += new EventHandler(MyAction) and =- new 
+  EventHandler(MyAction), but not =, this is vital.” Steve Bate —- “Button.Click += …” 
+  The most silly thing about this syntax is that the Click spontaniously changes from null 
+  to something on the first +=, and suddenly becomes null when you apply -= a certain amount 
+  of times. So after an operation when you expect to remove something from a collection, 
+  the collection itself becomes null. That’s why you usually see a test for null just before 
+  an event is invoked. Why they invented this and why they think this is smart, is beyond me. 
+  Worse is that it seems it’s not fixed in Whidbey. Thomas Eyde * I agree wholeheartedly. 
+  When I teach C# classes, students trip over this quirkiness like clockwork. - MicahMartin 
+  ”There’s nothing weird about that, it’s quite natural… Click += new Action, allows Click 
+  to act as both AddListener and RemoveListener, and makes perfect sense, since Click is a 
+  list of actions. It’s a nice use of operator overloading to simplify the common action of 
+  adding and removing event listeners.” —- Yes, it is a shame. The thing that I think is 
+  worst about the event/delegate mechanism is that it doesn’t evolve well. Imagine having an 
+  event called TransactionAdded. It’s an event so anyone can attach a delegate to it to find 
+  out when a transaction was added. Okay, now what should we do if we need another event 
+  called TransactionUpdated? Easy. We add it. But, is that the best thing? Now we have two 
+  events that people have to register for when they want to know about transaction operations. 
+  If we’d used a interface, a listener with two methods (added, updated) we could’ve just 
+  registered an object. ”A delegate is essentially a one method interface, and covers by far 
+  the vast majority of UI cases of listening to events, and nothigng prevents you from doing 
+  as you suggest, so what’s the complaint? Interfaces force you to declare objects to implement 
+  them, delegates are move flexible and allow you to pass any function that matches the correct 
+  signature, this allows polymorphism without forcing you to implement an interface, a great 
+  advantage when you don’t have access to the original source. Delegates are an extra tool that 
+  give you more flexibility than interfaces.” The sad thing about the event/delegate mechanism 
+  is that it lulls you in with the event for that first method, especially with the multicast 
+  feature. After you have that first event, many people will add a second and third event rather 
+  than refactor to an interface and a list of objects. In fact, I’m working with another team 
+  that’s done this just today. - MichaelFeathers ”Everything has potential for abuse, that doesn’t 
+  mean we shouldn’t want those extra tools. Delegates give you something interfaces can’t, 
+  polymorphism at the method level, rather than the object level, why wouldn’t you want that?” —- 
+  Why not use both? I use the Command Pattern and Delegates/Events. The fact is that the .NET 
+  Framework has the Button.Click += new EventHandler() syntax built in and that is how events are 
+  handled. So in my event handlers I execute Command objects and add them to a Command Stack 
+  (when necessary). This allows me to take advantage of the nice code completion in Visual Studio, 
+  while still using the nifty GoF Pattern.
+</p>  
+
+<!--
+...
+
+private CommandStack _commandStack = new CommandStack();
+someButton.Click += new EventHandler(myEventHandler);
+
+protected void myEventHandler(object sender, EventArgs args)
+{
+     _commandStack.Execute(new SmurfCommand("Kill Gargamel!"));
+}
+...
+-->
+
+<p>
+  Regardless, I think the intention of delegates was not to piss off GoF loyalists, but 
+  rather to introduce a better way of doing function pointers. Likewise the intention of 
+  events was to offer a different approach to anonymous methods & classes (though in C# 2 
+  anonymous methods/classes are brought in). After all C# is named C# because the language 
+  is like C++, only sharper (or duller if you ask a POJO). ;) - Ben Monro !* Tue, 20 Sep 
+  2005 09:10:10, Dave, Instance Methods A comparison of delegates and the command pattern 
+  using only static methods is only half the story. Using instance methods for delegates 
+  is quite simple, but emulating the functionality in the command pattern, while also simple, 
+  adds still more clutter to create and manage the additional object reference in each command 
+  class, and even if you favour the command pattern to save you learning a new syntax the extra 
+  “boilerplate” clutter it involves shifts the clarity of the construct over to the delegate. 
+  At least in my opinion. Another wrinkle is that the instance delegate implicitly has access 
+  to private members of its class, while the command pattern can only access public members of 
+  the referenced class, forcing you to expose a method to do the actual delegate work. Your 
+  subtract operation becomes:
+</p>
+  
+<!--
+public class Subtract: Operation
+{
+        private ContextObject _c;
+        Subtract (ContextObject c)
+        {
+             _c=c;
+
+        }
+    public double Run(double a, double b)
+    {
+        return _c.Run(a,b);
+    }
+}
+-->
+
+<p>
+  That seems a lot of extra boilerplate per class when delegates get it for free via: math 
+  = new Operation(c.Subtract); Worse, in this case I’ll already have c.Subtract written with 
+  the correct signature for the command class to call…this reduces the ‘command’ class to little 
+  more than an adapter that doesn’t really need to adapt anything. The entire class becomes 
+  redundant! —- Tue, 20 Sep 2005 17:16:32, Michel, C++ Equivalents “Delegates: one of the few 
+  unique aspects of .NET. How useful are they?” There are equivalents/alternatives to delegates 
+  in C++ so I would argue they are unique to .NET. Look att boost.function/boost.signal in 
+  conjunction with boost.bind gives a quite elegant and good alternative to the command pattern 
+  and it avoids additional single method intermethods and virtual calls. Look at www.boost.org 
+  for more info. At least boost.function and boost.bind is going in to the TR1 C++ specification. 
+  /Michel —- Thu, 22 Sep 2005 06:11:58, Bart De Boeck, Delegates versus inner classes What do you 
+  think about the arugments in - http://java.sun.com/docs/white/delegates.html -
+  http://msdn.microsoft.com/vjsharp/productinfo/visualj/visualj6/technical/articles/general/truth/default.aspx 
+  Bart http://www.xenopz.com/blog/bartdeboeck/ —- Mon, 26 Sep 2005 08:58:12, Chaz Haws, Delegate 
+  complexity I’ll grant you I’d have liked an easier to explain model for “event”. It does make a 
+  weird kind of sense once you know what it’s doing, but… feh. But the delegate itself really is 
+  pretty straightforward. In most cases it gets me everything I wanted from the Command pattern, 
+  and I find the shorter syntax to be more elegant. One other point: With pre-existing code of the 
+  right interface, Command would need a new class for each method, but delegates would need nothing 
+  at all. As for whether they are unique to .NET, well, actually no. The “closure” in Borland’s 
+  C++ Builder is the same thing. That was of course a feature in Delphi. So Anders is fond of his 
+  delegates. Me too! In the pre-Boost dark ages of C++ I tried to implement something like delegates. 
+  It was functional, but never as clean as the modern delegate syntax. I have a healthy respect for 
+  the complexity being hidden in there. (I’m even more impressed with Boost doing it without language 
+  support, but I’m not doing much C++ lately so I haven’t used it.) Of course, in C++ we overloaded 
+  operator() to help support this and could make any object look like a function call. So that part 
+  didn’t surprise me at all about delegates. —- Fri, 20 Jan 2006 04:29:03, Norman Sasono, How about 
+  Delegates + Events VS Observer Pattern? Who scores? —- Mon, 23 Jan 2006 11:25:08, Ravi Venkataraman, 
+  Much simpler in some other languages These patterns are much simpler in other languages that support 
+  first class functions, like Python. For example, you would write: (Syntax may not be exact)
+</p>
+
+<!--
+def add(a,b): return a+b
+def subtract(a,b): return a-b
+def multiply(a,b): return a*b
+def divide(a,b): return a/b
+
+def run(f,a,b): return f(a,b)
+-->
+
+<p>The run function could be called thus:</p>
+
+<!--
+run(add, 1, 2)
+run(subtract, 1, 2)
+run(multiply, 1, 2)
+run(divide, 1, 2)
+-->
+
+<p>
+  This, I believe, is much more expressive and intuitive. I believe Ruby lets you do this 
+  too. And of course, so does Lisp. Notice the difference in syntax between the C# delegate 
+  and the simplicity of Python. —- Mon, 23 Jan 2006 13:07:41, , Nowhere in the .NET literature 
+  are delegates ever described to be a replacement for the Command pattern. They are always 
+  used for the observer pattern or for “glue code” between components or where you would 
+  otherwise have to define an interface with one method (like Runnable in Java). —- Mon, 23 
+  Jan 2006 14:51:25, , C# is not that different from Python In C# the code looks very close to 
+  Python. The biggest difference is the explicit types.
+</p>
+  
+<!--
+int Add(int x, int y) { return x + y; };
+int Sub(int x, int y) { return x + y; };
+...
+
+run(Add, 1, 2);
+run(Sub, 1, 2);
+...
+-->
+
+<p>You can use anonymous functions, like Python’s lambda operator:</p>
+
+<!--
+run(delegate(int x, int y){return x*y;}, 1, 2);
+-->
+
+<p>
+  And, better than Python, anonymous functions are not limited to expressions.
+</p>
+<!-->  
+  // Multiply slowly!
+  run(delegate(int x, int y) {
+      int result = 0;
+      while(x&#45;&#45; &gt; 0) result += y;
+      return result;
+    }, 1, 2);
+-->

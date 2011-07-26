@@ -1,0 +1,263 @@
+<h1>Dependency Inversion Principle and iPhone</h1>
+<p id="author">Eric Smith</p>
+<p id="date">2009-04-16</p>
+
+<h2>
+  While working on the slides for our upcoming* talk on <abbr title="Test Driven Development">TDD</abbr> 
+  for iPhone I asked Eric Meyer why we need the Dependency Inversion Principle.  He 
+  eagerly answered, &ldquo;Testing!&rdquo; which made me laugh because I wasn’t giving 
+  him a trivia quiz, and I love Eric’s enthusiasm.  He’s right, but the answer is circular.  
+  <abbr title="Test Driven Development">TDD</abbr> is great because it gives us better 
+  designs that correspond to the <abbr title="Dependency Inversion Principle">DIP</abbr> 
+  which enables <abbr title="Test Driven Development">TDD</abbr>.  Ha!  I win, would 
+  you like to buy my consulting services?  I have plenty of three letter acronyms where 
+  those came from.
+</h2>
+<p>
+  Fortunately this isn’t the case, as the 
+  <abbr title="Dependency Inversion Principle">DIP</abbr> existed well before 
+  <abbr title="Test Driven Development">TDD</abbr> was popularized, but recently there 
+  was a <a href="http://www.joelonsoftware.com/items/2009/01/31.html">bit</a> 
+  <a href="http://blog.objectmentor.com/articles/2009/02/06/on-open-letter-to-joel-spolsky-and-jeff-atwood">of</a> 
+  a <a href="http://www.codinghorror.com/blog/archives/001225.html">dust-up</a> over 
+  the <abbr title="Single responsibility, Open-closed, Liskov substitution, Interface segregation and Dependency inversion">SOLID</abbr> 
+  principles.  Many developers don’t understand why dependency inversion is important, 
+  so let’s demonstrate the usefulness in the Objective-C language on the iPhone.
+</p>
+<p>
+  The Dependency Inversion Principle (DIP) reads as follows:
+</p>
+
+<p>
+  <em>A. High level modules should not depend upon low level modules.  Both should 
+  depend upon abstractions.</em>
+  <br>
+  <em>B. Abstractions should not depend upon details.  Details should depend upon 
+  abstractions.</em>
+</p>
+<p>
+  So your code should depend on interfaces not on concrete classes, but why?  Let’s 
+  look at a useful example in the Objective-C built in classes.
+</p>
+<script src="https://gist.github.com/1057173.js?file=esmith-20090416-1.m"></script>
+<p>
+  Do you see the <abbr title="Dependency Inversion Principle">DIP</abbr> at work?  
+  It’s subtle here, but look at the method stringWithFormat, which takes a format 
+  string and then a list of parameters to fill in the format specifiers.  The format 
+  specifier here is &ldquo;%@&rdquo; which takes any Objective-C object and calls 
+  descriptionWithLocale on it, or description otherwise.  The object that is passed 
+  in here could be anything because all the stringWithFormat method cares about is 
+  that the object provides at least one of the two methods above.  It’s depending 
+  on the interface, and not the concrete class.  Let’s imagine a world where this 
+  didn’t exist, and the NSString method could only be composed of other strings.  
+  Suddenly you’d have something like:
+</p>
+<script src="https://gist.github.com/1057173.js?file=esmith-20090416-2.m"></script>
+<p>
+  That’s not bad at all is it?  Well what if there are different objects.
+</p>
+<script src="https://gist.github.com/1057173.js?file=esmith-20090416-3.m"></script>
+<p>
+  Are you starting to see the problem?  Suddenly I can’t use this method without being
+  cognizant of the specifics of the object I passed in.  The minute one of these 
+  interfaces changes I have to change my code.  I stole this method from some real 
+  code, so let’s look at it with some context.  Once upon a time I was writing a mock 
+  object for an iPhone application.  Now iPhone doesn’t have a good mock object 
+  framework, at least that I’m aware of, so I was rolling my own mock.  The mock 
+  logged calls to it which I then queried.  To construct the string I used this 
+  method:
+</p>
+<script src="https://gist.github.com/1057173.js?file=esmith-20090416-4.m"></script>
+<p>
+  Don’t sweat the details right now, they’re not important.  Instead look at how you 
+  can see the <abbr title="Dependency Inversion Principle">DIP</abbr> succeeding and 
+  failing in the same code here.  The first parameter to createStringFrom is a cell 
+  object, but it’s of type id, so it could really be anything.  That’s good because 
+  I wasn’t sure when I wrote this mock what type the cell would be and I’d generally 
+  prefer that my mock object not have to know the details.  In fact the cell did 
+  change type several times which is why insulating yourself from change is so 
+  important.  There’s an assumption by many developers that you should only worry 
+  about the things you’ll be changing in the future, but the best gauge of future 
+  changes is present changes, and if you’re changing a module frequently during 
+  development as you get it right you’ve found a likely change point.  Even if you 
+  haven’t, you’ll make your life simpler in the present by insulating yourself from 
+  that change, speeding up your development cycles.  I digress.
+</p>
+<p>
+  The rest of this method isn’t so lucky.  You see CGPoint and CGRect are C structures, 
+  and I am left to write these as floats in the string (%f).  If I was to change the 
+  parameter types frequently I would probably introduce some way to insulate myself 
+  from that change as well, possibly by wrapping them in objects.  Since those 
+  parameters have not changed I haven’t done that, although I’m thinking about it.
+</p>
+<p>
+  Our current apprentice Colin has given a first-hand account of refactoring to 
+  <abbr title="Dependency Inversion Principle">DIP</abbr> 
+  <a href="http://softwareapprenticeship.wordpress.com/2009/04/02/week-2-thursday/">here</a> 
+  as well.
+</p>
+<p>
+  <strong>How do I do it?</strong>
+</p>
+<div style="float: left;">
+    <div class="thumbnail"><a href="http://skitch.com/paytonrules/bkqwe/skitched-20090403-102851"><img src="http://img.skitch.com/20090403-rurw6firdf12h6g2ak5air2sd4.preview.jpg" alt="skitched-20090403-102851.jpg"></a><br><span style="font-family: Lucida Grande,Trebuchet,sans-serif,Helvetica,Arial; font-size: 10px; color: rgb(128, 128, 128);">Uploaded with <a href="http://plasq.com/">plasq</a>’s <a href="http://skitch.com">Skitch</a>!</span></div>
+</div>
+<p>
+  Eric and I are working on a program to run 
+  <a href="http://en.wikipedia.org/wiki/Conway_game_of_life">Conway’s Game of Life</a>.  
+  On the iPhone screen you see Rounded Rect Buttons that change color based on whether 
+  a cell is alive or dead.  The problem is that we don’t really want to drag and drop 
+  300+ tiny buttons on the screen with interface builder.  Instead we want to create 
+  them programatically, when the GameOfLifeViewController is loaded.  Again I don’t 
+  want to overload you with extraneous details, so just take my word for it that there 
+  is a GameOfLifeViewController, and it needs to generate buttons.  Here’s what my 
+  first pass at a test looked like in rough pseudocode:
+</p>
+<div style="clear: both;"></div>
+<script src="https://gist.github.com/1057173.js?file=esmith-20090416-5.m"></script>
+<p>
+  There’s a lot wrong with this test.  The most obvious is the hard coded 15.  What 
+  happens when we want to change the number of rows and columns?  Now we have to 
+  change code in multiple places.  Naturally we did in fact change this, so I would 
+  have paid for this decision quickly if I hadn’t already refactored it away.  The 
+  second is that there’s going to be more than one test for creation, each of which 
+  will have to perform the same 15x15 loop.  The annoyance of constantly changing this 
+  will reveal the root the problem, the GameOfLifeViewController should really only 
+  be in charge of GameOfLifeView and really doesn’t need to know the details of the 
+  creation of its subviews.  It’s violating the Single Responsibility Principle.  We 
+  can fix that with a factory object, and will do so, but that will violate the 
+  Dependency Inversion Principle.  So we’ve got one 
+  <abbr title="Dependency Inversion Principle">DIP</abbr> violation, an 
+  <abbr title="Single Responsibility Principle">SRP</abbr> violation, and a potential 
+  second <abbr title="Dependency Inversion Principle">DIP</abbr> violation, all 
+  demonstrated in 6 lines of test code.
+</p>
+<p>
+  Fortunately we’re going to introduce some interfaces to clean that up.  The first 
+  is an interface to the board object.  Why the board?  Well the board should know 
+  the number of rows and columns it has, and if we can inject a fake version of the 
+  board we can actually set those to be 1 and 1.  That’s will make our test focus on 
+  what we are truly concerned about.  The second thing we’re going to do is introduce 
+  the Abstract Factory pattern to create our button views.  It’s a bit of a heavyweight 
+  solution but its going to pay off by cleaning up our client code dramatically.  We’ll 
+  have a View Controller concerned with controlling the view, and a creation factory 
+  concerned with creation, as well as a board that keeps track of rows.  Let’s take a 
+  look at the test now, again in rough pseudocode.
+</p>
+<script src="https://gist.github.com/1057173.js?file=esmith-20090416-6.m"></script>
+<p>
+  So what’s going on here?  In the setup we load up the board with a fake board, one 
+  that returns 1 for its rows and columns, and we load up its buttonControllerFactory 
+  with a fake buttonController Factory.  In our test we call the viewDidLoad method, 
+  which is called on controllers after their view is loaded.  Duh.  That’s the method 
+  where we use the buttonControllerFactory.  Then we call a method on the mock factory 
+  calledWith: that takes the parameters I expected the creation factory to receive.  
+  Finally we check that it was called with the assertion.  So far I’ve only been 
+  showing test code, because I wanted to demonstrate just how much cleaner our tests 
+  have become.  Now there’s no loop, no hard coded constants, and no testing the 
+  internals of the creation factory in the view controller.  That isn’t to say we 
+  don’t test the creation, we just do that in a different test case, the one that 
+  corresponds to the ConcreteButtonFactory class.  As a rule if our test code is 
+  cleaner, our implemenation code is cleaner, and that’s the case here as well.
+</p>
+<p>
+  Let’s now look at the real class, and how to enable Dependency Inversion on it.  We 
+  have to start with Objective-C protocols.  Protocols are very similar to Java 
+  interfaces, and just as useful, but are strangely underrepresented in XCode.  As 
+  best I can tell** just create an NSObject subclass and remove the .m file and any 
+  imports from the .h.  Here’s the protocol from the unfortunately named 
+  ButtonControllerFactoryProtocol.h:
+</p>
+<script src="https://gist.github.com/1057173.js?file=esmith-20090416-7.m"></script>
+<p>
+  As you can see the interface only defines one message, createButtonControllerForCell.  
+  It returns the ButtonController object, although it could return an object conforming 
+  to a protocol.  Indeed one could argue it should, as that would streamline my mock 
+  object.  Hmmm… I see a refactoring in my future.  Now let’s look at the class 
+  definition for the ConcreteButtonControllerFactory, which is the object that is 
+  actually used when the real app is running.
+</p>
+<script src="https://gist.github.com/1057173.js?file=esmith-20090416-8.m"></script>
+<p>
+  Not much here is there.  The important part to look at is 
+  NSObject<buttoncontrollerfactoryprotocol>.  ConcreteButtonControllerFactory inherits 
+  from NSObject, as all Cocoa objects do, and conforms to the 
+  ButtonControllerFactoryProtocol.  Like a Java interface this is a contract to later 
+  implement createButtonControllerForCell in my implementation file and that’s exactly 
+  what I’ve done.</buttoncontrollerfactoryprotocol>
+</p>
+<script src="https://gist.github.com/1057187.js?file=esmith-20090416-9.m"></script>
+<p>
+  This isn’t an article on UIKit so I’m not going to get into the details of creating 
+  the button.  You can see again that I’ve ignored the DIP for creating the UIButton 
+  and the ButtonController.  Since this is a factory I’m okay with this violation.  I 
+  could have created abstract factories for the UIButton and ButtonController and 
+  passed them in here but I don’t believe I’d gain any benefit from that implementation.  
+  That’s verified by my testing, as writing tests for the creation of these objects was 
+  hard before I introduced this factory but isn’t any longer.  If it becomes difficult 
+  then I’ll consider making the change to two factories.  Now we need to inject the 
+  concrete dependency.  In a Java project you could do this in a main method or with a 
+  <abbr title="Dependency Injection">DI</abbr> framework like Spring.  We’re going to 
+  be using my favorite <abbr title="Dependency Injection">DI</abbr> framework of all 
+  time: Interface Builder!<em>*</em>
+</p>
+<p>
+  It’s a common misconception that <abbr title="Interface Builder">IB</abbr> is just 
+  a <abbr title="Graphical User Interface">GUI</abbr> builder.  What’s great about 
+  it is that it doesn’t just generate a bunch of code, but instead &ldquo;freeze dries&rdquo; 
+  real objects to be instantiated when the program loads the 
+  <abbr title="NeXT Interface Builder">NIB</abbr> file.  Furthermore while the most 
+  common Outlets are <abbr title="User Interface">UI</abbr> elements there’s no 
+  reason other objects can’t be used.  Let’s take a look at my 
+  <abbr title="NeXT Interface Builder">NIB</abbr> document window for the 
+  GameOfLifeViewController:
+</p>
+<div class="thumbnail"><a href="http://skitch.com/paytonrules/bk2rf/gameoflifeviewcontroller.xib-3"><img src="http://img.skitch.com/20090406-1tcgehw25t5r4iaria1wgurnrb.preview.jpg" alt="GameOfLifeViewController.xib-3"></a><br><span style="font-family: Lucida Grande,Trebuchet,sans-serif,Helvetica,Arial; font-size: 10px; color: rgb(128, 128, 128);">Uploaded with <a href="http://plasq.com/">plasq</a>’s <a href="http://skitch.com">Skitch</a>!</span></div>
+<p>
+  As you can see I’ve got objects for the Game, ConcreteButtonControllerFactory, and 
+  the Board.  That’s because all three of the objects are injected at runtime, while 
+  the code depends on protocols.  To add your own objects to a 
+  <abbr title="NeXT Interface Builder">NIB</abbr> file simply by selecting it from 
+  the Library:
+</p>
+<div class="thumbnail"><a href="http://skitch.com/paytonrules/bk2re/activity-monitor"><img src="http://img.skitch.com/20090406-mh3fde4mes6ftsq3f93ss8xau.preview.jpg" alt="Activity Monitor"></a><br><span style="font-family: Lucida Grande,Trebuchet,sans-serif,Helvetica,Arial; font-size: 10px; color: rgb(128, 128, 128);">Uploaded with <a href="http://plasq.com/">plasq</a>’s <a href="http://skitch.com">Skitch</a>!</span></div>
+<p>
+  It’s inspector window will have a class drop down, so set this object’s object to 
+  your class.  Finally you need to connect the outlets to actual outlets in your code.  
+  Let’s look at the Outlets tab in <abbr title="Interface Builder">IB</abbr> for my 
+  controller (the File’s Owner): 
+</p>
+<div class="thumbnail"><a href="http://skitch.com/paytonrules/bk2rj/game-of-life-view-controller-identity"><img src="http://img.skitch.com/20090406-mhby6u9pu812hwef8iatnf1i4h.preview.jpg" alt="Game Of Life View Controller Identity"></a><br><span style="font-family: Lucida Grande,Trebuchet,sans-serif,Helvetica,Arial; font-size: 10px; color: rgb(128, 128, 128);">Uploaded with <a href="http://plasq.com/">plasq</a>’s <a href="http://skitch.com">Skitch</a>!</span></div>
+<p>
+  Notice how the controller still thinks of them all as NSObject?  So if I change the 
+  objects it doesn’t care, as long as I conform to the interface? Finally let’s take 
+  a peek at the controller interface file:
+</p>
+<script src="https://gist.github.com/1057187.js?file=esmith-20090416-10.m"></script>
+<p>
+  See any dependencies on the actual objects?  Nope - just protocols.  There are 
+  properties for the objects so that I can inject the dependencies through the tests, 
+  all of which pass in fake versions as various times depending on how it suits the 
+  test.  It may be unhealthy - but I find this incredibly cool.
+</p>
+<p>
+  <strong>Summary</strong>
+</p>
+<p>
+  What I love about Interface Builder is setting this up is extremely simple.  Writing 
+  tests for the controller that is based on these dependencies is also extremely simple, 
+  far simpler than just depending on the concrete objects.  It’s funny how developers 
+  often complain about the time wasted writing tests or &ldquo;over-engineering&rdquo; 
+  in this way, but once I broke these dependencies I got things done a lot faster.  
+  I’m writing working code without loading the actual simulator.  I write my tests 
+  first, making progress, and when I’m done for the session I run the app once or 
+  twice just to verify I haven’t done anything like forgotten to inject the dependency.  
+  Compare that to running the simulator constantly, each time hoping your code is 
+  functional.  Who’s wasting their time now?
+</p>
+<p>
+  FootNotes:<br>
+  * Uh yeah we gave that talk already.  These take a while!<br>
+  ** I’m 99% positive there’s a better way, and that I haven’t found it.  Tell me if there is!<br>
+  *** To be fair it’s the only one I’ve actually used.
+</p>

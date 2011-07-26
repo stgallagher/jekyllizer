@@ -1,0 +1,132 @@
+---
+layout: post
+title: Rinda and setting up Rindlets
+tag:
+---
+
+
+<p>
+	Jim Suchy recently laid down some basics of 
+	<a href="http://blog.8thlight.com/articles/2008/02/12/rinda-101">Rinda in his blog Rinda 101. I would 
+		like to build on that and talk a little about the rindlet architecture. A rindlet is some process 
+		that is listening to the tuplespace, waiting to read or take messages.
+</p>
+<p>
+	When a tuple is written to the tuplespace, the rindlet will look at the message and determine if this 
+	is a tuple of interest to it. If it is, then the engines warm up and the tuple gets processed by the 
+	logic in the rindlet. Otherwise, the rindlet will take a pass, and wait for another message to be 
+	written to the tuplespace.
+</p>
+<p>
+	These rindlets are autonomous and asynchronous pieces of business logic that are messaging across many 
+	systems, or across many modules of the same system. We deploy them as daemon processes.
+</p>
+<p>
+	As a proof of concept, Jim and I built a trivia game, with two different interfaces. One will be a rich 
+	client, developed using a ruby framework called 
+	<a href="http://blog.8thlight.com/articles/2008/02/05/limelight-at-railsconf-2008">limelight</a>, 
+	and one will be a command line ruby client.
+</p>
+<p>
+	Lets look at the code in the rich client application which updates the question on a screen for all 
+	the trivia participants to answer.
+</p>
+<!--
+require 'rinda_client'
+
+module CurrentQuestion
+
+  def start_update_question
+    Thread.new(self) do |current_question|
+      while true
+        update_question(current_question)
+        sleep 1
+      end
+    end
+  end
+
+  def question_update(current_question)
+    client = Rinda::RindaClient.new
+    tuple = client.read ["questioner", "response", "current question"], 1
+
+    unless tuple.nil?
+      current_question.text = tuple[3] 
+      current_question.update
+    end
+
+  end
+
+end
+-->
+<p>
+	This code spawns a thread to sit and listen to the rinda server to see if there are any new questions. 
+	The questioner rindlet will post a tuple called “current question” every 30 seconds to change the question. 
+	After we create a rinda client, we set up the match criteria for the tuples we are interested in.
+</p>
+<!-- 
+tuple = client.read ["questioner", "response", "current question"], 1
+-->
+<p>
+	We want to read all tuples that match 
+</p>
+<!-- 
+["questioner", "response", "current question"]
+current_question.text = tuple[3]  
+-->
+<p>
+	The fourth parameter, which is the question text to display on the screen.
+</p>
+<p>
+	This example shows you can integrate your application with rinda. Your application can listen to 
+	the tuplespace to get messages that are relevant only to it. If you are writing a rails application, 
+	then you would have to use the view helper periodically call remote, since rails is single threaded, 
+	it isn’t as easy as firing a thread and moving on.
+</p>
+<p>
+	Lets start with some rindlet code.
+</p>
+<!-- 
+require "rindlet"
+
+class QuestionerRindlet < Rinda::Rindlet
+
+  def run
+    with_standard_tuple("questioner", "next question") do |tuple|
+      game = Game.active_game
+
+      question_text = nil
+      if game.nil?
+        question_text = "No active game!"
+      else
+        question = game.next_question
+        question_text = question.nil? ? "No more questions!" : question.text
+      end
+
+      @rinda_client.write(["questioner", "response", "current question", "#{question_text}"])
+    end
+  end
+
+end 
+-->
+<p>
+	First, the with<i>standard</i>tuple method is a standard wrapper to match elements and take the tuple 
+	if it matches and pass it into the block. Alternatively, you could do:
+</p>
+<!-- 
+tuple = client.take [“questioner”, “request”, “next question”] 
+-->
+<p>
+	The rindlet itself then gets the next question from the game, and writes a tuple back to the tuplespace 
+	with a response, containing the question text. Notice the code in this rindlet feels a lot like controller 
+	code in the MVC pattern. Since rinda is a technology and notation of communication, it will just call the 
+	business logic in the models and respond to the actions performed if needed. Rindlets often behave as 
+	system level controllers, not specific to any one application.
+</p>
+<p>
+	I have had lots of fun getting rindlets to work, and they have been an interesting tool for decoupling 
+	business logic from any specific application. Happy coding!
+</p>
+<p>
+	<i>Note: I will soon be releasing a rinda gem with the rinda server and the base rindlet class, amongst some 
+	of its functionality.</i>
+</p>	

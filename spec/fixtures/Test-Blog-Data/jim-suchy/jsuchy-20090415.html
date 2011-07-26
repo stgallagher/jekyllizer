@@ -1,0 +1,73 @@
+<h1>Craftsman Swap Day 2</h1>
+<p id="author">Jim Suchy</p>
+<p id="date">2009-04-15</p>
+<h2>
+  Every week, Obtiva sets aside time for what they call Hackfest (I believe this grew out
+  of Geekfest, which is what I’d describe as a Lunch ‘n Learn). Everyone is encouraged to
+  take some time over lunch to work on some non-client code, and the emphasis is on
+  &ldquo;doing&rdquo; instead of just talking.
+</h2>
+<p>
+  I really like the idea of HackFest. By encouraging employees to spend time on side
+  projects, the company (and employee) can only benefit. Client-work is necessary in
+  order for us to get paid, but the passion for the craft cannot flourish if the only
+  projects one is working on is for someone else. There is something selfish about
+  software development, and that isn’t a bad thing.
+</p> 
+<p>
+  In order for you to enjoy your job, I believe that you have to get satisfaction out
+  of what you’re doing every day. I think that’s why I’m such a fan of Test Driven Development.
+  There is always a goal, usually only a maximum of a couple minutes out: either get the
+  current test to pass, or write a failing test (don’t forget to refactor).
+</p> 
+<p>
+  This constant flow is encouraging because every time you get your tests to green, there
+  is a feeling of accomplishment.
+</p>
+<p>
+  So for Hackfest, I joined <a href="http://andymaleh.blogspot.com/">Andy Maleh</a> on his
+  project, which is in the really early concept phase. We worked through some mockups and
+  designs for a social website that he has in the works.
+</p> 
+<p>
+  Basically, we designed and drew up paper mockups of a critical feature. 
+  <a href="http://en.wikipedia.org/wiki/Paper_prototyping">Paper prototyping</a> is 
+  intended to help developers create a user experience that meets the user’s needs.
+</p> 
+<p>
+  One possible mistake that you can make, as I certainly have, is to forget that you have AJAX
+  effects at your disposal in your web application, and that your prototypes should be built
+  with that in mind.
+</p> 
+<p>
+  Instead of every user input resulting in a new (paper) page being put down in front of the
+  user, consider simulating the slide effect that would occur when you click an &ldquo;add&rdquo;
+  button which dynamically inserts a new form into the page.
+</p>
+<p>
+  By just replacing the entire page in front of the user, you’re really missing the user
+  experience improvements that <abbr title="Asynchronous Javascript and XML">AJAX</abbr>
+  can give you. Andy’s mockups did this well, and I think that they will result in more
+  successful user testing.
+</p>
+<h3>Afternoon Pairing</h3>
+<p>
+  I paired with Nate Jackson for the good part of the rest of the afternoon. Nate was Obtiva’s
+  third apprentice and is now a consultant. We were working on a really cool iPhone application,
+  but mainly I just slowed Nate down.
+</p>
+<p>
+  One thing that bothers me about developing for the iPhone is how difficult it is to test the
+  code that touches the framework; in particular, all of the delegates in the controllers. I would
+  like to gain a better understanding of how the framework really works so that maybe I can find
+  some better seams for testing purposes.
+</p> 
+<p>
+  As a result of this inherent difficulty, we didn’t test drive the code that was written, and I
+  noticed that the rhythm of the pairing session was distinctly different from the ping-pong sessions
+  that I’ve grown accustomed to.
+</p>
+<p>
+  Without the failing test/passing test rhythm, there aren’t distinct break points where the keyboard
+  naturally gets passed. So though the pairing session was successful, it definitely felt different.
+</p>

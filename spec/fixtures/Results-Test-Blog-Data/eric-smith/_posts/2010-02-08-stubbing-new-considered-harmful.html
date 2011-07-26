@@ -1,0 +1,131 @@
+---
+layout: post
+title: Stubbing :new Considered Harmful
+tag:
+---
+
+
+<h1>Hi my name is Eric, and I have made a mess.</h1>
+
+<p>
+There I said it. I’m not proud of it, but I believe a couple very loosely related things:
+</p>
+
+<ul>
+  <li>You only learn from your mistakes</li>
+  <li>Everybody makes mistakes, a craftsman cleans them up.</li>
+</ul>
+
+<p>
+  It is in the process of cleaning up the mess that I’ve been trying to evaluate the messy 
+  code in the first place. How is the code messy? Was it Test-Driven? It was - or at least 
+  it attempted to be (we’ll get back to that). Was I lazy? Certainly not. Am I stupid? Crap 
+  I hope not. So how did we end up in this mess?
+</p>
+
+<h3>What’s the mess nimrod?</h3>
+
+<p>
+  Recently Justin, our latest apprentice, wrote about attending a code review 
+  <a href="http://8thlightapprenticeship.blogspot.com/2010/01/day-13.html">
+  here. The feature he is referring to is part of one of our best client’s systems, where we 
+  integrated with several webservices, making them look seamless in our application. This was 
+  an extremely difficult problem, and our code bent in a dozen painful ways for a solution, and 
+  has since become rigid. Changes have stopped being done in the nice Test-Code-Refactor mode, 
+  and instead are being done by trying a change, trying the product, then backing out the change 
+  and making the test pass. While we identified several ways to improve the code, such as better 
+  naming and adding a facade between some of our interfaces, one stated goal was to “make the 
+  tests readable.” See the problem isn’t that it’s not tested - it’s that you can’t follow the 
+  tests at all. Let’s look at an example, modified to protect the guilty:
+</p>  
+
+<!-- Ruby
+
+  it "should call a webservice when its complete" do
+    @caller.should_receive(:call_webservice)
+    typedObj = mock("Obj", :no_follow_ups? => false, :null_object => true)
+    ProprietaryObject.stub!(:create_typed_obj).and_return(typedObj)
+
+    @page.stub!(:widget_id).and_return(@widget.id)
+    @page.stub!(:previous_page_id).and_return(nil)
+    @product.page_cache = [@page]
+
+    @widget.follow_ups({}, {:application_id => "123", :group => "group"})
+  end
+  
+-->
+ 
+<p>
+  This probably isn’t the worst example - if you look closely you can see that we’re testing that 
+  call_webservice needs to get called when ‘its complete.’ But what complete? I don’t see a stubbed 
+  object that returns complete. Also I have no idea what @page, @widget, @product or :create<em>type</em>dobj 
+  are doing here. When I want to write the next test I have to guess at intent, and start playing 
+  with variables. What this is trying to test is that a webservice caller object receives call_webservice 
+  when the widget (an object on the screen) is called with certain variables. I’d tell you what 
+  those variables are, but I truly don’t know.
+</p>
+
+<p>
+  It doesn’t get better. Let’s look at where some of those variables are coming from. These are 
+  excerpts from a setup method that is too long.*
+</p>  
+
+<!-- Ruby
+
+  Context.stub!(:find_by_widget_and_application_form).and_return(@context)
+  Page.stub!(:new).and_return(@page)
+  ...
+  @caller = mock('caller', :call_webservice => nil)
+  WebserviceCaller.stub!(:new).and_return(@caller) 
+  ...
+  @page_factory = mock_model(PageFactory, :acquire => @page)
+  PageFactory.stub!(:new).and_return(@page_factory)
+  
+-->  
+  
+<p>
+  So by my count we’ve stubbed new three times, two finders, and an acquire all of which inject yet 
+  another dependency into the code. Thus the premise of the article <i>stubbing new considered harmful</i>.
+</p>  
+
+<h3>Is it really harmful?</h3>
+
+<p>
+  Dependencies in static languages are generally more onerous than what we’ve got here, sometimes 
+  extremely painful although usually it can be accomplished with simple setters and constructors. 
+  In Ruby this isn’t the case - you can just stub new and create the object the way the user intended, 
+  thereby continuing to test. This can be a VERY BAD THING because it’s a moment where you need to 
+  pause. Do you need this dependency? Should you be wrapping dependencies? Do you need a facade or wrapper 
+  object for a couple dependencies? The difficulty of DI in other languages enforces that pause, but Ruby 
+  does not. It lets you stub anything, only to one day wonder why you have such a mess on your hands.
+</p>
+
+<p>
+  It’s important to remember that Dependency Inversion existed before Unit Testing, and isn’t just a Unit 
+  Testing technique. Indeed we often sell TDD as a way to make you have better designs, and yet here it 
+  failed me because I can so simply call new and continue testing. This is a mistake. To paraphrase Jurassic 
+  Park, just because you can easily stub new doesn’t mean you should. Would you create a constructor that 
+  took five objects? Then why would you stub :new (or finders, or factory methods) five times. Would you pass 
+  in an object to the constructor that’s only used in one method? No - that’s not cohesive. By stubbing :new 
+  you can slowly, and easily, introduce dependency after dependency creating an indecipherable mess despite 
+  writing tests. Worse you can do this easily, without suffering the traditional pain of tightly coupled 
+  code. It’s only later that you’ll feel the awful, horrible, indescribable pain. Trust me it’s bad.
+</p>
+
+<p>
+  Am I really advocating stopping stubbing :new? No not really. It makes perfect since to just call :new 
+  when you can, and in many cases factories are a way to get around the limitations of a static language. 
+  What I am saying is that each time you do stub!(:new) THINK! You have a dependency to manage, so manage it. 
+  It’s your job you know.
+</p>
+
+<i>
+  *This is also a smell. Allow me to quote “The Art of Unit Testing”, an excellent book on Unit Testing by 
+  Roy Osherove
+</i>  
+
+<blockquote>
+  Don’t use [SetUp] and [TearDown] to initialize or destroy objects that aren’t shared throughout the test 
+  class in all the tests, because it makes the tests less understandable. Someone reading your code won’t 
+  know which tests use the logic inside the setup method and which don’t.
+</blockquote>

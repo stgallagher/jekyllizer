@@ -1,0 +1,162 @@
+---
+layout: post
+title: Ruby DSL Blocks
+tag:
+---
+
+
+<p>
+	There’s a common pattern I’ve seen for developing DSLs (Domain Specific Language) in Ruby. 
+	It’s used in RSpec, the Statemachine Gem, and Unclebob’s Clean Code talk at RailsConf 2007. 
+	I haven’t seen a name for this pattern so I’ll call it the <strong>DSL Block Pattern</strong>.
+</p>
+<h4>RSpec</h4>
+<!-- 
+describe "Bowling Game" do
+    it "should score 0 on a gutter game" do
+        game = Game.new
+        20.times { game.roll(0) }
+        game.score.should eql(0)
+    end
+end -->
+<h4>Statemachine</h4>
+<!-- 
+sm = Statemachine.build do
+    trans :locked, :coin, :unlocked
+    trans :locked, :pass, :locked
+    trans :unlocked, :pass, :locked
+    trans :unlocked, :coin, :unlocked
+end -->
+<h4>Parser</h4>
+<!-- 
+parser = Args.expect do
+    boolean "l"
+    number "p"
+    string "d"
+end -->
+<p>
+	Here’s the problem. You’ve got to write code for specific domain such as writing specifications 
+	(RSpec), defining a Statemachine, or defining command line arguments (Unclebob’s Clean Code talk). 
+	These domains have a contained and well defined terminology set. Often the cleanest, most elegant 
+	way to express this code is to create a DSL.
+</p>
+<p>
+	Before diving into the example, let me say that I like coffee as much as the next guy. But I feel 
+	lost when ever I go to a Starbucks. As you know, Starbucks has a it’s own language, DSL if you will, 
+	for ordering coffee. What follows is a DSL Block for ordering Starbucks coffee.
+</p>
+<p>
+	The general grammar for ordering coffee is: <i>Size, Adjective (optional), Type of Coffee</i>. 
+	This is by no means comprehensive but it’s sufficient for the example. So if you wanted to order a 
+	large coffee, for example, you would say, <i>Grande Coffee</i>. A small espresso: <i>Short Americano</i>. 
+	An extra large mixture of regular and decaffeinated coffee with some half and half: 
+	<i>Venti Breve Half Caff</i>.
+</p>
+<p>
+	Given the task to code these coffee orders, I’d like to be able to code it like this:
+</p>	
+<!-- 
+Starbucks.order do
+    grande.coffee
+    short.americano
+    venti.breve.half_caff
+end 
+-->
+<p>
+	Ok that looks good, but as you look closely, you’ll start to wonder about those methods, 
+	<code>grande</code>, <code>short</code>, and <code>venti</code> “Do they have to be defined on the 
+	Kernel?” you may ask. Defining them on the Kernel is a scary prospect. And that may convince you to 
+	clutter the syntax by passing an object into the block like this:
+</p>
+<!-- 
+Starbucks.order do |order|
+    order.grande.coffee
+    order.short.americano
+    order.venti.breve.half_caff
+end 
+-->
+<p>
+	This would allow you to define the <code>grande</code>, <code>short</code>, and <code>venti</code> 
+	methods on the object passed into the block. Although you do need an object where <code>grande</code>, 
+	<code>short</code>, and <code>venti</code> will be defined, you don’t need to add an argument to the 
+	block. You’ll find code out there, such as Migrations, that uses this less optimal route. It’s not 
+	necessary. The trick to get rid of the argument is below:
+</p>
+<!-- 
+module Starbucks
+
+  def self.order(&block)
+    order = Order.new
+    order.instance_eval(&block)
+    return order.drinks
+  end
+
+  class Order
+
+    attr_reader :drinks
+
+    def initialize
+      @drinks = []
+    end
+
+    def short
+      @size = "small"
+      return self
+    end
+
+    def grande
+      @size = "large"
+      return self
+    end
+
+    def venti
+      @size = "extra large"
+      return self
+    end
+
+    def coffee
+      @drink = "coffee"
+      build_drink
+    end
+
+    def half_caff
+      @drink = "regular and decaffeinated coffee mixed together"
+      build_drink
+    end
+
+    def americano
+      @drink = "espresso"
+      build_drink
+    end
+
+    def breve
+      @adjective = "with half and half"
+      return self
+    end
+
+    private
+
+    def build_drink
+      drink = "#{@size} cup of #{@drink}"
+      drink << " #{@adjective}" if @adjective
+      @drinks << drink
+
+      @size = @drink = @adjective = nil
+    end
+  end
+
+end 
+-->
+<p>
+	You can see that the Order object is doing all the work. It’s got the responsibility of interpreting 
+	the DSL, so let’s call it the Interpreter Object. The <code>Module::order</code> method simply 
+	creates an instance of <code>Order</code> and calls <code>istance_eval</code> on it. This causes the 
+	block to execute using the binding of the <code>Order</code> instance. All of the methods on 
+	<code>Order</code> will be accessible to the block.
+</p>
+<p>
+	The Interpreter Object can do any number of things as it interprets the DSL. In this case it simply 
+	generates a translation for Starbucks newbies. But, the sky’s the limit really.
+</p>
+<a href="http://blog.8thlight.com/articles/2007/5/21/ruby-dls-blocks#all_the_source">
+	Show all the source code.</a>

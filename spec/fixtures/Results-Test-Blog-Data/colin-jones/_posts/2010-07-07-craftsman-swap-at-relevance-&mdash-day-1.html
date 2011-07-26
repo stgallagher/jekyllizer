@@ -1,0 +1,80 @@
+---
+layout: post
+title: Craftsman Swap at Relevance &mdash; Day 1
+tag:
+---
+
+<h2>
+  I'm both honored and humbled to represent 8th Light on the latest 
+  <a href="http://nuts.redsquirrel.com/post/80855433/craftsman-swap">Craftsmanship Swap</a>,
+  with <a href="http://thinkrelevance.com">Relevance</a> in Durham, NC.
+</h2>
+<p> 
+  I'd first heard about Relevance through <a href="http://twitter.com/stuarthalloway">Stuart Halloway</a>'s
+  excellent book 
+  <a href="http://www.amazon.com/Programming-Clojure-Pragmatic-Programmers-Halloway/dp/1934356336">Programming Clojure</a>,
+  and their reputation precedes them in the Clojure community, as well as in the Ruby/Rails world. 
+</p>
+<p>
+  <a href="http://twitter.com/jasonrudolph">Jason Rudolph</a> had me come in a few minutes
+  early this morning to give me a quick introduction to the company before their company-wide
+  standup, where the whole company gathered and very efficiently went through the interesting
+  goings-on of the day. The plan for now is for me to spend a couple days working in Ruby/Rails,
+  and a couple on Clojure&mdash;I'm excited about both.
+</p>
+<p>
+  I paired up with <a href="http://twitter.com/redinger">Chris Redinger</a> to work on a Rails
+  project that's just a few weeks old, but already doing some pretty cool stuff. There's a pretty
+  slick graphing library on the project called <a href="http://highcharts.com/">Highcharts</a>,
+  which apparently even works on IE6 (gasp!). 
+</p>
+<p>
+  We did some refactoring, which was a pleasure - Chris has a great eye (nose?) for code smells
+  and writing excellent code (as well as customer relationships), and I often felt like we were
+  on the same wavelength as we made improvements. We ran into a strange issue with the RSpec
+  version we were on: models seem to be loaded twice during our spec runs, which gave us
+  annoying errors about redefining constants (when we were most definitely only defining them once).
+<p>
+<p> 
+  It turned out the right place for the (non-ActiveRecord) models was actually under <code>lib/</code>
+  in this case, and that cleared up our problem. Chris thought this may have already been fixed in
+  the latest RSpec 2 beta, but unfortunately we can't upgrade because newer versions are only
+  compatible with Rails 3, which we're not using on this project. 
+</p>
+<p>
+  We also got some feature work done, of course. The code is a pleasure to work in&mdash;clean, plenty
+  of tests, and several <a href="http://en.wikipedia.org/wiki/ThunderCats">Thundercats</a> references,
+  which is perhaps most important of all.
+</p>
+<p> 
+  In all seriousness, it was pretty easy to jump in and contribute, and that's been due in large part
+  to the high quality of the code. <a href="http://gembundler.com">Bundler</a>, by the way, seems awesome.
+  I've heard mixed reviews, but my experience installing gems today was such a breeze that I'm definitely
+  going to try to use it on my next Rails project. 
+</p>
+<p>
+  I also sometimes forget how freeing it is to work on a project using Git&mdash;all of our
+  greenfield projects use it, but I've gotten used to being on Subversion projects, where making a branch
+  is a big production. Chris uses feature branches regularly, and they seem to work pretty well.
+</p>
+<p>
+  The environment at Relevance is really nice - a big open space with lots of pairing stations, drinks
+  and snacks, and even a keg of <a href="http://twitter.com/abedra">Aaron Bedra</a>'s delicious
+  home-brewed Belgian-style wheat beer on tap.
+</p>
+<p>
+  We had a great lunch of Thai food and very techy conversation - Node.js, Clojure, and EventMachine
+  all got some playing time, and everyone agreed that Aquamacs was very pretty. Wait, maybe that
+  last part went differently&hellip;
+</p>
+<p>
+  After work, Aaron, his fiancee, <a href="http://twitter.com/stuartsierra">Stuart Sierra</a>,
+  <a href="http://twitter.com/jdpace">Jared Pace</a> and I grabbed some Mexican food (after what
+  was apparently a second failed attempt to eat at a place that serves something called a
+  &ldquo;Defibralator&rdquo;&mdash;don't blame me, that's how they spell it on the online menu).
+</p>
+<p>
+  Chris and I ended the day working on tracking down a data issue, which we hadn't completely 
+  solved by the end of the day, but we narrowed the possible culprits down significantly, and 
+  I'm sure it'll be obvious to us in the morning. Looking forward to tomorrow's adventures!
+</p>

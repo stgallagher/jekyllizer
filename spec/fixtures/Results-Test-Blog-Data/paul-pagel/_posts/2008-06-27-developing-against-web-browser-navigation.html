@@ -1,0 +1,57 @@
+---
+layout: post
+title: Developing against web browser navigation
+tag:
+---
+
+
+<p>
+	I find while writing web applications that I end up redefining what it means to go “back.” 
+	This means where I want the user to go when they hit the back button. The creation of AJAX 
+	has killed the behavior of the navigation buttons in the browser. The navigation buttons on 
+	a browser are from the time of sundials and static web pages. We live in the world of atomic 
+	watches and dynamic content. I don’t want you to go back to the last static web page that was 
+	loaded. More times than not, that messes up the user’s experience.
+</p>
+<p>
+	I have seen/implemented some solutions. One that we have used is when the first page is served 
+	up you start some kind of memory. Start a stack of the user’s actions, saving them in the 
+	session. When the user tries to go back to the main page, they are redirected to the real last 
+	page they were at. This is good for AJAX intensive applications. These days I am finding the 
+	percentage of AJAX requests is many times higher than AJAX requests when I am trying to create 
+	a rich user experience. The problem is you get into situations where the user really does want 
+	to go back to the last domain they are at, but your application, very annoyingly, will not let 
+	them leave. As a user of the internet, I quickly learned that if I hit the back button many 
+	times quick enough, the page doesn’t have time to render the redirect, and I can get back. The 
+	fact I even know that is annoying, let alone what it takes away from my application.
+</p>
+<p>
+	Another solution is to have lots of static pages. Don’t let the user get too far without loading 
+	a new page. This way the back button can really only do minimal damage. Use lots of client side 
+	JavaScript and limit the amount of AJAX calls to the bare minimum. This has become industry 
+	standard for web pages which involve payment processing. Since the developers can’t guarantee 
+	that a user won’t hit the back refresh / or forward buttons, you have to be able to have some 
+	kind of state recovery. If the distance between static pages is short, then you don’t do too 
+	much damage. However, this constraint limits what you can do with your web application, 
+	limiting AJAX calls.
+</p>
+<p>
+	My favorite solution is to take the browsers out back and teach them about feature envy. They 
+	are telling me to serve HTML/JavaScript/Flash content inside their main pane architecture, and 
+	they will take care of the rest. Well then, keep your hands to yourself!!! Navigating between 
+	web applications(domains) makes sense at some high level, because that is in the job of a web 
+	browser. They get you from one web application to another. However, inside of my web application, 
+	let me decide what I want the back button to do. I understand some kind of backwards compatibility 
+	so the Geocities web page with the contra code on it doesn’t get lost (like we don’t all have 
+	it memorized). So, let me turn it off for my domain. Give me a JavaScript API to say what the 
+	back button behavior should be or let me at least turn it off. There are 
+	<a href="http://www.robertpenner.com/experiments/backbutton/backbutton.html">some attempts</a> 
+	to do just this, but they are not straightforward or part of the core library.
+</p>
+<p>
+	So, this will require all developers of web applications to implement navigation that makes 
+	sense within their web applications. Great!!! If they are worried at all about user experience, 
+	they have already thought about this and have some solution in place. Getting rid of the back 
+	button just gives them more power. I have never met a developer who wouldn’t embrace more 
+	freedom in their tools.
+</p>	

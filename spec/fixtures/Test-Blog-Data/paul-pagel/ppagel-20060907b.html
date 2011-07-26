@@ -1,0 +1,21 @@
+<h1>Over Mocking</h1>
+<p id="author">Paul Pagel</p>
+<p id="date">2006-09-07</p>
+
+<p>
+	I have noticed using more mocks lately. Instead of using them sparingly for 
+	controlling services which are not instrumental to what I am testing, I am 
+	essentially using them as a way to isolated what I am testing. This has me 
+	noticing a side effect I am not entirely comfortable with. To use the mock, 
+	I need to be able to have the mock in the production code, which means I need 
+	to inject an abstraction of the mock (dynamic mocks will do that for you).
+</p>	
+<p>
+	So, the side effect is long parameter lists, specifically in constructors. 
+	Everything takes almost all the objects it uses. Then, to create the production 
+	objects are factories. I am using many more factories than I would without mass 
+	mocking. I am not sure if this is a good use of dependency decoupling and factory 
+	building as design techniques, or if this is a symptom of over design and tightly 
+	coupling the mocks to the tests, making it more difficult to change the tests 
+	without changing the interface the mock is implementing. Thoughts?
+</p>	

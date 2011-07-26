@@ -1,0 +1,66 @@
+---
+layout: post
+title: Ruby and the Art of Computer Programming
+tag:
+---
+
+
+<p>
+	Recently, I started to read the 
+	<a href="http://www.amazon.com/Art-Computer-Programming-Volumes-Boxed/
+	dp/0201485419/ref=pd_bbs_sr_1/104-8075516-3966305?ie=UTF8&s=books&qid=1194361896&sr=8-1">
+	Knuth’s Art of Computer Science</a>. 
+	To spice up the exercises, I am writing them out in ruby. Thinking about the basic math 
+	of programming and how to implement it in a high level language like ruby has been fun. 
+	The evolution of programming languages has gone far since the book was written. We can 
+	use cool new ruby syntax to do multiple steps in an algorithm!
+</p>
+<p>
+	Also, this is an exercise in writing clean code. Some of the algorithms in the book are a 
+	bit hard to read in there pure math form. So, when I write them out in ruby, I try to use 
+	as much expressiveness without adding clutter. This is no easy task, and often times I have 
+	to walk away from an algorithm for awhile and come back to it, because I will have my head 
+	deep in the math and less in the code. Or vice versa.
+</p>
+<p>
+	I was showing one of my solutions to a colleague of mine, 
+	<a href="http://blog.8thlight.com/doug">Doug Bradbury</a>, who saw a better way in ruby to 
+	solve the same problem I was with less lines of code and a higher readability. So, I decided 
+	to share one of the problems, and in a few days, I will post my version of the solution. We 
+	can see different solutions in different languages and different styles. Go ahead and try it 
+	out.
+</p>
+<p>
+	Here is the algorithm as written in the book.
+</p>
+<p>
+	This is Euclid’s Algorithm for the greatest common divisor
+</p>
+<!-- Code -->
+E0 [Ensure m >= n.] If m < n, exchange m < n. -->
+E1 [Find remainder.] Divide m by n and let r be the remainder. (We will have 0 <= r < n.)
+E2 [Is it zero?] If r = 0, the algorithm terminates;n is the answer.
+E3 [Reduce.] Set m <- n><- r>
+<!-- -->
+<h3>UPDATE: Here is a solution</h3>
+<!-- 
+def are_whole_numbers?(*numbers)
+  numbers.each {|number| return false if number.to_i.to_f != number}
+  return true
+end
+
+def euclid(m, n)
+  raise "Must be whole numbers." unless are_whole_numbers?(m, n)
+  return euclid(n, m) if m < n
+
+  remainder = m % n
+
+  return n if remainder == 0
+  return euclid(n, remainder)
+end 
+
+#Here are some examples
+puts euclid(35.0, 40.0) #should be 17.0
+puts euclid(119.0, 544.0) #should be 17.0
+puts euclid(555.0, 666.0) #should be 111.0
+-->

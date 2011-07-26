@@ -1,0 +1,83 @@
+<h1>JRuby Helps Us Craft Quality Software</h1>
+<p id="author">Doug Bradbury</p>
+<p id="date">2010-04-06</p>
+<h2>
+  &ldquo;It's kind of a Frankenstein.&rdquo; We've used this phrase more than a few times 
+  to describe the architecture and technology used to design a product that was recently 
+  released after almost a year of development by the software craftsmen of 8th Light. The 
+  product is a multi-platform, <abbr title="Personal Computer">PC</abbr> management application 
+  for library computer labs written primarily in Ruby, run on the <abbr title="Java Virtual Machine">JVM</abbr> 
+  with JRuby. The user interface is written in erb-templated <abbr title="Hypertext Markup Language">HTML</abbr> 
+  and Javascript, and is displayed in an embedded web browser. <abbr title="Java Native Access">JNA</abbr> 
+  (Java Native Access) is used to call operating system specific functions that enable an insane 
+  amount of control over the desktop. The various JRuby components communicate with each other 
+  over DRb.
+</h2>
+<p>
+  But the most amazing thing about this project is that we are using JRuby to deliver a 
+  portable, rich desktop app using the best of web technologies. We chose JRuby because it 
+  increased portability and performance and reduced development time.
+</p>
+<p>
+  At 8th Light we had tried before to build products for our clients using Ruby, but we 
+  always hit a dead end when it came to deployment. For our clients who provide software 
+  products instead of software services, the applications must install easily and completely 
+  on the end customers machines while still protecting the intellectual property of our client. 
+  We tried very hard to make technologies like RubyScript2exe work, but in the end a packing 
+  and unpacking solution was too slow and still left our client's source code open for the 
+  reading on the installed computer.
+</p>
+<p>
+  As we began the project about a year ago, we discovered that JRuby had reached the point 
+  where it could be a viable platform for us to be able to build products that our client's 
+  customers could easily deploy in their own environments. Our solution was to bundle all of 
+  our JRuby code into jars after it had been encrypted. By patching into the JRuby load service 
+  we were able to decrypt the source on the fly and leave the code bundled and encrypted on 
+  the disk at all times.
+</p>
+<p>
+  JRuby allows us dirt simple access to Java's huge collection of libraries, along with plenty 
+  of custom Java libraries our client had already written. We also go back the other way, 
+  implementing Java interfaces in JRuby and using those objects in Java code. This fluidity 
+  allows us to always pick the best tool for the job. Early in the project, this also helped 
+  to sell the technology to our client. They were wary of a new language that none of their 
+  in-house developers knew, but we were able to reassure them that they could easily drop back 
+  into Java at any time.
+</p>
+<p>
+  At one point in the project, the client's development team jumped on the project to add a 
+  new configuration interface to the server side of the application. The team wanted to use 
+  a set of Java tools that they were already familiar with, but needed to make calls into the 
+  JRuby side of the application to get and set the configuration values. We built a new Java 
+  interface for them and implemented it in JRuby—then from our Ruby initialization code, 
+  called a static Java function back on the Main class, passing in the configuration object. 
+  This allowed the client's team to initialize their java objects with the instance of our 
+  JRuby class that we had provided.
+</p>
+<script src="https://gist.github.com/1052328.js?file=dbradbury-20100406-1.java"></script>
+<script src="https://gist.github.com/1052328.js?file=dbradbury-20100406-2.rb"></script>
+<p>
+  We wanted to be extra sure that the class we were writting in Ruby would work from Java 
+  before we handed it over, so in addition to the rspecs we wrote to test the Ruby class, we 
+  also wanted to write a JUnit Test. Normally, we inject a JRuby object into Java by calling 
+  a Java function from a JRuby method and passing along the JRuby object that is to be used. 
+  In this case we wanted to actually instantiate the Ruby object in the setup of a JUnit test. 
+  We dug around in the JRuby APIs and were able to leverage the fact that the RubyRuntimeAdapter 
+  returns the last thing evaluated. We were able to use the toJava() method on the IRubyObject 
+  returned from eval and cast the result into the interface class. Then we were free to 
+  write JUnit tests exercising the functionality of the JRuby class.
+</p>
+<script src="https://gist.github.com/1052328.js?file=dbradbury-20100406-3.java"></script>
+<p>
+  We do a lot of things at 8th Light to ensure that we can deliver very high quality code to 
+  our clients as fast as is responsible. One of the most important things we do is work in highly 
+  productive languages. JRuby enables us to write most of the complicated business logic of our 
+  application in the highly productive Ruby language and still provide a viable deployment scheme 
+  that allows our clients to successfully sell their product to their customers.
+</p>
+<p>
+  <i>This article appears in the 
+  <a href="http://engineyard.cmail1.com/T/ViewEmail/y/9C51034F907B116A">
+    April 6th, 2010 Engine Yard Newsletter
+  </a>
+</p>

@@ -1,0 +1,163 @@
+---
+layout: post
+title: Embedded Ruby Talks Morse
+tag:
+---
+
+
+<h2>
+  I've <a href="http://blog.8thlight.com/articles/2008/12/30/embedded-ruby-sings-sinatra">been working</a> 
+  with Ruby on embedded systems for a couple of weeks now.  The final pieces have fallen 
+  into place and I'd like to share them with you.  From the beginning of the project, my 
+  goal have been to turn some LEDs on and off from a web page.
+</h2>
+<h3>Getting down to the metal</h3>
+<p>
+  Any embedded software application has to eventually control some interesting hardware. 
+  My ARM board had two <abbr title="Light Emitting Diodes">LEDs</abbr> wired up, so I thought 
+  I'd try to control them. The control for the ports that control those LEDs are in memory 
+  mapped registers. Ruby really never let's us see the memory that we are working with, and 
+  even if it did, we are working in a virtual memory environment, so we wouldn't be able to 
+  access the specific memory address where the register is located. So it was time to learn 
+  how to write Ruby extensions.
+</p>
+<p>
+  I was surprised how easy this ended up being.  Ruby has a great little module 'mkmf' that 
+  makes Makefiles for you.  The <abbr title="Application Programming Interface">API</abbr> 
+  for defining ruby modules was also pretty straight forward and explained well in 
+  <a href="http://www.rubycentral.com/pickaxe/ext_ruby.html">Pickaxe.</a>  I put the module 
+  I wrote up on git hub, so take a look 
+  <a href="http://github.com/dougbradbury/memory-mapped-io-ruby-extension/tree/master">there</a> 
+  if you are interested.  The extension allows you to just read from or write to any physical 
+  address on the device.  To set a bit in a register, you might do something like this.
+</p>
+<script src="https://gist.github.com/1052031.js?file=dbradbury-20090109-1.rb"></script>
+<p>
+  Ahh. . 0x, hex numbers, addresses. It's nice to be back.
+</p>
+<p>
+  To get the module into my Ruby environment, I created an 'mmio' directory in the 'ext' 
+  directory of the Ruby source and dropped in the source files. I didn't have to change any 
+  makefiles, I just created an extconf.rb and the ruby build system took care of the rest. 
+  It would certainly be possible to build the module separate from the rest of the Ruby source, 
+  but since I already had the source tree configure to cross-compile, the path of least 
+  resistance was to just include this extension in the source tree.
+</p>
+<p>
+  I posted my extension to the 
+  <a href="http://www.ruby-lang.org/en/community/mailing-lists/#ruby-core">ruby-core</a> 
+  mailing list to see if there was any wider interested in it.  It turns out there is a 
+  <a href="http://raa.ruby-lang.org/project/mmap/">memory mapper extension</a> already written.  
+  I took a quick look and it isn't exactly the same thing that I did.  My interface is much 
+  more basic (and simple), but I think the mmap extension could be made to do the same thing 
+  I am doing.
+</p>
+<h3>The Promised Land</h3>
+<p>
+  With a way to control the hardware from Ruby, I had finally arrived where I had wanted to be.  
+  The entire thesis behind this little experiment was that Ruby could make embedded application 
+  development fast and fun.  I found both to be true.  This entire application came together 
+  in just a couple of hours.  I was able to make use of a ruby gem that did a bunch of the 
+  work for me.  I called the application weblink.  You are free to interpret the name however 
+  you would like (We Blink, Web Blink, Web link).  The source is on 
+  <a href="http://github.com/dougbradbury/weblink/tree/master"> git hub.</a>
+</p>
+<p>
+  When test-driving an embedded system, you'll save yourself a bundle of time by doing as 
+  much of the development as you can on your host computer. The download, restart, test cycle 
+  can really add up when you are working in quick <abbr title="Test Driven Development">TDD</abbr> 
+  cycles. On my particular system, the files system is still being hosted remotely, and the 
+  language is interpreted (no compile) so this overhead is not that bad. Still I wanted my 
+  application to run on my development machine, and I didn't think it wise to overwrite some 
+  random address in my Mac's memory, so I needed an abstraction.
+</p>
+<p>
+  When developing these kinds of environments in a C++ system, I would traditionally build a 
+  pure-virtual interface and implement it twice, once for the target hardware and once for the 
+  simulated, or development environment. In C you can do a similar thing with the linker. You 
+  write two functions, one for each platform and just link in the correct one when building for 
+  that platform. With Ruby's ducktyping, there is no need for a defined interface, but the 
+  concept is very similar.
+</p>
+<p>
+  I wrote two Led classes both with 'on', 'off', and 'on?' methods.  The 
+  <a href="http://github.com/dougbradbury/weblink/tree/master/lib/mock_led.rb">MockLed</a> 
+  class just saves the on/off state in a <abbr title="YAML Ain't Markup language">YAML</abbr> file.  
+  The real <a href="http://github.com/dougbradbury/weblink/tree/master/lib/led.rb">Led</a> 
+  class uses the mmio extension to read and write a bit in a memory mapped register.  
+  I did not want the real Led class to have the platform specific knowledge about which 
+  <abbr title="Light Emitting Diodes">LEDs</abbr> were in which register, so I used the 
+  <a href="http://en.wikipedia.org/wiki/Factory_method_pattern">Factory Pattern</a> to 
+  create the Led objects.  The 
+  <a href="http://github.com/dougbradbury/weblink/tree/master/lib/leds_S3C2440A.rb">factory method</a> 
+  is called 'find.'  The MockLed file implements this same method that returns MockLed 
+  objects in the development environment.
+</p>
+<p>
+  The tricky part of this is switching between the two Led classes. For this, I chose to use 
+  Sinatra's environment configuration scheme. The production environment is used when running 
+  the app on the target, and the development environment runs on my Mac.
+</p>
+<script src="https://gist.github.com/1052031.js?file=dbradbury-20090109-2.rb"></script>
+<h3>Dit, Dash</h3>
+<p>
+  To celebrate the 
+  <a href="http://www.history.com/this-day-in-history.do?action=Article&amp;id=52316.">
+  170th anniversary of the first demonstration of the telegraph</a>, I decided to turn the 
+  application into a visual telegraph, beeping out little messages.  The ideas is that you enter 
+  a message in the web page, and the <abbr title="Light Emitting Diode">LED</abbr> blinks out your 
+  morse code.  Here is where I saw the great power of not only Ruby, but also the community who 
+  uses it.  I discovered right away that there is a 
+  <a href="http://www.bensinclair.com/article/ruby-morse-code-module">Morse Code Gem</a> 
+  already written.  You give it a string and It gives you back a series of dits, dashes, and spaces.  
+  Thanks <a href="http://www.bensinclair.com/">Ben</a>!
+</p>
+<p>
+  <a href="http://www.8thlight.com/main/bios/eric_meyer">Eric Meyer</a> sat down with me and we 
+  <a href="http://www.stickyminds.com/sitewide.asp?Function=WEEKLYCOLUMN&amp;ObjectId=9101&amp;ObjectType=ARTCOL&amp;btntopic=artcol">ping-ponged</a> 
+  out the <a href="http://github.com/dougbradbury/weblink/tree/master/lib/morse_blinker.rb">morse blinker</a> 
+  in short order.  I love how simple this class ended up.  It just proves again to me what great code 
+  you can write in Ruby.
+</p>
+<h3>See it for yourself</h3>
+<p>
+  Okay, so enough talking, let me show it to you. Enjoy.
+</p>
+<object height="394" width="700">
+  <param value="true" name="allowfullscreen">
+  <param value="always" name="allowscriptaccess">
+  <param value="http://vimeo.com/moogaloop.swf?clip_id=2755136&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=b4e11b&amp;fullscreen=1" name="movie">
+  <embed height="394" width="700" allowscriptaccess="always" 
+    src="http://vimeo.com/moogaloop.swf?clip_id=2755136&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=b4e11b&amp;fullscreen=1" 
+    type="application/x-shockwave-flash" allowfullscreen="true">
+</object>
+<h3>What's Next</h3>
+<p>
+  So I know that the response that I will get from embedded developers is &ldquo;Great, but it's 
+  slow and big, it can't be used in a real system.&rdquo; I'm going to do some profiling and 
+  optimization on this system to get some hard performance data. Initial results (just 
+  looking at 'top') shows that the ruby process with Sinatra, Webrick, the morse gem, and 
+  my code loaded up is taking up about 12% of the system memory. That mean about 6 or 7 MB. 
+  What nice is that you only pay for what you use. If you don't require it, it won't load 
+  into memory.
+</p>
+<p>
+  As far as clock cycles go, the ruby processes peaks out at about 20% of the 400 MHz 
+  processor when serving HTTP requests. While blinking the LEDs, only a fraction of a 
+  percent of the processor's cycles are being consumed. I'm not happy with the performance 
+  of Webrick (no one ever claimed it was fast anyway) and I am going to try to get Sinatra 
+  running with 'Thin' instead.
+</p>
+<p>
+  Synchronization: I fork a new ruby process to blink out the messages. If you got both 
+  LEDs blinking at the same time, they could step on each other's toes and cause incorrect 
+  values to be written to the LED. I need to stick a mutex in to protect that register. 
+</p>
+<p>
+  I remember early in my career, Kevin Moore and I had started using Ruby to run our 
+  embedded builds. We used the Win32 API to drive the automation interface of Metrowerks 
+  and we wrote lots of little tools to do the annoying parts of building a flash image for 
+  us. I remember at the time, Kevin and I having a conversation that went something like 
+  &ldquo;Wouldn't it be cool if we could write the entire app in Ruby?&rdquo; Well Kevin, 
+  now we can.
+</p>

@@ -1,0 +1,117 @@
+<h1>Rinda 101</h1>
+<p id="author">Jim Suchy</p>
+<p id="date">2008-02-11</p>
+<h2>
+  When building a software system composed of multiple decoupled components, the need typically
+  arises for interprocess coordination and communication. As an example, say that we have a customer
+  requirement that allows emails to be sent based on certain events or conditions that occur while the 
+  user is interacting with a web application.
+</h2>
+<p>
+  We build an email component that takes care of the details of actually sending of the email. The
+  web application could use the email component directly, but that would introduce a dependency that
+  we’d rather avoid. How can the two processes communicate without creating a dependency between the two?
+</p>
+<p>
+  If you’re using Ruby, there’s an option that is built right into the standard library. The 
+  <a href="http://www.ruby-doc.org/stdlib/libdoc/rinda/rdoc/index.html">Rinda module</a>
+  implements the Linda distributed computing paradigm in Ruby. That’s great, but what is Linda? 
+  <a href="http://www.ruby-doc.org/stdlib/libdoc/rinda/rdoc/index.html">Linda</a> is a
+  coordination language developed by a couple of Yale researchers in the early 1990s.
+</p>
+<p> 
+  Linda itself is built on the concept of a tuplespace. A tuple is an ordered list of objects, and a
+  tuplespace contains a set of tuples which can be accessed concurrently. A basic set of operations were
+  defined by the language to allow reads, writes and takes.
+</p>
+<p>
+  Getting back to the example, how can Rinda be utilized to enable communication between the web application
+  and the email component? First, a tuplespace will need to be setup that both components can access. When
+  a condition arises within the web application that requires an email to be sent on its behalf, a specific 
+  tuple will be written to the tuplespace.
+</p>
+<p>
+  The email component is looking for tuples that match a specific pattern. When it finds the tuple written by
+  the web application that matches this pattern, it processes the request and reports back to the tuplespace
+  when finished. In this way, we end up with only data coupling between the two processes, which is a much
+  looser coupling than a direct dependency. This type of approach bears some resemblance to a 
+  <a href="http://www.ruby-doc.org/stdlib/libdoc/rinda/rdoc/index.html">blackboard system</a>.
+</p>
+<h3>Hello World</h3>
+<p>
+  Now that we know a little bit about what Rinda can buy us, let’s dive in and try it out. Let’s put together
+  a simple server and client to demonstrate how each works.
+</p>
+<p>
+  Here’s a simple server (server.rb):
+</p>
+<script src="https://gist.github.com/1051212.js?file=jsuchy-20080211-1.rb"></script>
+<p>
+  We start by setting the default port to 4000. We then create a new TupleSpace object. The call to 
+  <code>start_service</code> starts a local dRuby server listening on port 4000.
+</p>
+<p>
+  Passing the TupleSpace as the second parameter sets the server’s front object to the TupleSpace. The URI
+  of the server is output, and the program waits for a kill signal, and we have a Rinda server ready to be
+  accessed by a client. To start the server:
+</p>
+<script src="https://gist.github.com/1051212.js?file=jsuchy-20080211-2.sh"></script>
+<p>
+  Here’s a simple interactive client (client.rb). It allows input to be gathered on standard input, with the form:
+</p>
+<script src="https://gist.github.com/1051212.js?file=jsuchy-20080211-3.rb"></script>
+<p>
+  We’re using the send method in order to invoke the method specified on standard input. There’s also a 
+  conversion between nil as a string into nil proper. This is necessary because of wildcards, which we’ll 
+  get to in a minute. With the server running, run the client to start a new interactive session:
+</p>
+<script src="https://gist.github.com/1051212.js?file=jsuchy-20080211-4.sh"></script>
+<p>
+  Below is a sample session (output is indented for clarity):
+</p>
+<script src="https://gist.github.com/1051212.js?file=jsuchy-20080211-5.sh"></script>
+<p>
+  The inputs above translate to these method calls:
+</p>
+<script src="https://gist.github.com/1051212.js?file=jsuchy-20080211-6.rb"></script>
+<p>
+  Note that reads do not remove the tuple from the tuplespace. The tuple is left untouched such that
+  other clients can access the same data. This is an important concept when dealing with synchronization
+  that we’ll return to in a future post.
+</p>
+<p>
+  The structure of the patterns used in the read and take methods deserve some additional attention.
+  When the tuplespace is queried through a read or a take, there are two criteria used to determine if a
+  tuple matches.
+</p>
+<p>
+  First, the length of the tuple must match the pattern’s length. In the example above, all patterns
+  are pairs (2-tuples), so only tuples that are pairs will qualify.
+</p>
+<p>
+  Second, the tuple must match the pattern specified. When specifying a pattern, nil is used as a
+  wildcard, which will match anything.
+</p>
+<p>
+  Assume that our tuplespace has the following tuples:
+</p>
+<script src="https://gist.github.com/1051212.js?file=jsuchy-20080211-7.sh"></script>
+<p>
+  If the pattern <code>[nil]</code> is specified, e.g. <code>ts.read([nil])</code>, only #1 will match.
+</p>
+<p>
+  If the pattern <code>[:message, nil]</code> is specified, only #2 will match. Of course, 
+  <code>[:message, “hello”]</code> would also result in #2 matching as well, while 
+  <code>[:message, “world”]</code> would not.
+</p>
+<p>
+  Using <code>[:message, nil, nil]</code>, <code>[:message, “hello”, nil]</code>, or 
+  <code>[:message, nil, “world”]</code> would all result in #3 matching. So it is important to remember
+  that patterns are matched on both length and content of the tuple.
+</p>
+<h3>Conclusion</h3>
+<p>
+  We haven’t even scratched the surface of what can be done with Rinda. This introduction only gets
+  the simplest client and server talking to each other. Stay tuned for more.
+</p>
+  

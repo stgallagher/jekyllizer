@@ -1,0 +1,83 @@
+<h1>Craftsman Swap Day 3</h1>
+<p id="author">Jim Suchy</p>
+<p id="date">2009-04-16</p>
+<h2>
+  I spent my day pairing with <a href="http://nuts.redsquirrel.com/">Dave Hoover</a>
+  on <a href="http://madmimi.com/">Mad Mimi</a>. The first thing I noticed during our
+  pairing session is that Dave has many more responsibilities within Obtiva than just coding.
+  The opportunities for distractions seem to increase exponentially the closer you are to the
+  details of running a business.
+</h2> 
+<p>
+  The context switching involved in handling interruptions while coding is something that I 
+  really struggle with, but Dave is quite adept at it. Having a pair helps with ignoring these
+  distractions, for better or for worse.
+</p>
+<p>
+  I’ve been using the <a href="http://www.pomodorotechnique.com/">Pomodoro technique</a> 
+  for the past couple months with some success to try to help stay focused and deal with
+  distractions, but I’ve found that the best way to avoid distractions is to pair program.
+</p> 
+<p>
+  Dave “thanked” me at the end of the day for helping him ignore his growing list of unread
+  emails, which he would have to catch up on later. The upshot of this is that we got some
+  concentrated work done without a ton of distractions taking our attention away from the task.
+</p>
+<p>
+  At the start of the day, we picked up a new Mad Mimi feature and started discussing it. As
+  is usually the case when beginning to dig into a feature, we quickly came up with some questions
+  for which we would need the customer’s input.
+</p> 
+<p>
+  Unfortunately, the customer wasn’t available; after making note of the questions, we started
+  talking about a change that will be rolled out sometime in the near future, but should not be
+  added just yet. Dave accurately identified the need to create a branch for the feature.
+</p> 
+<p>
+  I’ve recently had a similar need for this kind of feature branch, and I’ve done this a couple
+  times in the past few months. Dave hadn’t created a branch in Subversion before, so here was a
+  chance to teach him something.
+</p>
+<p>
+  There are a few different reasons why you might want to use this technique, but this is the
+  situation I’ve been running into lately. There are (at least) two different types of 
+  branches: bug fix / release, and feature.
+</p> 
+<p>
+  When releasing a new version of the system, a release branch can be created in order to allow
+  bug fixes to be quickly and safely developed and deployed. A feature branch, on the other hand,
+  comes in handy in a number of situations.
+</p> 
+<p>
+  One situation is when you want to develop a new feature that needs to be deployed as an update
+  to the release. If you were to develop the feature on the release branch, you would run the risk
+  of making deploying the branch at a moment’s notice difficult or impossible. By developing on a
+  feature branch, you can develop and test the feature in isolation, then merge the changes back
+  to the release branch (and/or the trunk).
+</p> 
+<p>
+  In Dave’s case, he releases from the trunk, but he wanted this particular feature to not be deployed
+  until he’s ready. A feature branch works great in this case, and he’ll only have to merge back to the
+  trunk since there isn’t a need for a release branch.
+</p> 
+<p>
+  Once that merge is done, the branch can (and should) be killed; the key to keeping your branches 
+  manageable is to limit the number of branches that you ever need to think about. The goal should
+  be for each branch to have the shortest lifetime as possible. For a decent branching strategy,
+  see <a href="http://nedbatchelder.com/text/quicksvnbranch.html">this article</a>.
+</p>
+<p>
+  After Dave successfully created his branch (and played around with merging to understand how that 
+  would work), we went ahead and started implementing this new feature on the branch. Of course,
+  we soon were able to get the information we needed from the customer to continue on the original
+  (higher priority) feature.
+</p> 
+<p>
+  Since we were working on the branch, we didn’t need to abandon our work in order to start on the
+  other feature. We just opened up the trunk’s code in our editor and away we went. This is another
+  advantage of working in a feature branch: it’s simple and cheap to jump around.
+</p> 
+<p>
+  We spent the rest of the day working on this feature, though we ended the day without completing it.
+  We will finish it up on day 4.
+</p>

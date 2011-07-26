@@ -1,0 +1,104 @@
+---
+layout: post
+title: Promises Promises
+tag:
+---
+
+
+<p>
+	<i>“Under Promise, Over Deliver”</i> (origin unknown)
+</p>
+<p>
+	<i>“How are you going to get a reputation as a miracle worker if you tell the Captain the 
+	actual amount of time it will take?!?!”</i> Scotty on Star Trek
+</p>
+<p>
+	I used to think the first statement was a just a more cynical restatement of the second, which 
+	is just a con job. Tell the boss you can’t have it done until Tuesday, finish on Friday, play 
+	golf Monday morning and deliver Monday afternoon. Everybody wins right? Except it’s 
+	fundamentally dishonest. Lately I’ve come to realize I do the first one every day, and I hope 
+	never do the second.
+</p>
+<p>
+	I have three step-children and I rarely promise them anything. It’s not because I’m a horrible 
+	father, but because a promise is a fundamentally special thing. I promised my wife I’d stay with 
+	her until the end of time, now that’s a promise. If I promise I know damn well I will do what I 
+	said, and I can’t have excuses. Now I’m naturally a very busy and easily distracted person so I 
+	know that if I promise too much, I’ll deliver a lot of disappointment. Instead I say “maybe” 
+	because it’s the honest answer. There is a huge difference between “I promise” and “I’ll try”, 
+	and I doubt “I’ll do my best” would have been an acceptable answer on my wedding day.
+</p>
+<p>
+	So what the heck does this have to do with development? I was thinking about iterations, and 
+	how the stories taken on are really a <i>promise</i> to the customer, but we don’t always treat 
+	them that way. A lot of teams, including at times our own unfortunately, instead Over Promise 
+	and Under Deliver. It’s usually done with the best of intentions because the customer wants more 
+	stuff done. You know what? My kids want to go to Dunkin Dounuts tomorrow, but I don’t know if I 
+	can take them so I won’t make a <i>promise</i>. We should look at our iterations the same way. 
+	I’m not talking about padding estimates like Scotty does, but what I’m talking about is avoid 
+	the traps of wishful-thinking when estimating stories. Specifically three things I see all the 
+	time.
+</p>
+<ol>
+	<li><h3>The Talk Down</h3>
+		<p>
+			The talk down usually happens when one or two team-members are out of sync with the rest of 
+			the group on the high side, but can also happen when the team’s points cover a range from small 
+			to large. Higher estimates mean higher risk and yet the lower estimates usually win this “battle.” 
+			There are two kinds of ways team members (and sometimes customers) encourage other developers 
+			down from their estimates, one good and one bad. I’ll illustrate with two stories where I was 
+			out of step with the group.
+		</p>
+		<p>
+			Right after I joined 8th Light we had a store that involved converting text to base64. I was 
+			inexperienced with Ruby and hadn’t done this before, so my estimate was higher than the others. 
+			At some point somebody said, “Eric that’s a method that’s built into ruby, it’s one method” and 
+			I sheepishly shrank my estimate. Hey I used to be a C++ programmer, cut me some slack! The point 
+			is this time being talked down made perfect sense. I didn’t know something, somebody told me the 
+			answer, and we fixed it.
+		</p>
+		<p>
+			Much more recently we had a story that involved showing the difference between two objects in the 
+			database. In this case I was again much higher than the group. I explained I had no idea how we 
+			would do this in a way that would satisfy the customer, but the team thought using the Unix diff 
+			tool on the already existing XML Output would be fine. With something feeling wrong in my gut I 
+			reluctantly brought down my estimate. A few minutes later Micah and I started on development, and 
+			discovered the problem. A few small changes to a product resulted in four pages of indecipherable 
+			XML differences. The story was scrapped, fortunately quickly before any time was invested in it.
+		</p>
+		<p>
+			Now what was different between the two times? In the first there was a concrete and clear way that 
+			my estimate was wrong. Yea! In the second there was still an icky feeling in my gut, yet I budged. 
+			Why? Because I don’t want to hold up my team, I don’t want to look stupid, and most importantly I 
+			failed to articulate my concerns with the approach given. You see for years I worked with 
+			InstallShield Developer, and for a while now they’ve saved their file format for projects as XML. 
+			But when two people attempted to work on the same file, then merge, it was almost always a nightmare, 
+			and this was with tools that just did diffing like Araxis Merge. Our quickly done tool to solve an 
+			immediate business need had little chance of success, but I was uncomfortable saying so. The moral: 
+			Don’t let yourself be talked down unless you really feel talked down. The team wasn’t wrong for 
+			stating how they felt, I was wrong for failing to articulate the issues I had.
+		</p>
+	</li>
+	<li><h3>The extra points</h3>
+		<p>
+			Occasionally as a team you really want to impress the customer, and they’re in a hurry. So maybe 
+			you take on a few extra points. I don’t feel this needs much explanation, don’t “hope” you can get 
+			it all done. Use your velocity, trust your estimates, and KNOW you’ll get it all done.
+		</p>
+	</li>	
+	<li><h3>The “Ambitious” Iteration</h3>
+		<p>
+			Sometimes your iteration feels just…off. You’ve taken on the same number of points as the previous 
+			iteration, but it feels in your gut like it’s too much. Now this is where the promise kicks in. 
+			Would you promise your loved ones something that in your gut you just didn’t feel like you could 
+			deilver? Than don’t do it to your customer. When the iteration feels ambitious try to put it in 
+			concrete terms, maybe you’ve been the victim of the “talk down.”
+		</p>
+		<p>
+			Remember a promise is a very important, even sacred, thing. It should not be taken on unless you are 
+			absolutely sure you can do it. Try saying to yourself before an iteration, “We promise to get all this 
+			done.” If that causes a shiver to go down your spine there’s a good chance you really hope you’ll get 
+			it all done, and maybe should take a bit off the board rather than be proven right later.
+		</p>	
+	</li>
+</ol>

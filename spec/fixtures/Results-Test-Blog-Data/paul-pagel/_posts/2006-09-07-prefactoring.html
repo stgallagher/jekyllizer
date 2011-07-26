@@ -1,0 +1,40 @@
+---
+layout: post
+title: PreFactoring
+tag:
+---
+
+
+<p>
+	Prefactoring is when you see a piece of code which the story you are working on 
+	which has a refactorings which would make your story easier. I have seen prefactoring 
+	to be a dangerous process. On one hand, you save time when you know that this 
+	refactorings will need to be done. You are faced with the choice of writing temporary 
+	code (in the sense of duplicate then refactor) or refactoring, then writing quality code. 
+	The software designer in me always wants to choose the prefactoring solution, since it 
+	gets to make code cleaner, remove duplication, and be more efficient. Then I can stand 
+	on the mountain top waving my flag. 
+</p>
+<p>
+	There are a few problems right off the bat. First, the uber-developer in all of us will 
+	refactor as much as we can, therefore refactor based scope creep is bound to show up. I 
+	don’t really know how to stay away from scope creep in this manner. 
+</p>
+<p>
+	Prefactoring can lead to a version of design up front which is detrimental if you don’t 
+	need it. However, sometimes you know up front this design simplification will cut the story 
+	time in half. Do you prefactor? What kinds of smells make it ok or terrible to prefactor? 
+</p>
+<p>
+	I have tried backing my way in and using test(s) as a life jacket, so once the test passes, 
+	the refactoring is done. However, the problem with this is it leaves me with half done 
+	refactorings. The code is constantly moving up in quality, however, it might not look it due 
+	to the inconsistencies produced by half done refactorings. I generally think of a complete 
+	refactorings as something that made my system better in some manner I would like developers 
+	who are extending the behavior of the system to use the refactorings as a model.
+</p>
+<p>
+	Do my refactorings make the system easier to extend? Half-factorings don’t, but they do 
+	provide a manageable slope moving positive. I don’t have the time to tackle the big 
+	refactorings, but I don’t want to leave them unfinished.
+</p>	

@@ -1,0 +1,111 @@
+<h1>IList, IComparable, ICarumba!</h1>
+<p id="author">Micah Martin</p>
+<p id="date">2006-09-07</p>
+
+<p>
+  This <i>IConvention</i> is an interesting one. <i>“Let’s prefix all interfaces with a capital I.”</i> 
+  Who thought of this? Why did they think it was a good idea?
+</p>  
+
+<p>
+  Let’s say I want to implement the Command pattern in C#. I create the following interface…. and to be 
+  true the fathers of C# I use the IConvention.
+</p>  
+
+<!--
+public interface ICommand
+{
+    void Execute();
+} 
+-->
+
+<p>
+  In my application I can now write Code like this.
+</p>
+
+<!--
+public void ExecuteCommands(IList commands)
+{
+    foreach(ICommand command in commands)
+        command.Execute();
+}
+-->
+
+<p>
+  Clearly, every object in the IList of commands is an Implementation of <b>ICommand</b>. And <b>ICommand</b> 
+  is an Interface because It starts with an I. That’s Important to know because If It didn’t have the I, It 
+  might be an abstract class or even a concrete class. And If that were the case then….. well…. hmmm…. it 
+  doesn’t really matter. I could call the class <b>ICommand</b> or I could call it <b>Command</b>. From the 
+  point of view of the client code, maybe <b>Command</b> it’s an interface or maybe it’s not. So if it’s all 
+  the same, I might as well submit to the convention and call it <b>ICommand</b>. Right?
+</p>
+
+<p>
+  <b>Wrong!</b> Prefixing interfaces with I is a mistake and this is why….
+</p>
+
+<p>
+  Assume that I really do need a <i>Command</i> abstraction. Should it be an interface or an abstract class? 
+  I can’t think of any logic to put in the base class and the Dependancy Inversion Principles says interfaces 
+  are preferred. So I’ll make it an interface and follow the IConvention naming it <b>ICommand</b>. After a 
+  while there are a dozen or so implementations of <b>ICommand</b> in the application. New implementations are 
+  popping up all the time. One day I realize that the application needs to know whether an <b>ICommand</b> has 
+  executed or not. Since this affects all implementations of <b>ICommand</b> I can add another method to the 
+  interface:
+</p>
+
+<!--
+public interface ICommand
+{
+    void Execute();
+    bool Executed { get; }
+} 
+-->
+
+<p>
+  However, it’s not long before I realize that all the derived classes implement the <b>Executed</b> property 
+  with the exact same code. They also need a boolean field. So to avoid duplicate code, I’ll use Template Method 
+  like so:
+</p>
+
+<!--
+public abstract class ICommand
+{
+    private bool hasExecuted = false;
+
+    public virtual Execute()
+    {
+        PerformExecution();
+        hasExecuted = true;
+    }
+
+    protected abstract PerformExecution();
+
+    public bool Executed
+    {
+        get { return hasExecuted; }
+    }
+}
+-->
+
+<p>
+  But wait! <b>ICommand</b> is not longer an interface. I can’t just leave that I sitting there. Clients will think 
+  it’s still an interface. So now I need to rename the class to <b>Command</b> without the I. Fortunately, !-ReSharper-! 
+  will help me there. But now I’ve got the <b>Command</b> class in a file named <i>ICommand.cs</i>. Renaming the file is 
+  a bit more challenging since it has to be changed in source control as well. So I rename the file in the subversion 
+  repository, then remove the <i>ICommand.cs</i> file from the Visual Studio project, and finally add the new <i>Command.cs</i> 
+  file to the project…. whew. That silly I sure causes a good deal of hurt.
+</p>
+
+<p>
+  I’ve stumble over this scenario more times than I care to mention. Experience has taught me that prefixing interfaces 
+  with an I is a choice that will come back and haunt me. So I don’t do it.
+</p>  
+
+<p>
+  Here’s my dilema. Maybe you can help me. I’ve been translating Unclebob’s <b>Agile Software Development</b> book into C#. 
+  In the code examples I have heeded my experience and created interfaces without the I prefix. Reviewers don’t like this. 
+  They keep telling me that I need to add the I prefix. I’m torn. I feel in my heart of hearts that using the IConvention does 
+  more harm than good. Yet, readers of the book will be familiar with the IConvention and may be confused by examples that 
+  don’t use it. What’s the right thing to do?
+</p>  

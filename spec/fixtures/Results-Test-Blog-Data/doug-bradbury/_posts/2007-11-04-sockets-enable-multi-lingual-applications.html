@@ -1,0 +1,167 @@
+---
+layout: post
+title: Sockets Enable Multi-Lingual Applications
+tag:
+---
+
+
+<p>
+	As we work with our clients to delivery new features to them quickly and with high quality code, 
+	we are finding that the fastest way forward is often writing code in Ruby. The problem is that 
+	in many cases we are working with an existing application written in a different language. We 
+	may need to add a feature to a C++ application or integrate with a Java Library. One of our 
+	favorite solutions in this situations is to have multiple applications talking to each other 
+	over sockets.
+</p>
+<p>
+	We’ve found that using sockets to communicate between applications is a great way to ‘bolt on’ 
+	new functionality. This type of communication has been around for a long time and nearly every 
+	language has socket communication in standard libraries or in free open source projects.
+</p>
+<p>
+	Dean Wampler suggested that 
+	<a href="http://blog.objectmentor.com/articles/2007/07/04/applications-should-use-several-languages">
+	Applications Should Use Several Languages</a> and socket communication is another way to enable this.
+</p>	
+<h3>Socket Basics</h3>
+<p>
+	Most internet communication is built on socket communication, so I won’t try to go into great 
+	detail here. I don’t pretend to be an expert. Here is what you need to understand about sockets to 
+	use them in your applications.
+</p>
+<h3>UDP vs TCP</h3>
+<p>
+	There are two basic types of IP socket protocols: UDP and TCP. UPD is what I’ll call a ‘send and 
+	pray’ protocol. In UDP there is really no difference between server and client. Each node can 
+	listen on some port and write on some port. Messages are sent from point to point or broadcast to 
+	all nodes. Either way, delivery is not guaranteed. The message will likely make it to the 
+	destination, but there are a host of things that could happen that would prevent delivery. Worse, 
+	as the sender you can’t know whether of not your message made it unless you implement some kind of 
+	response protocol on top.
+</p>
+<p>
+	I’ve used UDP communications for monitoring / metering applications where it isn’t important that 
+	every message be delivered, but I’ve also found that I usually end up implementing some kind of 
+	delivery guarantee mechanism anyway.
+</p>
+<p>
+	TCP sockets build another layer on top of basic IP communication that does guarantee delivery. 
+	Once the connection is established between client and server, both side can communicate knowing 
+	that their message will be received. On the Server side, a socket listens on a particular port for 
+	new connections. Most libraries call this operation ‘accept.’ A client ‘opens’ a connection to the 
+	server. This process involves the client and the server agreeing on a new port for communication. 
+	If the server is going to accept multiple connections, then it usually launches a new thread to 
+	handle each new connection.
+</p>
+<p>
+	I use TCP Sockets for most inter-application communication. It turns out that in most situations, 
+	I want that guaranteed delivery and don’t want to bother with my own acknowledgment protocol. So 
+	it’s the TCP Socket that I’ll show you for now.
+</p>
+<p>
+	Over my next few posts, I’ll show you how to communicate via sockets in many languages. We’ll start 
+	with Ruby. Ruby has TCP Sockets built in, though there really isn’t much documentation on how to use 
+	it. Here is how to do it.
+</p>
+<p>
+	The TCPSocket class can be found in ‘socket’
+</p>
+<!-- require 'socket'  -->
+<p>
+	Create a socket server. The first parameter is the address to listen on. If you specify ‘0.0.0.0’ 
+	then the server will accept connections from any host. If you specify ‘localhost’ or ‘127.0.0.1’ 
+	this the server will only accept connections from sockets on the same computers. The port can be 
+	anything you want. Be sure to avoid commonly used ports.
+</p>
+<!-- server = TCPServer.new('localhost', '4138')  -->
+<p>
+	Now, when you call accept on the server it will block until a client opens up a connection.
+</p>
+<!-- server_socket = server.accept -->
+<p>
+	Now that the server is waiting for a new connection, let’s open that connection from a client. 
+	Note that this needs to be happening in a separate ruby process. The first parameter is the host 
+	address or name of the server. The second is the port on which the server is listening.
+</p>
+<!-- require 'socket'
+client_socket = TCPSocket.new('localhost', '4138') -->
+<p>
+	Now that there is as new connection open the client and server can talk back and forth at will. 
+	In this example, the server just echos the clients message back to it. So all together, the Server 
+	side looks like this:
+</p>
+<!-- 
+require 'socket' 
+server = TCPServer.new('localhost', '4138') 
+server_socket = server.accept
+message = server_socket.recvfrom(256)[0]
+server_socket.write("You Said: #{message}") 
+-->
+<p>And the Client side:</p>
+<!-- 
+require 'socket'
+client_socket = TCPSocket.new('localhost', '4138')
+print "Enter Message:  "
+input = gets
+client_socket.write(input)
+response = client_socket.recvfrom(256)[0]
+puts response 
+-->
+<p>
+	So that’s it, you are communicating between two applications with sockets. If we want 
+	the server to continue processing messages, we can loop reading from the socket:
+</p>
+<!-- 
+require 'socket' 
+server = TCPServer.new('localhost', '4138') 
+server_socket = server.accept
+
+message = ""
+until message.chomp == "quit" do
+    message = server_socket.recvfrom(256)[0]
+    server_socket.write("You Said: #{message}")
+end 
+-->
+<p>
+	So far our server can only handle one connection at a time. Often times, you’ll want 
+	multiple client to be able to open up connections to the server. To do this, we’ll need 
+	to launch a new thread each time a client connects. This is a little class that does 
+	that. You can implement your own handler object to handle each socket. The handler only 
+	needs a ‘serve’ method that takes a socket. The ThreadGroup is a nice little class to keep 
+	track of the threads. When a thread finishes, it is automatically removed from the thread 
+	group.
+</p>
+<!-- 
+require 'socket' 
+
+class MultiTcpServer
+
+  def initialize(handler, port)
+    @group = ThreadGroup.new
+    @handler = handler
+    @server = TCPServer.new('0.0.0.0', port) 
+  end
+
+  def connections_open
+    return @group.list.size
+  end
+
+  def run
+    begin
+      loop do
+        socket = @server.accept
+        @group.add(Thread.new {@handler.serve(socket)})
+      end
+    rescue IOError
+    end
+  end
+
+  def stop
+    @server.close
+  end
+
+end 
+-->
+<p>
+	Hopefully this little tutorial was helpful. Next time I’ll take a look at sockets in C++ or Java.
+</p>	

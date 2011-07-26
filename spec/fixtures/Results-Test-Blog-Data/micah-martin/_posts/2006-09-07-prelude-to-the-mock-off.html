@@ -1,0 +1,50 @@
+---
+layout: post
+title: Prelude to the Mock Off
+tag:
+---
+
+
+<p>
+  !title Prelude to the Mock Off You can read David’s side of the story here: 
+  <a href="http://butunclebob.com/ArticleS.DavidChelimsky.StopMockingMe">Stop Mocking Me</a>
+</p>
+
+He puts it gently… We’ve actually had some heated arguments about these mocking frameworks and it’a all kinda silly. In the end we’re writting good tests for well designed code. Still, these mocking frameworks rub me the wrong way.
+
+<h4>Why do I prefer hand-made mocks?</h4>
+ 
+ <p>
+   1 They’re simple to write. Yeah it requires a new class but it only takes a couple seconds 
+   and it’s the most brainless code you’ll ever write. 2 They’re simple to use. If I want an 
+   instance of a DataEntryView I simple type new MockDataEntryView(). With a mocking framework, 
+   it takes 3 or 4 lines before I have a usable object. 3 They’re much more flexible. With mocking 
+   frameworks you can set returns values and expected method calls but that’s about it. Hand-made 
+   mocks are limited only by your imagination. 4 Mocking frameworks are refactoring-challenged. 
+   Especially NMock. Rename a method and dozens of tests will break. 5 Readability. Tests using 
+   hand-made mock are easy to read. Tests using mocking frameworks require murky configuration. 
+   6 Mocking frameworks violate testing convention. Build, Operate, Check. Conventionally, all 
+   tests follow this flow. With mocking frameworks the flow becomes, Build, Check, Operate, Verify.
+   7 Failures are deceptive with mocking frameworks. When you get a failure in a test using a mocking 
+   framework, the line number usually points to a call to Verify. With Rhino it can point to the last 
+   line of a using block. Either way, the failure could have been caused by any number of assertions. 
+   It’s up to you to figure out which one. With hand-made mocks, line numbers pinpoint the problem by 
+   revealing the exact failing assertion.
+</p>
+
+<h4>What do I hope to get out of the Mockoff?</h4>
+
+<p>
+  I’ve played with several mocking frameworks before. 
+  I hope that by committing to use them for 3 days, I’ll gain insight as to so many people use them. 
+  Maybe I’ll find that they improve my productivity and I’ll use them in the future on a regular 
+  basis.
+</p>  
+
+<h4>What do I expect to happen during the Mockoff?</h4>
+
+<p>  
+  I’m trying very hard to have an open mind going 
+  into this. My stubborn self is expecting 3 days of frustration. My optimistic self is expecting to 
+  gain appreciation for mocking frameworks. We’ll see what happens.
+</p>  

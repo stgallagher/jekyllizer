@@ -1,0 +1,115 @@
+<h1>Self Shunt</h1>
+<p id="author">Paul Pagel</p>
+<p id="date">2006-09-11</p>
+
+<p>
+	The self-shunt method of testing has been conflicting for me. Self-shunt is a good 
+	testing pattern to test observers/views. A colleague of mine has started to convince 
+	me that self-shunt has some serious drawbacks. I want to explore the different ways 
+	to address the same pattern and how they fit into the test process and the test content. 
+	Are certain patterns easier to write and certain ones have a better final form?
+</p>
+<p>
+	Lets look at some code from Michael Feathers self shunt paper (see bottom for link). I 
+	extended it to do the mocking examples. The user story we are working with is the name of 
+	an item must be displayed on the led when the item is scanned.
+</p>
+<p>
+	Writing all of the tests did not require a concrete window (Display). We didn't need to create 
+	the stub of the file to use; we could just use the interface. All the test patterns let the 
+	test be isolated in the test class/interface/production class triad. As a developer, it is 
+	easier for me to produce faster without quality loss if my context of thought is limited as 
+	much to the scope of the test as possible. Each extra window I switch is more contexts to deal 
+	with.
+</p>
+<p>
+	Here are three different tests:
+</p>
+<!-- 
+public class ScannerTest extends TestCase implements Display
+{
+    private Item lastItem;
+
+    public void testScan()
+    {
+        Item item = new Item("corn flakes");
+        Scanner scanner = new Scanner(this);
+        scanner.scan(item);
+        assertEquals(item,lastItem);
+    }
+
+    public void displayItem(Item item)
+    {
+        lastItem = item;
+    }
+} 
+-->
+<p>
+	The first test is making user of self-shunt test. Self-shunt was a quick way to start writing 
+	a test. The implementation on the interface in the test class will give you a good idea on what 
+	the implementation of the concrete class should look like when you get there. Also, the test 
+	is simple and the syntax is expressive. However, the scalability is questionable. If you had 
+	more than one self-shunted interface in a single test file, it would be hard to start 
+	differentiating between which variables are used in which. Also, moving around the file to get 
+	a good sense of what a test is doing is misdirectional and distracting. Ideally, I want to see 
+	the entire test on one screen, so I can read it. If there were many implemented methods in a 
+	test file that were not tests or helpers, there is the potential to be confused.
+</p>
+<!-- 
+public class ScannerTest   extends TestCase
+{
+    public void testScan()
+    {
+        Item item = new Item("corn flakes");
+        Display mockDisplay = new MockDisplay();
+        Scanner scanner = new Scanner(mockDisplay);
+        scanner.scan(item);
+        assertEquals(item,((MockDisplay)mockDisplay).lastItem);
+    }
+}
+
+public class MockDisplay implements Display
+{
+    public Item lastItem;
+    public void displayItem(Item item)
+    {
+        lastItem = item;
+    }
+} 
+-->
+<p>
+	Then I wrote the hand mock test. This test got rid of the clutter of implementing interfaces 
+	in the test and having local variables. Also, there are no external libraries needed, like a 
+	dynamic mocking library. The test is simple and easy to read. The biggest drawback is dealing 
+	with the hand mock test file. It is untested code that I have seen a tendency for behavior to 
+	slip into, which is disastrous. It can cause a bug in your tests that take too long to track 
+	down. Ideally this doesnâ€™t happen, but I have seen it many times.
+</p>
+<!-- 
+public class ScannerTest extends TestCase
+{
+   public void testScan()
+   {
+       MockControl control = MockControl.createControl(Display.class);
+       Display mockDisplay = (Display) control.getMock();
+       Item item = new Item("");
+       mockDisplay.displayItem(item);
+       control.replay();
+       Scanner scanner = new Scanner(mockDisplay);
+       scanner.scan(item);
+       control.verify();
+   }
+} 
+-->
+<p>
+	Finally the dynamic mock test was written. This test was the simplest to write as a matter of 
+	process also the fewest lines of code. I never needed to leave the scope of the test function. 
+	It was just setting up my expectations and letting the test run. As Micah Martin pointed out to me, 
+	the test execution seems backwards and unreadable with dynamic mocks. The verification statements 
+	are at the beginning of the method and the execution is at the end. This is different than all the 
+	other tests in the system that follows an intuitive flow cycle of build, operate, and check.
+</p>
+<p>
+	With a little investigation I found Michael Feathers paper on Self Shunt 
+	(www.objectmentor.com/resources/articles/SelfShunPtrn.pdf).
+</p>	

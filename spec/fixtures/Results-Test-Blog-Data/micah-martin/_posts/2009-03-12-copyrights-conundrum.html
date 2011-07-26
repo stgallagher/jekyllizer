@@ -1,0 +1,118 @@
+---
+layout: post
+title: Copyrights Conundrum
+tag:
+---
+
+
+<p>
+  Here’s the situation. You’ve spent days working on an open source project. 
+  Your sweat, blood, and tears have been poured into thousands of lines of code 
+  spread through countless file in a sprawling tree of directories. The final 
+  step is to release your masterpiece into the wild. So you choose your open source 
+  license and then it hits you; you realize that need to add a copyright header to 
+  EACH and EVERY source code files. How tedious! You google for a tool that will 
+  automatically add the headers for you, and you find nothing satisfactory. In the 
+  end, you write your own script to add the headers for you.
+</p>
+
+<p>
+  I’ve been in this exact situation and written such a script too many times. 
+  My most recent experience and script implementation will be the last. I’ve dubbed 
+  this last imeplementation 
+  <a href="https://github.com/slagyr/mmcopyrights">MM Copyrights</a> 
+  and you’re welcome to use it.
+</p>
+
+<p>
+  MM Copyrights is a simple Ruby gem that will search a directory for source code 
+  files, inserting or updating a header comment in each file.
+</p>
+
+<h3>Installing</h3>
+
+It’s just a matter of installing the gem hosted on Github.
+
+<!--
+gem sources -a http://gems.github.com
+sudo gem install slagyr-mmcopyrights
+-->
+
+<p>
+  Update: The github shenanigans is not longer needed. To install, simply:
+</p>
+
+<!--
+sudo gem install mmcopyrights
+-->
+
+<h3>Usage</h3>
+
+<p>
+  Let’s say you want to add the following copyright header to all .rb files in 
+  the lib directory…
+</p>
+
+<!--
+require 'mmcopyrights'
+MM::Copyrights.process("lib", "rb", "#-", "©2009 Micah Martin\nAll rights reserved")
+-->
+
+<p>
+  And all the ruby files will look like this:
+</p>
+
+<!--
+#- ©2009 Micah Martin
+#- All rights reserved
+
+... ruby code ...
+-->
+
+<p>
+  Typically I keep the copyright text in a separate file and write the following 
+  Rake task…
+</p>
+
+<!--
+task :copyrights do
+    require 'mmcopyrights'
+    MM::Copyrights.process('lib', "rb", "#-", IO.read('copyrights.txt'))
+end
+-->
+
+<p>
+  or the following ant task if need be…
+</p>
+
+<!--
+<target name="copyrights">
+    <exec command="ruby">
+        <arg value="-rrubygems" />
+        <arg value="-e" />
+        <arg value="require 'mmcopyrights'; MM::Copyrights.process('src', 'java', 
+        '//-', IO.read('copyright.txt'))" />
+    </exec>
+</target>
+-->
+
+<h3>Details</h3>
+
+<p>
+  If you haven’t guessed, <code>MM::Copyrights::process</code> takes 4 parameters.
+</p>
+
+<ol>
+  <li>The path of the directory containing source code.<li>
+  <li>The extension of source file to be processed.</li>
+  <li>The comment prefix. Note that there’s an extra -. This is because we want the 
+    copyright comments to be unique from all other comments. The tool will search 
+    for this unique prefix to find existing copyright headers.</li>  
+  <li>The copyright text, without the comment prefix.</li>
+</ol>
+
+<p>  
+  That’s about it. Feel free to run <code>MM::Copyrights::process</code> multiple 
+  times on the same code base. It’s harmless. And when the new year rolls around, 
+  just change the copyright text and rerun the tool. It will update existing headers.
+</p>  
